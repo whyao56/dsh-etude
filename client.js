@@ -1011,7 +1011,9 @@ window.__ModuleLoader__.load({
           ? React.createElement(
               'div',
               { style: { ...styles.banner('info'), marginTop: 6 } },
-              `${t('label.exportedTo')}：${detail.export.dir}（${detail.export.files} ${t('label.files')} · ${Math.round((detail.export.bytes || 0) / 1024)} KB）`,
+              // 「复验过没有」得写在脸上：老账本里没有这个字段，那时导出是不复验的，
+              // 所以只有明确的 true 才说「已复验」，其余一律当没验过。
+              `${t('label.exportedTo')}：${detail.export.dir}（${detail.export.files} ${t('label.files')} · ${Math.round((detail.export.bytes || 0) / 1024)} KB · ${detail.export.verified === true ? t('label.verified') : t('label.notVerified')}）`,
             )
           : null,
       )
@@ -1264,6 +1266,8 @@ window.__ModuleLoader__.load({
         'label.packDir': '包目录',
         'label.exportedTo': '导出到',
         'label.files': '个文件',
+        'label.verified': '已复验',
+        'label.notVerified': '未复验',
         'label.images': '张图',
         'label.audios': '条音',
         'label.noAudio': '还没有语音',
@@ -1325,6 +1329,8 @@ window.__ModuleLoader__.load({
         'label.packDir': 'Pack dir',
         'label.exportedTo': 'Exported to',
         'label.files': 'files',
+        'label.verified': 'verified',
+        'label.notVerified': 'not verified',
         'label.images': 'images',
         'label.audios': 'audio',
         'label.noAudio': 'No audio yet',

@@ -10,7 +10,7 @@
  *
  * 用法：node tests/rpc-smoke.mjs
  */
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -202,6 +202,7 @@ try {
   const exportJob = await runJob('pack.export', { id: packId })
   check('导出任务成功', exportJob.status === 'done', exportJob.error ?? '')
   const exportedDir = exportJob.result?.dir
+  const sourceDir = exportJob.result?.sourceDir
   check('导出结果里有目录', typeof exportedDir === 'string' && exportedDir.length > 0, String(exportedDir))
   check('导出的副本里有清单', await exists(join(exportedDir, 'manifest.json')))
   const exportedManifest = JSON.parse(await readFile(join(exportedDir, 'manifest.json'), 'utf8'))
@@ -214,6 +215,24 @@ try {
   const afterExport = await call('state')
   check('包状态变成 exported', afterExport.packs[0].status === 'exported', afterExport.packs[0].status)
   check('列表里带着导出位置', typeof afterExport.packs[0].exportDir === 'string', String(afterExport.packs[0].exportDir))
+  check('导出时说清了复验过了', exportJob.result?.verified === true, String(exportJob.result?.verified))
+
+  // 同一个包重导，旧文件不能留着：目录里躺着 manifest 没提过的东西，人一看
+  // 就以为包是坏的。这里真塞一个进去，再导一次，看它消没消失。
+  const stale = join(exportedDir, 'zzz-stale.txt')
+  await writeFile(stale, 'stale')
+  const reExport = await runJob('pack.export', { id: packId })
+  check('重导成功', reExport.status === 'done', reExport.error ?? '')
+  check('重导把上一次的残留清掉了', !(await exists(stale)), stale)
+
+  // 副本坏了要能拦住：把源包里那张图末字节改掉，sha256 就对不上了。
+  const sourceImage = join(sourceDir, firstImage)
+  const original = await readFile(sourceImage)
+  await writeFile(sourceImage, Buffer.concat([original, Buffer.from([0])]))
+  const brokenExport = await runJob('pack.export', { id: packId })
+  check('源包被改坏时导出失败', brokenExport.status === 'failed', brokenExport.status)
+  check('失败原因说的是副本没过校验', brokenExport.code === 'export-invalid', String(brokenExport.code))
+  await writeFile(sourceImage, original)
 
   console.log('— 收摊 —')
   await call('pack.delete', { id: packId })
