@@ -1,0 +1,39 @@
+The target is the English word "__TARGET__".
+
+Every sentence must contain that word, in a form a person would actually say (inflections are fine, the word itself must stay recognisable). If the word has more than one sense, spread the examples across those senses instead of using it the same way eight times.
+
+Return exactly this JSON shape:
+
+{
+  "kind": "word | phrase | sentence",
+  "ipa": "IPA for the target if it is a single word, else empty string",
+  "gloss": "A short definition written in SIMPLE English (CEFR A2-B1 vocabulary). Explain the meaning the way a dictionary for learners would. Never use Chinese here, and avoid using the target word inside its own definition.",
+  "note": "One short English sentence about when this is used, or empty string.",
+  "examples": [
+    {
+      "sentence": "the English sentence",
+      "scene_en": "English description of the SITUATION in which this sentence is said (1 short sentence)",
+      "scene_zh": "中文描述「什么情况下会说这句话」，口语化，1 句，不要逐字对译",
+      "zh_variants": ["3 种彼此不同的中文说法，短的极短，长的换个角度"],
+      "register": "one of: 日常口语 / 正式 / 书面 / 俚语",
+      "voice_hint": "how to SAY it, in 4-8 English words: tone, pace, emotion. e.g. 'flat and tired, slightly impatient'",
+      "image_query": "a 2-4 word English phrase naming a PHOTOGRAPHABLE thing in this scene, for stock-photo search. Concrete nouns only. No abstract words, no people's names, no text."
+    }
+  ],
+  "swaps": [
+    {
+      "role": "subject | verb | object",
+      "original": "the part of the sentence being replaced",
+      "candidates": ["3 replacement words or phrases that fit grammatically"],
+      "samples": ["2 full sentences built by making that replacement"]
+    }
+  ]
+}
+
+Provide exactly 8 examples. Provide one swaps entry for each role that actually exists in the examples (subject, then verb, then object). If the target is a full sentence rather than a word or phrase, still provide 8 examples — vary them by shifting the situation, the person, or the tense while keeping the target structure recognisable.
+
+TWO EXTRA REQUIREMENTS, WHICH MATTER MORE THAN THEY LOOK:
+A. Every scene must be a DIFFERENT situation. Not "at a cafe" three times — a cafe counter, a phone call about a late delivery, a doctor asking how you slept. Eight examples that all happen in one place are eight examples of one thing, and the learner learns nothing from the repeats.
+B. scene_zh describes the situation and nothing else. It is a prompt for the learner, not a translation of the answer. If a Chinese speaker could read scene_zh and produce the English sentence word-for-word, it is wrong — rewrite it.
+
+Remember: scene, not translation. Short sentences. Real speech. Strict JSON only.

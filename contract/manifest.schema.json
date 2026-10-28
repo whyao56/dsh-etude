@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/whyao56/dsh-etude/contract/manifest.schema.json",
+  "title": "Etude 卡片包 v2 清单",
+  "description": "语言卡片工厂交给 Etude 训练器的成品包。它只描述「包里有什么、谁点过头」，二进制在 images/ 与 audio/ 里，用 sha256 对账。schema 管结构，contract/validate.js 与 contract/validate.py 管那些表达不出来的规矩（文件真的在、哈希真的对、图必须有人复核）。",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["format", "format_version", "generator", "created_at", "lesson", "examples"],
+  "properties": {
+    "format": { "const": "etude-lesson" },
+    "format_version": { "const": 2 },
+    "generator": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["kind", "name", "version"],
+      "properties": {
+        "kind": { "const": "dsh-plugin" },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "model": { "type": "string" },
+        "prompt_version": { "type": "string" },
+        "run_id": { "type": "string" }
+      }
+    },
+    "created_at": { "type": "string", "minLength": 1 },
+    "lesson": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["target", "kind", "language", "voice"],
+      "properties": {
+        "target": { "type": "string", "minLength": 1, "description": "要去练的那个词 / 短语 / 整句。" },
+        "kind": { "enum": ["word", "phrase", "sentence"] },
+        "language": { "enum": ["en"], "description": "目前只有英文能生成；语言白名单在 validate.js/.py 里。" },
+        "gloss": { "type": "string", "description": "CEFR A2–B1 的简单英文释义，不许用目标词自己解释自己。" },
+        "ipa": { "type": "string" },
+        "note": { "type": "string" },
+        "voice": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["engine", "voice"],
+          "properties": {
+            "engine": { "type": "string", "minLength": 1, "description": "实际用的引擎。降级过就写降级后的那个，别写想要的。" },
+            "voice": { "type": "string", "minLength": 1 },
+            "rate": { "type": "string" },
+            "volume": { "type": "string" }
+          }
+        }
+      }
+    },
+    "examples": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["sentence", "scene_en", "scene_zh", "zh_variants", "review"],
+        "properties": {
+          "ord": { "type": "integer", "minimum": 1 },
+          "sentence": { "type": "string", "minLength": 1, "maxLength": 400 },
+          "scene_en": { "type": "string", "minLength": 1, "maxLength": 600 },
+          "scene_zh": { "type": "string", "minLength": 1, "maxLength": 600 },
+          "zh_variants": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "register": { "type": "string" },
+          "voice_hint": {
+            "type": "string",
+            "description": "怎么说这句：语气、快慢、情绪。用来挑语速，也告诉人该怎么念。"
+          },
+          "image_query": { "type": "string", "description": "造这句图时用的检索词，留着方便以后重找。" },
+          "media": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["image", "audio"],
+            "properties": {
+              "image": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": ["file", "sha256", "bytes", "width", "height"],
+                "properties": {
+                  "file": { "type": "string", "pattern": "^images/[^/]+$" },
+                  "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                  "bytes": { "type": "integer", "minimum": 1, "maximum": 4194304 },
+                  "width": { "type": "integer", "minimum": 640 },
+                  "height": { "type": "integer", "minimum": 640 },
+                  "source": { "type": "string" },
+                  "query": { "type": "string" },
+                  "license": { "type": "string" },
+                  "author": { "type": "string" },
+                  "credit_url": { "type": "string" },
+                  "overridden": { "type": "boolean", "description": "预检没过、被人工强行选用的图，这里留个记号。" }
+                }
+              },
+              "audio": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": ["file", "sha256", "bytes", "seconds", "engine", "voice"],
+                "properties": {
+                  "file": { "type": "string", "pattern": "^audio/[^/]+$" },
+                  "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                  "bytes": { "type": "integer", "minimum": 1 },
+                  "seconds": { "type": "number", "exclusiveMinimum": 0 },
+                  "engine": { "type": "string", "minLength": 1 },
+                  "voice": { "type": "string", "minLength": 1 }
+                }
+              }
+            }
+          },
+          "review": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["image", "audio"],
+            "description": "没有复核记录的包不算成品 —— 图必须有人点过头，语音必须有人真听过。",
+            "properties": {
+              "image": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": ["by", "at"],
+                "properties": {
+                  "by": { "type": "string", "minLength": 1 },
+                  "at": { "type": "string", "minLength": 1 },
+                  "candidates": { "type": "integer", "minimum": 1 },
+                  "picked": { "type": "string" }
+                }
+              },
+              "audio": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": ["by", "at", "listened"],
+                "properties": {
+                  "by": { "type": "string", "minLength": 1 },
+                  "at": { "type": "string", "minLength": 1 },
+                  "listened": { "const": true }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "swaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "role": { "type": "string" },
+          "original": { "type": "string" },
+          "candidates": { "type": "array", "items": { "type": "string" } },
+          "samples": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "examples": { "type": "integer", "minimum": 1 },
+        "images": { "type": "integer", "minimum": 0 },
+        "audios": { "type": "integer", "minimum": 0 },
+        "min_image_short_edge": { "type": "integer", "minimum": 0 },
+        "flat_images": { "type": "integer", "minimum": 0, "description": "被像素体检判成纯色块 / 渐变的图，成品包里必须是 0。" },
+        "text_in_images": { "type": ["integer", "null"], "description": "没做文字检测就留 null，不许拿 0 冒充「检测过了」。" },
+        "pixel_analysis": { "enum": ["sharp", "none"] },
+        "reviewed_images": { "type": "integer", "minimum": 0 },
+        "reviewed_audios": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

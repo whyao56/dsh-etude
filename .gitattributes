@@ -1,0 +1,13 @@
+# 统一行尾：源码一律 LF，仓库里不存 CRLF。
+# 不写这个的话 Windows 上 `git add` 会警告「LF will be replaced by CRLF」，
+# 而两边行尾不同会让 sha256 校验以外的对比工具（diff / 校验器副本）发抖。
+* text=auto eol=lf
+
+# 这些是二进制，别让 git 碰
+*.mp3 binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.gif binary
+*.ico binary

@@ -1,0 +1,7 @@
+# Bundle self-activation patch: installing this package into a profile
+# (`dsh plugin --profile <name> add dsh-etude`) mounts the plugin's node half
+# through this row. The client half (sidebar 的卡片工厂面板 + 设置页) is
+# discovered from the `dsh.client` declaration in package.json.
+- insert:
+    - id: etude
+      name: dsh-etude

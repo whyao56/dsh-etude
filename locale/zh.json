@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "title": "Etude 卡片工厂",
+    "description": "把一个词、短语或整句做成一套语言卡片：不同场景的例句、逐句人工复核过的真照片配图、逐句 TTS 语音，打包成 v2 卡片包交给 Etude 训练器。"
+  },
+  "nav": {
+    "title": "卡片工厂",
+    "subtitle": "例句 · 配图 · 语音 · 入包"
+  },
+  "action": {
+    "create": "新建卡片包",
+    "createBusy": "正在生成…",
+    "open": "打开",
+    "back": "返回列表",
+    "pack": "打包并校验",
+    "packBusy": "正在打包…",
+    "install": "导入 Etude",
+    "installBusy": "正在导入…",
+    "retry": "重试",
+    "refresh": "刷新",
+    "delete": "删除",
+    "deleteConfirm": "确定删除这个卡片包？已复核的记录会一起丢掉。",
+    "pickImage": "挑一张图",
+    "moreCandidates": "换一批",
+    "upload": "自己上传",
+    "uploading": "正在上传…",
+    "lockImage": "就用这张",
+    "playAudio": "试听",
+    "playing": "播放中…",
+    "resynth": "重新合成",
+    "resynthBusy": "正在合成…",
+    "markListened": "我听了，没问题",
+    "unlockImage": "重挑配图",
+    "unlockAudio": "重新试听",
+    "openPack": "打开包目录",
+    "copyPath": "复制路径"
+  },
+  "status": {
+    "generating": "生成中",
+    "text": "例句已就绪",
+    "media": "素材待复核",
+    "ready": "可打包",
+    "packed": "已打包",
+    "installed": "已导入",
+    "failed": "失败"
+  },
+  "label": {
+    "target": "目标",
+    "kind": "类型",
+    "language": "语言",
+    "gloss": "释义",
+    "ipa": "音标",
+    "register": "语域",
+    "scene": "什么时候说这句",
+    "examples": "例句",
+    "images": "配图",
+    "audios": "语音",
+    "quality": "质检",
+    "progress": "进度",
+    "createdAt": "创建于",
+    "engine": "引擎",
+    "voice": "音色",
+    "seconds": "时长",
+    "license": "授权",
+    "author": "作者",
+    "source": "来源",
+    "credit": "出处",
+    "reviewed": "已复核",
+    "notReviewed": "未复核",
+    "candidates": "候选",
+    "packDir": "包目录",
+    "manifest": "清单",
+    "errors": "不过关的地方",
+    "warnings": "提醒",
+    "empty": "还没有卡片包。上面输入一个词，先做一个。",
+    "emptyNeedText": "先输入一个词、短语或整句。",
+    "noImage": "这一条还没配图",
+    "noAudio": "这一条还没语音",
+    "imageLocked": "配图已锁定",
+    "audioLocked": "语音已试听",
+    "flatRejected": "这张图是纯色或渐变，不像真照片，已挡掉",
+    "tooSmall": "图太小（短边要至少 {edge} 像素）",
+    "tooBig": "文件太大（上限 {mb} MB）",
+    "notImage": "这不是图片文件"
+  },
+  "hint": {
+    "flow": "先造句，再逐条点图、试听，每条都点过头才允许打包。",
+    "reviewRequired": "没有点过头的图、没有试听过的语音不会进包。",
+    "pixelOff": "本机没有 sharp，图片只做了结构检查，纯色图挡不住。",
+    "noCandidates": "这一批候选都不合格。换一批，或者自己传一张。"
+  },
+  "error": {
+    "generic": "出错了：{message}",
+    "notInstalled": "没找到 Etude 的数据目录，先在 Etude 里跑一次生成，或者手动设置数据目录。",
+    "network": "网络不通：{message}"
+  },
+  "kind": {
+    "word": "单词",
+    "phrase": "短语",
+    "sentence": "整句"
+  }
+}

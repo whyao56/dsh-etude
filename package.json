@@ -1,0 +1,81 @@
+{
+  "name": "dsh-etude",
+  "version": "0.1.0",
+  "description": "DSH 语言卡片工厂：给一个词、短语或整句，产出不同场景的例句、逐句人工点过头的真照片配图与 TTS 语音，打成可导入 Etude 训练器的 v2 卡片包。",
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "plugin",
+    "etude",
+    "flashcard",
+    "language",
+    "cordis"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./icon": "./icon.svg",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "icon.svg",
+    "cordis.patch.yml",
+    "lib/",
+    "locale/*.json",
+    "contract/",
+    "tests/",
+    "docs/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test tests/unit.test.mjs && node tests/client-smoke.mjs && node tests/rpc-smoke.mjs",
+    "test:unit": "node --test tests/unit.test.mjs",
+    "test:client": "node tests/client-smoke.mjs",
+    "test:rpc": "node tests/rpc-smoke.mjs",
+    "test:py": "python -m pytest tests/test_contract.py -q",
+    "selftest": "node tests/selftest.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5",
+    "ws": "^8.18.3"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whyao56/dsh-etude.git"
+  },
+  "bugs": "https://github.com/whyao56/dsh-etude/issues",
+  "homepage": "https://github.com/whyao56/dsh-etude#readme",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.0",
+    "@deepseek-ai/dsh-credentials": ">=0.1.2-alpha.1",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.2-alpha.1",
+    "@deepseek-ai/dsh-tools": ">=0.1.2-alpha.1",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  }
+}
