@@ -986,10 +986,10 @@ window.__ModuleLoader__.load({
             'button',
             {
               style: styles.button,
-              onClick: () => handlers.install(),
-              disabled: (detail.status !== 'packed' && detail.status !== 'installed') || busy,
+              onClick: () => handlers.exportPack(),
+              disabled: (detail.status !== 'packed' && detail.status !== 'exported') || busy,
             },
-            t('action.install'),
+            t('action.export'),
           ),
           React.createElement(
             'button',
@@ -1007,11 +1007,11 @@ window.__ModuleLoader__.load({
             )
           : null,
         detail.pack?.dir ? React.createElement('div', { style: { ...styles.banner('info'), marginTop: 10 } }, `${t('label.packDir')}：${detail.pack.dir}`) : null,
-        detail.install?.lessonId
+        detail.export?.dir
           ? React.createElement(
               'div',
               { style: { ...styles.banner('info'), marginTop: 6 } },
-              `Etude #${detail.install.lessonId} · ${detail.install.images} ${t('label.images')} · ${detail.install.audios} ${t('label.audios')}${detail.install.audioError ? ` · ${detail.install.audioError}` : ''}`,
+              `${t('label.exportedTo')}：${detail.export.dir}（${detail.export.files} ${t('label.files')} · ${Math.round((detail.export.bytes || 0) / 1024)} KB）`,
             )
           : null,
       )
@@ -1039,7 +1039,7 @@ window.__ModuleLoader__.load({
           confirmAudio: (ord) => factory.act('pack.confirmAudio', { id: selected, ord }),
           unlockAudio: (ord) => factory.act('pack.unlockAudio', { id: selected, ord }),
           pack: () => factory.runJob('pack.pack', { id: selected }),
-          install: () => factory.runJob('pack.install', { id: selected }),
+          exportPack: () => factory.runJob('pack.export', { id: selected }),
           remove: async () => {
             const pack = state.packs?.find((one) => one.id === selected)
             if (!window.confirm(`${t('action.deleteConfirm')}\n${pack?.target ?? ''}`)) return
@@ -1160,10 +1160,27 @@ window.__ModuleLoader__.load({
 
     // ── 配置卡 ──────────────────────────────────────────────────────────────
 
-    function ConfigPage({ form, t }) {
+    function ConfigPage({ form, view, t }) {
       const cfg = useForm(form)
       const value = cfg.snapshot?.value ?? {}
       const disabled = !cfg.writable
+
+      // `summary` 是插件页上那一行字，`page` 才是整张表。不分开的话，
+      // 插件列表页里会硬塞进一整张表单，把下面那些行挤到看不见。
+      if (view === 'summary') {
+        const line = [
+          value.ttsEngine || 'auto',
+          value.ttsVoiceEdge || 'en-US-AriaNeural',
+          value.rate || '+10%',
+          t('config.summaryExamples').replace('{n}', String(value.examplesPerLesson ?? 8)),
+          value.exportDir || t('config.exportDefault'),
+        ]
+        return React.createElement(
+          'div',
+          { style: { fontSize: 12, lineHeight: 1.6, color: 'var(--dsw-alias-label-secondary)' } },
+          line.join(' · '),
+        )
+      }
 
       const field = (label, key, options) =>
         React.createElement(
@@ -1201,7 +1218,7 @@ window.__ModuleLoader__.load({
         field(t('config.rate'), 'rate'),
         field(t('config.volume'), 'volume'),
         field(t('config.examples'), 'examplesPerLesson'),
-        field(t('config.etudeUrl'), 'etudeUrl'),
+        field(t('config.exportDir'), 'exportDir'),
         React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: 'var(--dsw-alias-label-tertiary)', marginTop: 4 } }, t('config.hint')),
       )
     }
@@ -1229,7 +1246,7 @@ window.__ModuleLoader__.load({
         'action.moreBusy': '正在找…',
         'action.upload': '自己上传',
         'action.pack': '打包',
-        'action.install': '装进 Etude',
+        'action.export': '导出成品包',
         'action.delete': '删掉这个包',
         'action.deleteConfirm': '真删掉这个卡片包？里面的图片和语音也会没。',
         'action.findImages': '找候选图',
@@ -1237,7 +1254,7 @@ window.__ModuleLoader__.load({
         'status.text': '待配素材',
         'status.media': '补素材中',
         'status.packed': '已打包',
-        'status.installed': '已安装',
+        'status.exported': '已导出',
         'status.failed': '失败',
         'label.empty': '左边空着。上面输入一个词，回车。',
         'label.examples': '例句',
@@ -1245,6 +1262,8 @@ window.__ModuleLoader__.load({
         'label.author': '作者',
         'label.credit': '出处',
         'label.packDir': '包目录',
+        'label.exportedTo': '导出到',
+        'label.files': '个文件',
         'label.images': '张图',
         'label.audios': '条音',
         'label.noAudio': '还没有语音',
@@ -1263,8 +1282,10 @@ window.__ModuleLoader__.load({
         'config.rate': '语速',
         'config.volume': '音量',
         'config.examples': '每包条数',
-        'config.etudeUrl': 'Etude 地址',
+        'config.exportDir': '导出目录',
+        'config.exportDefault': '默认：下载\dsh-etude',
         'config.hint': '语速和音量对 Edge 生效；OpenAI 兼容的那类接口只有语速（换成 speed），没有音量。',
+        'config.summaryExamples': '每包 {n} 条例句',
       },
       en: {
         'nav.title': 'Card factory',
@@ -1286,7 +1307,7 @@ window.__ModuleLoader__.load({
         'action.moreBusy': 'Searching…',
         'action.upload': 'Upload',
         'action.pack': 'Build pack',
-        'action.install': 'Install into Etude',
+        'action.export': 'Export pack',
         'action.delete': 'Delete pack',
         'action.deleteConfirm': 'Delete this pack? Its images and audio go too.',
         'action.findImages': 'Find images',
@@ -1294,7 +1315,7 @@ window.__ModuleLoader__.load({
         'status.text': 'Needs media',
         'status.media': 'Filling media',
         'status.packed': 'Packed',
-        'status.installed': 'Installed',
+        'status.exported': 'Exported',
         'status.failed': 'Failed',
         'label.empty': 'Nothing here. Type a word above and press Enter.',
         'label.examples': 'Examples',
@@ -1302,6 +1323,8 @@ window.__ModuleLoader__.load({
         'label.author': 'By',
         'label.credit': 'Source',
         'label.packDir': 'Pack dir',
+        'label.exportedTo': 'Exported to',
+        'label.files': 'files',
         'label.images': 'images',
         'label.audios': 'audio',
         'label.noAudio': 'No audio yet',
@@ -1320,8 +1343,10 @@ window.__ModuleLoader__.load({
         'config.rate': 'Rate',
         'config.volume': 'Volume',
         'config.examples': 'Per pack',
-        'config.etudeUrl': 'Etude URL',
+        'config.exportDir': 'Export folder',
+        'config.exportDefault': 'default: Downloads/dsh-etude',
         'config.hint': 'Rate and volume apply to Edge. OpenAI-compatible TTS only takes speed — no volume.',
+        'config.summaryExamples': '{n} examples per pack',
       },
     }
 
@@ -1368,7 +1393,8 @@ window.__ModuleLoader__.load({
             configForms.whileServed([CONFIG_NS], () =>
               ctx.slots.inject('plugins.bundle.config', () =>
                 ctx.slots.register({ name: 'plugins.bundle.config', key: NS, locale: NS }, (owner) =>
-                  React.createElement(ConfigPage, { form, t, ...owner }),
+                  // 宿主给了 owner.form 就用它（那一页自带写入动作），否则退回 configForms 那份。
+                  React.createElement(ConfigPage, { form: owner?.form ?? form, view: owner?.view, t }),
                 ),
               ),
             ),

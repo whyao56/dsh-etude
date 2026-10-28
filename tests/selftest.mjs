@@ -1,9 +1,10 @@
 /**
- * 整条链路自检：造例句 → 找候选图 → 挑图 → 合成语音 → 试听确认 → 打包 → 校验清单。
+ * 整条链路自检：造例句 → 找候选图 → 挑图 → 合成语音 → 试听确认 → 打包 → 校验 → 导出。
  *
  * 为什么要有它：宿主里的那套工具只能在 DSH 界面里点，而
- * 「图搜得到吗、sharp 会不会挂、Edge TTS 能不能出声、清单校验器认不认」
- * 这些事必须能一条命令跑出来。模型那一步用本地假模型顶替，其余全是真的。
+ * 「图搜得到吗、sharp 会不会挂、Edge TTS 能不能出声、清单校验器认不认、
+ * 导出的那份副本能不能独立过校验」这些事必须能一条命令跑出来。
+ * 模型那一步用本地假模型顶替，其余全是真的。
  *
  * 用法：
  *   node tests/selftest.mjs                 跑一遍，成功就删掉临时目录
@@ -11,14 +12,15 @@
  *   node tests/selftest.mjs --target umbrella
  *   node tests/selftest.mjs --examples 4
  *   node tests/selftest.mjs --no-images     跳过配图（只验文字与语音）
- *   node tests/selftest.mjs --install       最后再装进 Etude（需要 Etude 在跑）
+ *   node tests/selftest.mjs --export        最后再导出成品包
+ *   node tests/selftest.mjs --root D:\x --export-dir E:\y
  */
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { validateManifest } from '../contract/validate.js'
-import { installPack } from '../lib/etude.js'
 import { dependencyReport } from '../lib/deps.js'
+import { exportPack } from '../lib/export.js'
 import { imageSize } from '../lib/images.js'
 import { mp3Duration } from '../lib/mp3.js'
 import {
@@ -43,19 +45,17 @@ const value = (name, fallback) => {
 
 const KEEP = flag('keep')
 const WITH_IMAGES = !flag('no-images')
-const WITH_INSTALL = flag('install')
+const WITH_EXPORT = flag('export')
 const TARGET = value('target', 'coffee')
 const EXAMPLES = Number.parseInt(value('examples', '8'), 10)
 const CANDIDATES = Number.parseInt(value('candidates', '5'), 10)
 /**
- * 指定一个固定数据目录 / Etude 地址。
+ * 指定一个固定数据目录与导出目录。
  *
- * 装进 Etude 的那一步要求两件事：插件的数据目录和 Etude 的数据目录是同一个
- * （媒体文件按名字直接落过去，不重复存一份），以及那个 Etude 是跑着的。
- * 所以验 M4 时用 `--root <Etude 的数据目录> --etude http://127.0.0.1:8978`。
+ * 平时两者都在临时目录里跑完就删；要留证据时用 `--root` 与 `--export-dir` 指定。
  */
 const FIXED_ROOT = value('root', '')
-const ETUDE_URL = value('etude', 'http://127.0.0.1:8977')
+const FIXED_EXPORT = value('export-dir', '')
 
 const START = Date.now()
 const step = (text) => {
@@ -73,6 +73,16 @@ function check(label, condition, detail = '') {
   }
 }
 
+/** 递归数一个目录里的文件数（不含子目录自身）。 */
+async function countFiles(directory) {
+  let total = 0
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const full = join(directory, entry.name)
+    total += entry.isDirectory() ? await countFiles(full) : 1
+  }
+  return total
+}
+
 async function main() {
   step(`依赖：${JSON.stringify({ sharp: dependencyReport().sharp, ws: dependencyReport().ws })}`)
 
@@ -82,6 +92,7 @@ async function main() {
   const model = await startFakeModel()
   step(`假模型在 ${model.url}，数据目录 ${root}`)
 
+  const exportDir = FIXED_EXPORT || join(root, 'export')
   const config = makeConfig({
     llmBaseUrl: model.url,
     llmModel: 'fake-model',
@@ -90,8 +101,7 @@ async function main() {
     autoPrepareCandidates: false,
     examplesPerLesson: EXAMPLES,
     ttsEngine: 'edge',
-    etudeUrl: ETUDE_URL,
-    etudeWriteAudioPath: true,
+    exportDir,
   })
   const ctx = makeCtx()
 
@@ -181,6 +191,10 @@ async function main() {
     )
     check('没有纯色块图', packed.manifest.quality.flat_images === 0, String(packed.manifest.quality.flat_images))
 
+    // 包目录里到底几个文件：manifest + 每条例句的一张图一条音。
+    const packedFiles = await countFiles(packed.dir)
+    check('包目录里有清单和全部媒体', packedFiles === EXAMPLES * 2 + 1, `${packedFiles} 个文件`)
+
     // ---- 6. 独立校验器再过一遍（读真实文件） ----
     step('用 contract/validate.js 独立验一遍清单')
     const manifestPath = join(packed.dir, 'manifest.json')
@@ -196,45 +210,47 @@ async function main() {
     const dry = await checkPack(root, created.id)
     check('checkPack 也通过', dry.verdict?.ok === true)
 
-    // ---- 7. 装进 Etude（可选） ----
-    if (WITH_INSTALL) {
-      step('装进 Etude')
-      const installed = await installPack({ root, packId: created.id, url: config.etudeUrl })
-      check('Etude 收了', Boolean(installed.lessonId), `lesson ${installed.lessonId}`)
-      check('配图写进 Etude 了', installed.images === picked.length, `${installed.images} 条`)
-      check('语音路径也写了', installed.audios === picked.length, `${installed.audios} 条，问题：${installed.audioError ?? '无'}`)
-      if (Array.isArray(installed.imageFailures) && installed.imageFailures.length > 0) {
-        console.log(`        · 没配上图的：${JSON.stringify(installed.imageFailures)}`)
-      }
+    // ---- 7. 导出成品包（可选） ----
+    // 以前这一段是「导入 Etude 并核对它的界面能取回图」。现在插件自己就是全套，
+    // 所以要证的是另一件事：导出目录里那份副本能独立通过契约校验，字符和字节都对得上。
+    if (WITH_EXPORT) {
+      step('导出成品包')
+      const exported = await exportPack({ root, packId: created.id, exportDir: exportDir })
+      check('导出目录建出来了', Boolean(exported.dir), exported.dir)
+      check('导出里的文件数和包一致', exported.files === packedFiles, `${exported.files}/${packedFiles}`)
+      check('导出字节不为零', exported.bytes > 0, `${Math.round(exported.bytes / 1024)} KB`)
 
-      // 图片真的能从 Etude 自己的路由拿回来 —— 这才是界面上「看得到图」的证据。
-      // 只看数据库里有个文件名是不够的：名字对不上、文件没落盘都会是 404。
-      const detail = await fetch(`${installed.url.replace(/\/+$/, '')}/api/lessons/${installed.lessonId}`).then((one) => one.json())
-      const rows = Array.isArray(detail?.examples) ? detail.examples : []
-      let served = 0
+      const exportedManifestPath = join(exported.dir, 'manifest.json')
+      const exportedManifest = JSON.parse(await readFile(exportedManifestPath, 'utf8'))
+      const exportVerdict = await validateManifest(exportedManifest, {
+        loadFile: async (relative) => readFile(join(exported.dir, relative)),
+      })
+      check('导出的那份也能独立过校验', exportVerdict.ok === true, JSON.stringify(exportVerdict.errors))
+      check('导出的是新 format', exportedManifest.format === 'card-pack', String(exportedManifest.format))
+
+      const mark = await getPack(root, created.id)
+      check('账本记了导出位置', Boolean(mark.export?.dir), mark.export?.dir ?? '没记')
+      check('状态变成 exported', mark.status === 'exported', mark.status)
+
+      // 每张图、每条音都要能在导出目录里按 manifest 写的位置读到，且尺寸/时长能解出来。
+      let images = 0
+      let audios = 0
       let tooSmall = 0
-      for (const row of rows) {
-        if (!row.scene_image) continue
-        const response = await fetch(`${installed.url.replace(/\/+$/, '')}/api/images/${row.scene_image}`)
-        if (!response.ok) continue
-        const bytes = Buffer.from(await response.arrayBuffer())
-        const size = imageSize(bytes)
-        if (!size) continue
-        served += 1
-        if (Math.min(size.width, size.height) < 480) tooSmall += 1
+      for (const item of exportedManifest.examples) {
+        const imagePath = join(exported.dir, item.media.image.file)
+        const imageBytes = await readFile(imagePath)
+        const size = imageSize(imageBytes)
+        if (size) {
+          images += 1
+          if (Math.min(size.width, size.height) < 480) tooSmall += 1
+        }
+        const audioBytes = await readFile(join(exported.dir, item.media.audio.file))
+        const duration = mp3Duration(audioBytes)
+        if (duration?.seconds > 0) audios += 1
       }
-      check('Etude 能按名字取回配图', served === picked.length, `${served}/${picked.length}`)
-      check('取回的图短边都不小于 480', tooSmall === 0, `${tooSmall} 张太小`)
-
-      const audioRows = rows.filter((row) => row.audio_path)
-      check('Etude 里每条都指到语音文件', audioRows.length === picked.length, `${audioRows.length}/${picked.length}`)
-      if (audioRows.length > 0) {
-        const first = audioRows[0].audio_path
-        const response = await fetch(`${installed.url.replace(/\/+$/, '')}/api/audio/${first}`)
-        const bytes = Buffer.from(await response.arrayBuffer())
-        const duration = mp3Duration(bytes)
-        check('Etude 能播这条语音', response.ok && Boolean(duration?.seconds), `${first} ${bytes.length}B ${duration?.seconds?.toFixed(2) ?? '?'}s`)
-      }
+      check('导出里的图都能解出尺寸', images === picked.length, `${images}/${picked.length}`)
+      check('导出的图短边都不小于 480', tooSmall === 0, `${tooSmall} 张太小`)
+      check('导出里的语音都能算出时长', audios === picked.length, `${audios}/${picked.length}`)
     }
 
     console.log('')

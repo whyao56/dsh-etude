@@ -2,7 +2,7 @@
  * dsh-etude — Host half.
  *
  * 卡片工厂：目标 → 8 条场景例句 → 每句一张要人点头的配图 + 一条要人试听的语音
- * → v2 卡片包 → 装进 Etude 训练器。
+ * → v2 卡片包（落在自己的目录里，可以整个搬走）。
  *
  * 三件事都不在模型手里，写在这里提醒后来的人别把它们做丢了：
  *   1. 配图必须有人从候选里挑一张（`imageReview.by` 是硬校验项）；
@@ -11,15 +11,18 @@
  *
  * 宿主这半只做四件事：注册工具、开一条 loopback RPC 给界面、给 `webServer`
  * 挂媒体路由（图/音频走 <img>/<audio>，不走 base64）、往系统提示词里加一段说明。
+ *
+ * **这个插件不依赖任何外部应用。** 账本、素材、成品包全在 `dataDir` 那棵树里，
+ * 成品包是标准的 v2 卡片包目录，谁想读都能读。
  */
 import z from '@deepseek-ai/schemastery'
 
 import { registerMediaRoutes } from './lib/http-server.js'
 import { createJobRunner } from './lib/jobs.js'
 import { setProxyUrl } from './lib/net.js'
-import { etudeRoot } from './lib/paths.js'
+import { dataRoot } from './lib/paths.js'
 import { createRpcHandler } from './lib/rpc.js'
-import { createEtudeTools } from './lib/tools.js'
+import { createFactoryTools } from './lib/tools.js'
 import { clampInt, normalizeSpace } from './lib/util.js'
 
 export const name = 'dsh-etude'
@@ -51,7 +54,8 @@ function unwrapVolatile(value) {
 }
 
 export const Config = z.object({
-  dataDir: maybeVolatile(z.string().default('')).description('Etude 数据目录。留空就用 ETUDE_DATA_DIR 或 %LOCALAPPDATA%\\Etude。'),
+  dataDir: maybeVolatile(z.string().default('')).description('数据目录。留空就是 %LOCALAPPDATA%\\dsh-etude。账本、素材、成品包都在这里。'),
+  exportDir: maybeVolatile(z.string().default('')).description('导出成品包时往哪儿放。留空就是 %USERPROFILE%\\Downloads\\dsh-etude。'),
   language: maybeVolatile(z.string().default('en')).description('目标语言。目前只有 en 能生成。'),
   examplesPerLesson: maybeVolatile(z.number().default(8)).description('一个包几句，1–40。'),
   zhVariants: maybeVolatile(z.number().default(3)).description('每句给几种故意不一致的中文说法，2–4。'),
@@ -71,8 +75,6 @@ export const Config = z.object({
   ttsApiKeyEnv: maybeVolatile(z.string().default('OPENAI_API_KEY').role('credential-ref')).description('存 API key 的环境变量名。key 本身放在 DSH 的凭据里。'),
   ttsModel: maybeVolatile(z.string().default('tts-1')).description('TTS 模型名。'),
   ttsVoice: maybeVolatile(z.string().default('alloy')).description('OpenAI 兼容 TTS 的音色名。'),
-  etudeUrl: maybeVolatile(z.string().default('http://127.0.0.1:8977')).description('Etude 训练器的地址。'),
-  etudeWriteAudioPath: maybeVolatile(z.boolean().default(true)).description('把语音文件名直接写进 Etude 的库。关掉就得在 Etude 里重新合成一次。'),
   proxyUrl: maybeVolatile(z.string().default('')).description('联网用的代理，比如 http://127.0.0.1:7897。留空会自动读 HTTPS_PROXY 和系统代理设置。搜不到候选图时先看这里。'),
 })
 
@@ -82,6 +84,7 @@ function normalizeConfig(raw) {
   const text = (key, fallback) => normalizeSpace(pick(key)) || fallback
   return {
     dataDir: normalizeSpace(pick('dataDir')),
+    exportDir: normalizeSpace(pick('exportDir')),
     language: text('language', 'en'),
     examplesPerLesson: clampInt(pick('examplesPerLesson'), 1, 40, 8),
     zhVariants: clampInt(pick('zhVariants'), 2, 4, 3),
@@ -108,17 +111,15 @@ function normalizeConfig(raw) {
     get url() {
       return this.ttsBaseUrl
     },
-    etudeUrl: text('etudeUrl', 'http://127.0.0.1:8977'),
-    etudeWriteAudioPath: pick('etudeWriteAudioPath') !== false,
     proxyUrl: normalizeSpace(pick('proxyUrl')),
   }
 }
 
 const SYSTEM_HINT = [
-  '本机装了 dsh-etude 卡片工厂，可以给一个词/固定说法/整句造语言训练卡（例句 + 配图 + 语音 + 打包 + 装进 Etude）。',
-  '相关工具：etude_create 造包、etude_status 看进度、etude_pack 打包/安装。',
+  '本机装了 dsh-etude 卡片工厂，可以给一个词/固定说法/整句造语言训练卡（例句 + 配图 + 语音 + 打包 + 导出）。',
+  '相关工具：etude_create 造包、etude_status 看进度、etude_pack 打包/导出。',
   '重要：配图必须由人从候选里挑一张、语音必须由人试听确认，模型替不了这一步。',
-  '所以「造好了」不等于「能用了」—— 用户还需要去 Etude 工厂面板里点图和听音频。汇报时要把这个说清楚，不要替用户宣布完成。',
+  '所以「造好了」不等于「能用了」—— 用户还需要去卡片工厂面板里点图和听音频。汇报时要把这个说清楚，不要替用户宣布完成。',
 ].join('\n')
 
 export function apply(ctx, config) {
@@ -131,7 +132,7 @@ export function apply(ctx, config) {
     setProxyUrl(value.proxyUrl)
     return value
   }
-  const getRoot = () => etudeRoot(getConfig().dataDir)
+  const getRoot = () => dataRoot(getConfig().dataDir)
   const jobs = createJobRunner()
 
   getConfig()
@@ -155,7 +156,7 @@ export function apply(ctx, config) {
     scoped.effect(() => registerMediaRoutes(webServer, { getRoot, getApiHandler: () => handle }), 'dsh-etude: media routes')
   })
 
-  for (const tool of createEtudeTools({ ctx, getConfig, getRoot })) {
+  for (const tool of createFactoryTools({ ctx, getConfig, getRoot })) {
     ctx.effect(() => ctx.tools.register(tool), `dsh-etude: tool ${tool.name}`)
   }
 

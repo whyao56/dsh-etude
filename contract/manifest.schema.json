@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/whyao56/dsh-etude/contract/manifest.schema.json",
-  "title": "Etude 卡片包 v2 清单",
-  "description": "语言卡片工厂交给 Etude 训练器的成品包。它只描述「包里有什么、谁点过头」，二进制在 images/ 与 audio/ 里，用 sha256 对账。schema 管结构，contract/validate.js 与 contract/validate.py 管那些表达不出来的规矩（文件真的在、哈希真的对、图必须有人复核）。",
+  "title": "卡片包 v2 清单",
+  "description": "卡片工厂出的成品包。它只描述「包里有什么、谁点过头」，二进制在 images/ 与 audio/ 里，用 sha256 对账。schema 管结构，contract/validate.js 与 contract/validate.py 管那些表达不出来的规矩（文件真的在、哈希真的对、图必须有人复核）。老包的 format 写的是 etude-lesson，现在写 card-pack，两个都认。",
   "type": "object",
   "additionalProperties": true,
   "required": ["format", "format_version", "generator", "created_at", "lesson", "examples"],
   "properties": {
-    "format": { "const": "etude-lesson" },
+    "format": { "enum": ["card-pack", "etude-lesson"] },
     "format_version": { "const": 2 },
     "generator": {
       "type": "object",

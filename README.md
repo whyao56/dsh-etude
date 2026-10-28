@@ -1,113 +1,199 @@
-# dsh-etude
+# dsh-etude · 卡片工厂
 
-**DeepSeek Harness 插件：语言卡片工厂。**
+**DeepSeek Harness 插件：把「一个词」做成一整套能练的语言卡片。**
 
-给它一个词、一个固定说法、一句英文，它把「卡片」做出来 —— 8 条不同场景的例句、
-每条例句一张对得上情境的实拍图、一条能听清语气的语音，打成 v2 卡片包交给
-[Etude](https://github.com/whyao56/Etude) 去练（五通道 + 间隔重复）。
+给它一个词、一个固定说法、一句英文，它把卡片造出来 —— 8 条互不相同场景的例句、
+每条例句一张对得上情境的实拍照片、一条能听清语气的语音，逐句人工确认后打成一个
+自包含的 v2 卡片包，导出到本地目录。
 
-装好之后侧栏多一个「卡片工厂」，在里面造包、挑图、试听、打包、装进 Etude。
-也可以用工具直接招呼：`etude_create` / `etude_status` / `etude_pack`。
+**整条链路都在这个插件里闭环**：造例句、搜图、像素预检、九宫格挑图、TTS 合成、
+试听确认、打包、契约校验、导出。不依赖任何外部应用、不需要额外数据库、不需要
+另起服务。
 
-> 现状：**0.1.0，能用了**。真模型造出过 8 条例句的包；配图走 Commons 实拍图、
-> 每张都经过人工点选；语音走 Edge TTS（零配置、不需要 key），也能接 OpenAI 兼容接口。
-> 见 [docs/HANDOVER.md](docs/HANDOVER.md) 了解为什么切开这一半。
+```
+侧栏「卡片工厂」→ 输入 coffee → 造包
+  → 8 条例句（场景互不相同，中文说法故意不一致）
+  → 每条 9 张候选实拍图，你点一张（或者自己上传）
+  → 每条语音，真播一遍，播到六成才许点「我听过了」
+  → 打包：缺图、缺复核、哈希不对，都不给打
+  → 导出：Downloads/dsh-etude/coffee-<id>/ 里就是成品
+```
 
-## 为什么是插件，而不是「在 Etude 里继续改」
+> 现状：**0.1.0，能用**。真模型造过 8 目标 × 8 条例句，零 flag；配图走 Wikimedia
+> Commons 实拍图，每张都人工点过；语音走 Edge TTS（零配置、不要 key），也能接
+> OpenAI 兼容的 TTS。
 
-Etude 0.1.1 里有两半：训练器（好）和卡片工厂（坏）。
+---
 
-| | 谁做 | 在哪 |
-|---|---|---|
-| 造卡（写句、找图、TTS、人工挑图） | **dsh-etude**（本仓库） | DSH 插件 |
-| 练卡（五通道、调度、统计、跟读） | Etude 0.1.1（参考实现） | 本地 exe / 源码 |
+## 为什么这么设计
 
-造卡是一次性、贵、必须有人看一眼的活；练卡是长期、便宜、天天跑的活。
-混在一个进程里，工厂的毛病会拖着训练器一起被骂。
+这三条不是功能，是拒绝：
 
-## 三条一开始就定死的规矩
+**1. 每张图都有人点过头。** 检索候选 → 预检 → 九宫格挑图 → 锁定。没有「自动配好
+就入库」这条路。一条例句给 9 张候选、三列铺满整卡（每格约 300×225），是因为
+小于 150px 的缩略图根本看不出拍的是什么，那叫让人瞎点。
 
-1. **每张图都有人点过头。** 检索候选 → 预检 → 九宫格挑图 → 锁定。没有「自动配好就入库」这条路。
-2. **试听必须真能播。** 界面上是真正的 `<audio>`，播到六成才允许点「我听过了」。
-3. **重复的目标不重复收费。** 同目标同参数再点一次「造包」，直接复用上次的包，一分钱不花。
+**2. 试听必须真能播。** 界面上是真正的 `<audio>`，播到六成才解锁「我听过了」；
+合成只回字节数、不给可播放的东西，这个插件不会认为它成了。
 
-契约里把这三条写成了硬校验：`review.image.by` 与 `review.audio.by` 没有值、
-`audio.listened !== true` 的包，`contract/validate.*` 一律拒收 —— 打不出来。
+**3. 重复的目标不重复收费。** 幂等键 = `hash(target, kind, language, examples,
+zhVariants, model, promptVersion, voice)`。同参数再点一次「造包」，直接复用上次的
+包，一分钱不花；失败的包不复用（不然永远卡在失败的那份上）。
+
+契约里把前两条写成了硬校验：`review.image.by` / `review.audio.by` 没值、
+`audio.listened !== true` 的包，`contract/validate.*` 一律拒收 —— 物理上打不出来。
+
+---
 
 ## 装上
 
 ```powershell
-# 依赖（sharp 做像素体检，ws 打 Edge TTS 的 WebSocket）
 cd <本仓库>
-npm install
-
-# 装进 DSH（在本仓库根目录之外的任意地方用 DSH 的 plugin_manager 也行）
+npm install          # 只有两个运行依赖：sharp（像素体检）、ws（Edge TTS 的 WebSocket）
 ```
 
-装进 profile 后 `plugin_manager set_plugin target=include:etude enabled=false` 再
-`enabled=true` 会重新加载宿主半（`changed:false` 时它不会重跑）。
+然后在 DSH 里把本目录当 bundle 装：
+
+```
+plugin_manager  install_bundle  target: "<本仓库的绝对路径>"
+```
+
+改完代码要重新加载宿主半时，`set_plugin` 的 target 是 **entryId `include:etude`**，
+而且必须先 `enabled=false` 再 `enabled=true`（`changed:false` 时它不会重跑）。
 
 ## 用起来
 
-界面上：侧栏「卡片工厂」→ 输入目标 → 造包 → 逐条「找候选图 / 点一张 / 生成语音 / 我听过了」
-→ 打包 → 装进 Etude。**红字没消掉之前，打包按钮会告诉你还差哪几条。**
+**界面**：侧栏「卡片工厂」。左边是包列表，右边是整包；逐条「找候选图 → 点一张 →
+生成语音 → 我听过了」，全绿之后「打包」，再「导出成品包」。
 
-命令行（自检整条链路，用假模型，不花真钱、不联网找例句）：
+**工具**（让 Agent 自己招呼，但**复核这一步刻意不给工具**）：
+
+| 工具 | 参数 | 干什么 |
+|---|---|---|
+| `etude_create` | `target` 必填，`kind` / `examples` / `prepareImages` | 造一个包（同步等它造完） |
+| `etude_status` | `packId` 可选 | 哪几条还差图、哪几条还差试听 |
+| `etude_pack` | `packId` 必填，`export` 可选 | 打包；`export:true` 顺手导出 |
+
+**命令行自检**（假模型顶替 LLM，其余全真：真去 Commons 搜图、真跑 Edge TTS）：
 
 ```powershell
-node tests/selftest.mjs --target coffee --examples 4 --candidates 6 --keep
-node tests/selftest.mjs --target coffee --examples 8 --install   # 顺手装进 8977 上的 Etude
+node tests/selftest.mjs --target coffee --examples 4 --candidates 9 --keep
+node tests/selftest.mjs --target coffee --examples 8 --export
 ```
 
-跑测试：
+**测试**：
 
 ```powershell
-npm test                                  # JS 单元 + 客户端渲染冒烟
-python -m pytest tests/test_contract.py -q  # 契约双份校验器 + 像素守卫反证
+npm test                                    # JS 单元 18 条 + 客户端渲染冒烟 + RPC 冒烟 40 项
+npm run test:py                             # 契约双份校验器 + 像素守卫反证，16 条
 ```
 
-## 数据落在哪
+---
 
-全部在 `%LOCALAPPDATA%\Etude`（`ETUDE_DATA_DIR` 或插件设置里的 `dataDir` 可以改）：
+## 设置
 
-```
-factory/library.json          账本：包、例句、复核记录（真源，不是内存）
-factory/media/images|audio    内容寻址的媒体（<source>-<sha256[:20]>.<ext>）
-factory/packs/<id>/           打好的成品包：manifest.json + images/ + audio/
-factory/candidates/           还没选中的候选图（换一批就删）
-staging/<id>/                 打包中转（校验不过会留着让人查）
-etude.sqlite3  images/  audio/   Etude 自己的库和媒体目录
-```
+| 键 | 默认 | 说明 |
+|---|---|---|
+| `dataDir` | 空 = `%LOCALAPPDATA%\dsh-etude` | 账本、素材、成品包都在这 |
+| `exportDir` | 空 = `%USERPROFILE%\Downloads\dsh-etude` | 导出往哪儿放 |
+| `language` | `en` | 目前只有 `en` 能生成 |
+| `examplesPerLesson` | `8` | 1–40 |
+| `zhVariants` | `3` | 每句几种**故意不一致**的中文说法，2–4 |
+| `provider` / `model` | 空 = 跟随当前会话 | 造例句用哪个模型 |
+| `llmBaseUrl` / `llmApiKeyEnv` / `llmModel` | 空 | 想用 OpenAI 兼容端点时才填 |
+| `candidateLimit` | `9` | 每条给几张候选图，3–12 |
+| `autoPrepareCandidates` | `true` | 造完例句顺手找候选图 |
+| `pixelCheck` | `true` | 用像素统计挡纯色块、渐变、大色块海报 |
+| `ttsEngine` | `auto` | `auto` / `edge` / `openai`；Edge 永远兜底 |
+| `rate` / `volume` | `+10%` / `+10%` | Edge 用这种写法，OpenAI 兼容会换算成 `speed=1.1`（没有 volume） |
+| `ttsVoiceEdge` | `en-US-AriaNeural` | Edge 音色短名，面板里有完整音色表 |
+| `ttsBaseUrl` / `ttsApiKeyEnv` / `ttsModel` / `ttsVoice` | 空 | 想接 OpenAI 兼容 TTS 时才填 |
+| `proxyUrl` | 空 = 自动读 `HTTPS_PROXY` 与系统代理 | 搜不到候选图先看这里 |
 
-媒体文件名不是随便起的：`<小写字母>-<sha256 前 20 位>.<ext>`。这正好是 Etude
-自己的命名规则，所以同一份字节既能由插件提供服务，也能直接落进 Etude 的目录里被认出来。
+API key 不写在设置里，只写「存哪个环境变量名」，值放 DSH 的凭据里。
+
+---
 
 ## 成品包长什么样
 
-`format: "etude-lesson"`、`format_version: 2`。结构在
-[`contract/manifest.schema.json`](contract/manifest.schema.json)，表达不出来的规矩在
-[`contract/validate.js`](contract/validate.js) 与 [`contract/validate.py`](contract/validate.py)
-（两份逐条对齐，测试里同一批好包坏包喂给两边，判定必须一致）。
+```
+coffee-13f770d580a24fc4/
+├── manifest.json        清单：包里有什么、谁点过头
+├── images/              每条例句一张实拍图
+└── audio/               每条例句一条 mp3
+```
 
-每条例句带 `voice_hint`（怎么说这句）与 `image_query`（图是怎么搜来的）；
-每张图带 `source / query / license / author / credit_url`，缺了授权信息只警告、
-不拦交付 —— 但那种包不该对外发。
+`format: "card-pack"`、`format_version: 2`。结构在
+[`contract/manifest.schema.json`](contract/manifest.schema.json)，表达不出来的规矩在
+[`contract/validate.js`](contract/validate.js) 与 [`contract/validate.py`](contract/validate.py)：
+**两份逐条对齐，测试里同一批好包坏包同时喂给两边，判定必须一致。**
+
+校验器管的是那些 schema 说不出来的事：文件真的在不在、sha256 和文件对不对得上、
+图短边 ≥640、音频能读出时长、有没有人复核过、同句有没有重复、同一个文件有没有
+被两条例句抢。
+
+老包的 `format` 写的是 `etude-lesson`，现在写 `card-pack`，**两个都认**（用老值会
+给一条 warning）。改名是因为「这个包属于谁」不该由别人定义 —— 包是这套契约的，
+不是某个应用的。
+
+每条例句还带两个附加字段：`voice_hint`（怎么说这句：语气/快慢/情绪）与
+`image_query`（图是怎么搜来的）。每张图带 `source / query / license / author /
+credit_url`，缺授权信息只警告、不拦交付 —— 但那种包别对外发。
+
+## 数据落在哪
+
+```
+%LOCALAPPDATA%\dsh-etude\
+├── factory/library.json           账本：包、例句、复核记录（真源，不是内存）
+├── factory/media/images|audio     内容寻址的媒体（<source>-<sha256[:20]>.<ext>）
+├── factory/packs/<id>/            打好的成品包
+├── factory/candidates/            还没选中的候选图（换一批就删）
+└── staging/<id>/                  打包中转（校验不过会留着让人查）
+```
+
+媒体名是 `<小写字母>-<sha256 前 20 位>.<ext>`。这不是随手起的：名字只由内容决定，
+所以同一份字节不管被哪个包用、被复制到哪，都还是同一个名字，重复的自动只存一份。
+
+---
 
 ## 已知的坑（都踩过，别再踩）
 
-- **Node 的 `fetch` 不读系统代理。** 走 Clash 之类的话，直连 Openverse / Commons 会卡到超时。
-  `lib/net.js` 显式解析「设置 → 代理」→ 环境变量 → Windows 注册表，走 CONNECT 隧道。
-  搜不到图先看设置里的 `proxyUrl`。
-- **`output.schema` 是 Harness 的 value schema DSL，不是 JSON Schema。** 必填写在属性上
-  （`{ type: 'string', required: true }`），写成 `required: [...]` 数组会让整个插件激活失败。
-- **宿主 web 服务整站要鉴权。** `<img src="/etude/...">` 这种子资源带不上 token，会 401。
-  所以界面的图与音频都走 RPC 拿字节、转 blob URL，不走 HTTP 路由。
-- **Etude 的 `POST /api/lessons/import` 完全忽略 media 字段。** 它只吃文字。
-  配图靠导入后逐条 `PATCH /api/examples/{id}` 写 `scene_image`；
-  语音没有对外 setter，只能直写 sqlite（`node:sqlite`，`busy_timeout` 兜住 WAL），
-  写不进去也不算失败 —— 会标成「语音需要重建」。
-- **渐变图能骗过方差。** 纯色块 `stdev < 6` 就够，但线性渐变 `stdev` 能到 70 多。
-  必须看二阶差分（`secondDiff < 1.1` 判渐变）。
+- **Node 的 `fetch` 不读系统代理。** 走 Clash 之类时，直连 Openverse / Commons 会
+  卡到超时。`lib/net.js` 按「设置 → 环境变量 → Windows 注册表 → 直连」显式解析，
+  走 CONNECT 隧道；没有代理时零额外开销。注意搜不到图时先看 `proxyUrl`。
+- **Openverse 会抽风。** 同一个 query 一会儿 200 一会儿 504。所以每个搜索有内存缓存
+  （8 条例句的 `image_query` 常常撞车，不缓存第二条起白等十几秒），并且连错 3 次
+  本次进程就不再用它，Commons 顶上。
+- **渐变图能骗过方差。** 纯色块 `stdev < 6` 就够了，但线性渐变 `stdev` 能到 73。
+  必须看**二阶差分**（`secondDiff < 1.1` 判渐变）。大色块海报看 `uniqueRatio`。
+  这三种都真造了图跑过验证。
+- **`output.schema` 是 Harness 的 value schema DSL，不是 JSON Schema。** 必填写在
+  属性上（`{ type: 'string', required: true }`）；写成 `required: [...]` 数组会让整个
+  插件激活失败，报 `schema.required is not supported by the value schema DSL`。
+- **宿主 web 服务整站要鉴权。** `<img src="/etude/...">` 这种子资源带不上 token，
+  会 401。所以界面的图和音频都走 RPC 拿字节、转 blob URL，不走 HTTP 路由。
+- **同一个绑定名不能自己在同一条语句里调用自己。**
+  `const [packs, selfcheck] = await Promise.all([listPacks(root), selfcheck()])`
+  里右边的 `selfcheck()` 命中的是正在声明的局部绑定（TDZ），面板打开就白屏。
+- **语速/音量不是所有引擎都认。** Edge 用 `+10%`，OpenAI 兼容用 `speed=1.1` 且没有
+  volume。原样透传会让参数静默失效，所以这里按引擎换算。
+
+## 仓库结构
+
+```
+index.js           Host 半入口：Config、RPC、媒体路由、三个工具、systemPrompt 段
+client.js          Web UI 半：侧栏图标 + 主面板 + 配置卡（零依赖，手写 SVG）
+lib/
+  prompts.js       Etude 那套七条 HARD RULES 原文 + 本插件加的三处约束
+  examples.js      造例句、确定性校验、不过关带意见重试一次
+  images.js        检索（Openverse/Commons）、像素预检、内容寻址落盘
+  tts.js           引擎选择与降级；tts-edge.js 是 Edge WebSocket 的纯 JS 实现
+  packs.js         状态机：造包 → 配素材 → 打包；所有复核闸门都在这
+  export.js        导出成品包到本地目录
+  manifest.js      camelCase → 契约 v2 的 snake_case
+contract/          清单 schema + 两份同源校验器（JS / Python）
+tests/             单元、客户端渲染冒烟、RPC 冒烟、整链路自检、pytest
+```
 
 ## 许可
 

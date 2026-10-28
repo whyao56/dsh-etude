@@ -31,8 +31,7 @@ export function makeConfig(overrides = {}) {
     ttsApiKeyEnv: '',
     ttsModel: '',
     ttsVoice: '',
-    etudeUrl: 'http://127.0.0.1:8977',
-    etudeWriteAudioPath: false,
+    exportDir: '',
   }
   const merged = { ...base, ...overrides }
   Object.defineProperty(merged, 'url', { get: () => merged.ttsBaseUrl, enumerable: false })

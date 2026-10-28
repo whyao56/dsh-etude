@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """卡片包 v2 校验器 —— `contract/validate.js` 的 Python 双胞胎。
 
-为什么要有两份：造包的那一侧在 Node 里跑（插件宿主是 Node），可 Etude 那边
-是 Python，将来审包、批处理、CI 都在 Python 里更顺手。两份各写一遍最容易
-慢慢漂开，所以规矩只有一套，字段名、阈值、判定顺序、错误文案都逐条对齐；
-`tests/test_contract.py` 会拿同一批「好包 / 坏包」分别喂给两边，只要判定
-不一致就报错。
+为什么要有两份：造包的那一侧在 Node 里跑（插件宿主是 Node），而审包、批处理、
+CI 这类事情在 Python 里更顺手。两份各写一遍最容易慢慢漂开，所以规矩只有一套，
+字段名、阈值、判定顺序、错误文案都逐条对齐；`tests/test_contract.py` 会拿同一批
+「好包 / 坏包」分别喂给两边，只要判定不一致就报错。
 
 用法（命令行）：
     python contract/validate.py <包目录>
@@ -22,8 +21,11 @@ import os
 import sys
 from typing import Any, Callable, Optional
 
-FORMAT = "etude-lesson"
+FORMAT = "card-pack"
 FORMAT_VERSION = 2
+# 老包兼容：最早的 v2 契约写的是 "etude-lesson"。现在插件自己就是全套，
+# 新包一律写 "card-pack"；旧值读得进来，但会带一条提醒。
+LEGACY_FORMATS = ("etude-lesson",)
 MAX_EXAMPLES = 40
 MAX_SCENE_CHARS = 600
 MAX_ZH_VARIANTS = 4
@@ -54,8 +56,11 @@ def validate_manifest(manifest: Any, load_file: Optional[Loader] = None) -> dict
     if not isinstance(manifest, dict):
         return {"ok": False, "mode": mode, "errors": ["清单不是一个 JSON 对象。"], "warnings": warnings}
 
-    if manifest.get("format") != FORMAT:
-        fail(f"format 必须是 \"{FORMAT}\"，现在是 {json.dumps(manifest.get('format'), ensure_ascii=False)}。")
+    fmt = manifest.get("format")
+    if fmt != FORMAT and fmt not in LEGACY_FORMATS:
+        fail(f"format 必须是 \"{FORMAT}\"，现在是 {json.dumps(fmt, ensure_ascii=False)}。")
+    elif fmt != FORMAT:
+        note(f"format 是旧值 {json.dumps(fmt, ensure_ascii=False)}，还认，但新出的包应该写 \"{FORMAT}\"。")
     if manifest.get("format_version") != FORMAT_VERSION:
         fail(f"format_version 必须是 {FORMAT_VERSION}，现在是 {json.dumps(manifest.get('format_version'))}。")
     created_at = manifest.get("created_at")
@@ -127,7 +132,7 @@ def validate_manifest(manifest: Any, load_file: Optional[Loader] = None) -> dict
             else:
                 seen_sentences[key] = index + 1
             if len(sentence) > 400:
-                fail(f"{at}的句子超过 400 字，Etude 那边会截断。")
+                fail(f"{at}的句子超过 400 字，这种长度多半是模型把解释塞进来了。")
 
         scene_en = example.get("scene_en")
         scene_zh = example.get("scene_zh")

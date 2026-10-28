@@ -17,13 +17,17 @@ DSH 宿主进程（Node）
           ├── lib/images.js   → Openverse / Commons
           ├── lib/tts.js      → Edge TTS（lib/edge-token.js + ws）/ OpenAI 兼容
           ├── lib/manifest.js → contract/validate.js
-          └── lib/etude.js    → Etude HTTP API + sqlite
+          └── lib/export.js   → 成品包导出到本地目录（不依赖任何外部应用）
 浏览器（Web GUI）
   client.js  React 组件挂到 main / sidebar.panellist / plugins.bundle.config
 ```
 
 界面上一切事实都来自宿主：客户端半没有自己的业务状态，只有「现在看哪个包」和
 「哪个任务在跑」。所以刷新页面不会丢东西，也不会和账本对不上。
+
+> 命名说明：`dsh-etude` 是插件自己的名字（etude = 练习曲，一音一句地抠），
+> 所以工具叫 `etude_*`、RPC 通道叫 `/etude`、媒体路由在 `/etude/*` 下。
+> **这些名字只属于这个插件，不代表它要接哪个别的应用。**
 
 ## 十个决定
 
@@ -98,16 +102,22 @@ Edge 用 `rate=+10%` / `volume=+10%`；OpenAI 兼容只有 `speed=1.1`，没有 
 `voice_hint`（"flat, tired, slow"）里的情绪词会再挪 ±10% 的语速 —— 同一批卡片
 听起来不该像同一个人用同一种情绪念完八句。
 
-否掉的：把 rate/volume 原样传给所有引擎（Etude 0.1.1 就是这么静默失效的）。
+否掉的：把 rate/volume 原样传给所有引擎（参考实现就是这么静默失效的）。
 
-### 9. Etude 集成：能走 API 就走 API，走不了才碰数据库
+### 9. 插件自己就是全套，不接别人
 
-- 导入：`POST /api/lessons/import`（只吃文字，etude 会忽略 media 字段）
-- 配图：逐条 `PATCH /api/examples/{id}` 带 `scene_image`
-- 语音：**没有对外 setter**，只能 `UPDATE examples SET audio_path=...`（`node:sqlite`，
-  `busy_timeout=5000` 兜住 WAL 并发写）。写失败不致命，标成「语音需要重建」。
+最初这一节写的是「导入某个外部训练器：能走 API 就走 API，走不了才碰数据库」。
+那条路走通过，然后被砍了 —— 理由不是技术上不行，而是**边界放错了**：
 
-否掉的：让 Etude 自己重新合成一遍（要 key、要花钱，而且同一句话重复收费）。
+- 别人的东西：要探测服务在不在、要读它的 sqlite、要把文件塞进它的目录、要指望
+  它的文件名规则不变。任何一处变动，工厂就静默坏掉，而且坏在别人那一半。
+- 自己的东西：包就是包。`manifest.json` + `images/` + `audio/`，谁想练自己拿去练。
+
+所以现在末端是 `lib/export.js`：把打好的包 copy 到导出目录就完事。包格式的
+`format` 也从承接方的名字改成了 `card-pack`（老值当别名继续认）。
+
+否掉的：留一个「兼容模式」同时支持两条路。那等于两边都得测、都会坏，而且没人为
+坏掉的那一半负责。
 
 ### 10. 打包前先自检，校验不过保留 staging
 
@@ -120,7 +130,7 @@ Edge 用 `rate=+10%` / `volume=+10%`；OpenAI 兼容只有 `speed=1.1`，没有 
 ## 状态机
 
 ```
-generating ──→ text ──→ media ──→ packed ──→ installed
+generating ──→ text ──→ media ──→ packed ──→ exported
      └──────────┴────────┴─────────┴──→ failed（记 lastError）
 ```
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RPC 冒烟：把界面会调的每一个端点真调一遍。
  *
  * 为什么值得单独跑一遍：客户端半只通过 `/etude` 这条通道说话，端点名写错一个
@@ -11,7 +11,18 @@
  * 用法：node tests/rpc-smoke.mjs
  */
 import { readFile } from 'node:fs/promises'
+import { access } from 'node:fs/promises'
 import { join } from 'node:path'
+
+/** 文件在不在；在就 true，不在就 false（不抛）。 */
+async function exists(target) {
+  try {
+    await access(target)
+    return true
+  } catch {
+    return false
+  }
+}
 
 import { createRpcHandler } from '../lib/rpc.js'
 import { createJobRunner } from '../lib/jobs.js'
@@ -173,7 +184,7 @@ try {
   check('打包结果里有目录', typeof dir === 'string' && dir.length > 0, String(dir))
 
   const manifest = JSON.parse(await readFile(join(dir, 'manifest.json'), 'utf8'))
-  check('清单 format/format_version 正确', manifest.format === 'etude-lesson' && manifest.format_version === 2)
+  check('清单 format/format_version 正确', manifest.format === 'card-pack' && manifest.format_version === 2, String(manifest.format))
   check('清单里三条例句都带媒体与复核',
     manifest.examples.length === 3 &&
       manifest.examples.every((one) => one.media?.image && one.media?.audio && one.review?.image?.by && one.review?.audio?.by))
@@ -186,6 +197,23 @@ try {
 
   const afterPack = await call('state')
   check('包状态变成 packed', afterPack.packs[0].status === 'packed', afterPack.packs[0].status)
+
+  console.log('— 导出 —')
+  const exportJob = await runJob('pack.export', { id: packId })
+  check('导出任务成功', exportJob.status === 'done', exportJob.error ?? '')
+  const exportedDir = exportJob.result?.dir
+  check('导出结果里有目录', typeof exportedDir === 'string' && exportedDir.length > 0, String(exportedDir))
+  check('导出的副本里有清单', await exists(join(exportedDir, 'manifest.json')))
+  const exportedManifest = JSON.parse(await readFile(join(exportedDir, 'manifest.json'), 'utf8'))
+  const firstImage = exportedManifest.examples[0].media.image.file
+  check('导出的副本里有图有音',
+    await exists(join(exportedDir, firstImage)) &&
+      await exists(join(exportedDir, exportedManifest.examples[0].media.audio.file)),
+    firstImage)
+
+  const afterExport = await call('state')
+  check('包状态变成 exported', afterExport.packs[0].status === 'exported', afterExport.packs[0].status)
+  check('列表里带着导出位置', typeof afterExport.packs[0].exportDir === 'string', String(afterExport.packs[0].exportDir))
 
   console.log('— 收摊 —')
   await call('pack.delete', { id: packId })

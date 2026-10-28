@@ -13,8 +13,14 @@
  */
 import { createHash } from 'node:crypto'
 
-export const FORMAT = 'etude-lesson'
+export const FORMAT = 'card-pack'
 export const FORMAT_VERSION = 2
+/**
+ * 老包兼容：最早的 v2 契约把 `format` 写成 `etude-lesson`。那时这个插件只是
+ * 另一个训练器的素材工厂。现在插件自己就是全套，值改成 `card-pack`；
+ * 读的时候旧值还认，这样别人手里的旧包不会一夜之间变成「不合法」。
+ */
+export const LEGACY_FORMATS = ['etude-lesson']
 export const MAX_EXAMPLES = 40
 export const MAX_SCENE_CHARS = 600
 export const MAX_ZH_VARIANTS = 4
@@ -39,8 +45,10 @@ export async function validateManifest(manifest, { loadFile } = {}) {
     return { ok: false, mode, errors: ['清单不是一个 JSON 对象。'], warnings }
   }
 
-  if (manifest.format !== FORMAT) {
+  if (manifest.format !== FORMAT && !LEGACY_FORMATS.includes(manifest.format)) {
     errors.push(`format 必须是 "${FORMAT}"，现在是 ${JSON.stringify(manifest.format)}。`)
+  } else if (manifest.format !== FORMAT) {
+    warnings.push(`format 是旧值 ${JSON.stringify(manifest.format)}，还认，但新出的包应该写 "${FORMAT}"。`)
   }
   if (manifest.format_version !== FORMAT_VERSION) {
     errors.push(`format_version 必须是 ${FORMAT_VERSION}，现在是 ${JSON.stringify(manifest.format_version)}。`)
@@ -101,7 +109,7 @@ export async function validateManifest(manifest, { loadFile } = {}) {
       const key = sentence.toLowerCase()
       if (seenSentences.has(key)) errors.push(`${at}的句子和第 ${seenSentences.get(key)} 条重复了。`)
       else seenSentences.set(key, index + 1)
-      if (sentence.length > 400) errors.push(`${at}的句子超过 400 字，Etude 那边会截断。`)
+      if (sentence.length > 400) errors.push(`${at}的句子超过 400 字，这种长度多半是模型把解释塞进来了。`)
     }
 
     const sceneEn = String(example.scene_en ?? '')
@@ -170,7 +178,7 @@ export async function validateManifest(manifest, { loadFile } = {}) {
     })
 
     // 同一份字节只许落一份。两个例子共用一张图不是错，但清单上重复登记
-    // 等于包里有冗余副本，Etude 那边会当成两张不同的图存。
+    // 等于包里有冗余副本 —— 换个客户端就可能被当成两张不同的图存。
     for (const [kind, entry] of [
       ['配图', media.image],
       ['语音', media.audio],

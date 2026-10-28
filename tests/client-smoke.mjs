@@ -314,9 +314,9 @@ const fakePack = {
 }
 
 const fakeState = {
-  root: 'C:\\Users\\HP\\AppData\\Local\\Etude',
+  root: 'C:\\Users\\HP\\AppData\\Local\\dsh-etude',
   version: '0.1.0',
-  etudeUrl: 'http://127.0.0.1:8977',
+  exportDir: 'C:\\Users\\HP\\Downloads\\dsh-etude',
   packs: [fakePack],
   jobs: [],
   selfcheck: [

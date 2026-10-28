@@ -96,7 +96,7 @@ def example(index: int, *, with_media: bool = True, reviewed: bool = True, liste
 
 def manifest(examples):
     return {
-        "format": "etude-lesson",
+        "format": "card-pack",
         "format_version": 2,
         "generator": {
             "kind": "dsh-plugin",
@@ -169,6 +169,27 @@ def test_good_pack_passes(tmp_path):
     assert verdict["ok"] is True, verdict["errors"]
     assert verdict["mode"] == "full"
     assert verdict["errors"] == []
+
+
+# ── format 的老名字还认，但会提醒 ─────────────────────────────────────────
+
+
+def test_legacy_format_is_accepted_with_warning(tmp_path):
+    data = manifest([example(0)])
+    data["format"] = "etude-lesson"
+    pack = write_pack(tmp_path / "legacy", data)
+    verdict = load(pack)
+    assert verdict["ok"] is True, verdict["errors"]
+    assert any("旧值" in one for one in verdict["warnings"]), verdict["warnings"]
+
+
+def test_unknown_format_is_rejected(tmp_path):
+    data = manifest([example(0)])
+    data["format"] = "card-packs"
+    pack = write_pack(tmp_path / "wild", data)
+    verdict = load(pack)
+    assert verdict["ok"] is False
+    assert any("format" in one for one in verdict["errors"]), verdict["errors"]
 
 
 # ── 反证 1：没有复核记录不许入库 ───────────────────────────────────────────

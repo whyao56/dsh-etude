@@ -1,16 +1,18 @@
 {
   "name": "dsh-etude",
   "version": "0.1.0",
-  "description": "DSH 语言卡片工厂：给一个词、短语或整句，产出不同场景的例句、逐句人工点过头的真照片配图与 TTS 语音，打成可导入 Etude 训练器的 v2 卡片包。",
+  "description": "DSH 语言卡片工厂：给一个词、短语或整句，产出不同场景的例句、逐句人工点过头的真照片配图与 TTS 语音，打成自包含的 v2 卡片包导出到本地目录。图库检索、像素预检、九宫格挑图、试听确认、打包导出全部在这个插件内完成，不依赖任何外部应用。",
   "keywords": [
     "deepseek",
     "deepseek-harness",
     "dsh",
     "dsh-plugin",
     "plugin",
-    "etude",
     "flashcard",
-    "language",
+    "language-learning",
+    "tts",
+    "openverse",
+    "wikimedia-commons",
     "cordis"
   ],
   "type": "module",
