@@ -1,0 +1,35 @@
+# 依赖与虚拟环境
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 构建产物
+dist/
+build/
+*.spec.bak
+
+# 运行时数据（卡片包、媒体、数据库都不进仓库）
+staging/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# 本地配置与凭据
+.env
+*.local.json
+config.local.json
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 系统
+Thumbs.db
+desktop.ini
+.DS_Store
