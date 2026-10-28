@@ -1,4 +1,4 @@
-/**
+﻿/**
  * RPC 冒烟：把界面会调的每一个端点真调一遍。
  *
  * 为什么值得单独跑一遍：客户端半只通过 `/etude` 这条通道说话，端点名写错一个
@@ -10,6 +10,7 @@
  *
  * 用法：node tests/rpc-smoke.mjs
  */
+import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -173,6 +174,19 @@ try {
   check('只补还没候选的那两条（已有的不动）', filled.result?.total === 2, String(filled.result?.total))
   check('两条都补上了', filled.result?.done === 2 && (filled.result?.failures?.length ?? 0) === 0,
     JSON.stringify(filled.result?.failures))
+
+  // 批量取候选时两条例句的 image_query 常常撞车，图库回的是同一批结果。
+  // 这里必须能看出两批候选「没有同一份字节」—— 否则九个格子是同一张照片的九个位置，
+  // 而且挑完打包会被契约判「第 3 条和第 2 条重了」。
+  const digests = []
+  for (const ord of [2, 3]) {
+    const more = await call('candidate.list', { id: packId, ord })
+    const list = Array.isArray(more) ? more : more.candidates
+    const bytes = Buffer.from((await call('candidate.bytes', { stagedName: list[0].stagedName })).dataBase64, 'base64')
+    digests.push(createHash('sha256').update(bytes).digest('hex'))
+  }
+  check('两条的首张候选不是同一份字节', digests[0] !== digests[1], digests.join(' / '))
+
   for (const ord of [2, 3]) {
     const more = await call('candidate.list', { id: packId, ord })
     const list = Array.isArray(more) ? more : more.candidates
