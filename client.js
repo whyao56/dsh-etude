@@ -945,6 +945,10 @@ window.__ModuleLoader__.load({
       if (!detail) return React.createElement('div', { style: styles.empty }, t('label.empty'))
       const total = detail.examples.length
       const reviewed = detail.examples.filter((one) => one.imageReview?.by && one.audioReview?.listened).length
+      // 还没图、也还没有候选的那几条 —— 只有这些需要去图库取货。
+      const needsCandidates = detail.examples.filter(
+        (one) => !one.image && (one.imageCandidates?.length ?? 0) === 0,
+      ).length
       return React.createElement(
         'div',
         null,
@@ -977,6 +981,15 @@ window.__ModuleLoader__.load({
         React.createElement(
           'div',
           { style: { display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' } },
+          // 「还差几张图」得看得见：八条各点一次找候选等于开头先点八下，
+          // 所以给一个批量取的按钮（只取货、不点头 —— 挑哪张还是人来）。
+          needsCandidates > 0
+            ? React.createElement(
+                'button',
+                { style: styles.button, onClick: () => handlers.candidatesAll(), disabled: busy },
+                `${t('action.candidatesAll')}（${needsCandidates}）`,
+              )
+            : null,
           React.createElement(
             'button',
             { style: { ...styles.buttonPrimary, opacity: reviewed < total ? 0.45 : 1 }, onClick: () => handlers.pack(), disabled: reviewed < total || busy },
@@ -1033,6 +1046,7 @@ window.__ModuleLoader__.load({
       const handlers = useMemo(
         () => ({
           candidates: (ord) => factory.runJob('pack.candidates', { id: selected, ord }),
+          candidatesAll: () => factory.runJob('pack.candidatesAll', { id: selected }),
           pick: (ord, stagedName) => factory.act('pack.pick', { id: selected, ord, stagedName }),
           unlockImage: (ord) => factory.act('pack.unlockImage', { id: selected, ord }),
           upload: (ord, payload) => factory.act('pack.upload', { id: selected, ord, ...payload }),
@@ -1240,6 +1254,7 @@ window.__ModuleLoader__.load({
         'action.synthBusy': '合成中…',
         'action.playing': '播放中',
         'action.synthAll': '补齐全部语音',
+        'action.candidatesAll': '找全部候选图',
         'action.markListened': '我听过了',
         'action.unlockAudio': '取消确认',
         'action.unlockImage': '换一张',
@@ -1303,6 +1318,7 @@ window.__ModuleLoader__.load({
         'action.synthBusy': 'Synthesizing…',
         'action.playing': 'Playing',
         'action.synthAll': 'Synthesize all',
+        'action.candidatesAll': 'Find all candidates',
         'action.markListened': 'I listened',
         'action.unlockAudio': 'Undo',
         'action.unlockImage': 'Replace',

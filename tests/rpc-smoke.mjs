@@ -168,8 +168,12 @@ try {
   check('拒绝时说明了还差什么', /配图|语音|复核/.test(refusalMessage), refusalMessage)
 
   console.log('— 补齐剩下两条 —')
+  const filled = await runJob('pack.candidatesAll', { id: packId })
+  check('批量找候选任务成功', filled.status === 'done', filled.error ?? '')
+  check('只补还没候选的那两条（已有的不动）', filled.result?.total === 2, String(filled.result?.total))
+  check('两条都补上了', filled.result?.done === 2 && (filled.result?.failures?.length ?? 0) === 0,
+    JSON.stringify(filled.result?.failures))
   for (const ord of [2, 3]) {
-    await runJob('pack.candidates', { id: packId, ord })
     const more = await call('candidate.list', { id: packId, ord })
     const list = Array.isArray(more) ? more : more.candidates
     await call('pack.pick', { id: packId, ord, stagedName: list[0].stagedName, by: 'rpc-smoke' })
