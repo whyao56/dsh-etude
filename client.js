@@ -276,6 +276,40 @@ window.__ModuleLoader__.load({
         fontSize: 13,
         lineHeight: 1.9,
       },
+      // 一个包都没有时的居中空态：图标先给个落脚点，标题说清现在是什么状态，
+      // 底下一行说第一步做什么。三层的落差靠字号与颜色，不靠边框。
+      emptyBig: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        padding: '96px 24px',
+        textAlign: 'center',
+        color: 'var(--dsw-alias-label-tertiary)',
+      },
+      emptyIcon: {
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        display: 'grid',
+        placeItems: 'center',
+        border: '1px solid var(--dsw-alias-border-l2)',
+        background: 'var(--dsw-alias-bg-layer-1)',
+        color: 'var(--dsw-alias-label-secondary)',
+        marginBottom: 2,
+      },
+      emptyTitle: {
+        fontSize: 16,
+        fontWeight: 600,
+        color: 'var(--dsw-alias-label-primary)',
+      },
+      emptyHint: {
+        fontSize: 13,
+        lineHeight: 1.8,
+        color: 'var(--dsw-alias-label-tertiary)',
+        maxWidth: 380,
+      },
     }
 
     // ── 数据 ────────────────────────────────────────────────────────────────
@@ -942,7 +976,17 @@ window.__ModuleLoader__.load({
     // ── 主面板 ──────────────────────────────────────────────────────────────
 
     function PackDetail({ detail, busy, handlers, t }) {
-      if (!detail) return React.createElement('div', { style: styles.empty }, t('label.empty'))
+      // 一个包都没有时，中间这块是用户看到的第一屏：一张居中的空态，
+      // 说清楚「这里会出现什么」和「第一步做什么」。只写一行小字太像出错了。
+      if (!detail) {
+        return React.createElement(
+          'div',
+          { style: styles.emptyBig },
+          React.createElement('div', { style: styles.emptyIcon }, React.createElement(Icon, { name: 'factory', size: 30 })),
+          React.createElement('div', { style: styles.emptyTitle }, t('label.emptyTitle')),
+          React.createElement('div', { style: styles.emptyHint }, t('label.empty')),
+        )
+      }
       const total = detail.examples.length
       const reviewed = detail.examples.filter((one) => one.imageReview?.by && one.audioReview?.listened).length
       // 还没图、也还没有候选的那几条 —— 只有这些需要去图库取货。
@@ -975,12 +1019,19 @@ window.__ModuleLoader__.load({
             )
           : null,
         React.createElement('div', { style: styles.sectionTitle }, t('label.examples')),
+        // 例句还没到时，这块不能就一个「例句」标题空着 —— 那看起来像坏了。
+        total === 0
+          ? React.createElement('div', { style: styles.empty }, t('label.generatingHint'))
+          : null,
         detail.examples.map((example) =>
           React.createElement(ExampleCard, { key: example.ord, example, busy, handlers, t }),
         ),
-        React.createElement(
-          'div',
-          { style: { display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' } },
+        // 例句还一条都没有时（正在造），动作条没有意义：打包空的包只会被拒。
+        // 与其摆一排点了会报错的按钮，不如让它此刻不存在。
+        total > 0
+          ? React.createElement(
+              'div',
+              { style: { display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' } },
           // 「还差几张图」得看得见：八条各点一次找候选等于开头先点八下，
           // 所以给一个批量取的按钮（只取货、不点头 —— 挑哪张还是人来）。
           needsCandidates > 0
@@ -1010,8 +1061,9 @@ window.__ModuleLoader__.load({
             t('action.synthAll'),
           ),
           React.createElement('button', { style: styles.button, onClick: () => handlers.remove() }, t('action.delete')),
-        ),
-        reviewed < total
+            )
+          : null,
+        reviewed < total && total > 0
           ? React.createElement(
               'div',
               { style: { ...styles.banner('warn'), marginTop: 10 } },
@@ -1019,7 +1071,7 @@ window.__ModuleLoader__.load({
               React.createElement('span', null, t('hint.reviewRequired')),
             )
           : null,
-        detail.pack?.dir ? React.createElement('div', { style: { ...styles.banner('info'), marginTop: 10 } }, `${t('label.packDir')}：${detail.pack.dir}`) : null,
+        detail.pack?.dir && total > 0 ? React.createElement('div', { style: { ...styles.banner('info'), marginTop: 10 } }, `${t('label.packDir')}：${detail.pack.dir}`) : null,
         detail.export?.dir
           ? React.createElement(
               'div',
@@ -1126,7 +1178,8 @@ window.__ModuleLoader__.load({
                     ),
                   ),
                 )
-              : React.createElement('div', { style: styles.empty }, t('label.empty')),
+              // 空列表时左边保持安静 —— 指引只写在中间那一块，写两遍像两个错。
+              : null,
           ),
           React.createElement(
             'div',
@@ -1234,8 +1287,14 @@ window.__ModuleLoader__.load({
         field(t('config.rate'), 'rate'),
         field(t('config.volume'), 'volume'),
         field(t('config.examples'), 'examplesPerLesson'),
+        field(t('config.candidates'), 'candidateLimit'),
         field(t('config.exportDir'), 'exportDir'),
-        React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: 'var(--dsw-alias-label-tertiary)', marginTop: 4 } }, t('config.hint')),
+        field(t('config.dataDir'), 'dataDir'),
+        // 代理是「搜不到图」时唯一能自救的旋钮，所以必须在这一页上，
+        // 而不是只写进文档 —— 写文档的东西没人会在报错当场去翻。
+        field(t('config.proxy'), 'proxyUrl'),
+        React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: 'var(--dsw-alias-label-tertiary)', marginTop: 4 } }, t('config.hintProxy')),
+        React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: 'var(--dsw-alias-label-tertiary)', marginTop: 2 } }, t('config.hint')),
       )
     }
 
@@ -1273,8 +1332,10 @@ window.__ModuleLoader__.load({
         'status.packed': '已打包',
         'status.exported': '已导出',
         'status.failed': '失败',
-        'label.empty': '左边空着。上面输入一个词，回车。',
+        'label.emptyTitle': '还没有卡片包',
+        'label.empty': '在上面输入一个词、一个固定说法，或者一整句，回车就会开始造。',
         'label.examples': '例句',
+        'label.generatingHint': '模型正在写例句，一般十几秒，句子多的时候一分钟。写完这一屏会自动出现卡片。',
         'label.reviewed': '已确认',
         'label.author': '作者',
         'label.credit': '出处',
@@ -1303,6 +1364,10 @@ window.__ModuleLoader__.load({
         'config.examples': '每包条数',
         'config.exportDir': '导出目录',
         'config.exportDefault': '默认：下载\dsh-etude',
+        'config.candidates': '候选图上限',
+        'config.dataDir': '数据目录',
+        'config.proxy': '代理地址',
+        'config.hintProxy': 'Node 的 fetch 不读系统代理。搜不到候选图时先把这里填上（例如 http://127.0.0.1:7897），改完立刻生效，不用重启。',
         'config.hint': '语速和音量对 Edge 生效；OpenAI 兼容的那类接口只有语速（换成 speed），没有音量。',
         'config.summaryExamples': '每包 {n} 条例句',
       },
@@ -1337,8 +1402,10 @@ window.__ModuleLoader__.load({
         'status.packed': 'Packed',
         'status.exported': 'Exported',
         'status.failed': 'Failed',
-        'label.empty': 'Nothing here. Type a word above and press Enter.',
+        'label.emptyTitle': 'No packs yet',
+        'label.empty': 'Type a word, a fixed phrase, or a whole sentence above and press Enter.',
         'label.examples': 'Examples',
+        'label.generatingHint': 'The model is writing the sentences — usually ten-odd seconds, up to a minute. They appear here on their own.',
         'label.reviewed': 'confirmed',
         'label.author': 'By',
         'label.credit': 'Source',
@@ -1367,6 +1434,10 @@ window.__ModuleLoader__.load({
         'config.examples': 'Per pack',
         'config.exportDir': 'Export folder',
         'config.exportDefault': 'default: Downloads/dsh-etude',
+        'config.candidates': 'Candidates per example',
+        'config.dataDir': 'Data folder',
+        'config.proxy': 'HTTP proxy',
+        'config.hintProxy': "Node's fetch ignores the system proxy. If image search fails, put it here (e.g. http://127.0.0.1:7897). Takes effect immediately.",
         'config.hint': 'Rate and volume apply to Edge. OpenAI-compatible TTS only takes speed — no volume.',
         'config.summaryExamples': '{n} examples per pack',
       },

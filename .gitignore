@@ -24,6 +24,11 @@ staging/
 *.local.json
 config.local.json
 
+# 教程视频的中间产物（语音缓存、静帧、抽帧检查）
+docs/video/.cache/
+docs/video/.preview/
+docs/video/.check/
+
 # 编辑器
 .vscode/
 .idea/

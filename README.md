@@ -39,6 +39,19 @@
 
 ---
 
+## 教程
+
+两份，一份慢慢看、一份先过一遍骨架：
+
+- **[操作手册](docs/GUIDE.md)** —— 十八节，从「什么都没装」讲到「拿到一个能用的包」。
+  每个按钮叫什么、每行提示什么意思、哪一步会被拒、为什么被拒，都写了；配十一张界面
+  截图（第一次打开 / 正在造 / 卡片三层 / 九宫格 / 语音行 / 导出横幅 / 设置页 …）。
+- **[视频教程](docs/video/dsh-etude-tutorial.mp4)** —— 6 分钟，中文旁白，讲同一件事的
+  骨架。画面和旁白都是代码生成的：改 `docs/video/narration.mjs` 里一行字重跑一遍，
+  片子自己变长变短，不用重录。做法见 [docs/video/README.md](docs/video/README.md)。
+
+---
+
 ## 为什么这么设计
 
 这三条不是功能，是拒绝：
@@ -209,7 +222,9 @@ lib/
   manifest.js      camelCase → 契约 v2 的 snake_case
 contract/          清单 schema + 两份同源校验器（JS / Python）
 tests/             单元、客户端渲染冒烟、RPC 冒烟、整链路自检、pytest
-docs/              DESIGN（十条决定，每条都写了否掉的另一个选择）、HANDOVER、assets
+docs/              GUIDE（操作手册）、DESIGN（十条决定，每条都写了否掉的另一个选择）、
+                   HANDOVER、assets（README 与手册用的截图）
+docs/video/        教程视频与生成它的代码（narration.mjs 逐字稿 + build.mjs 渲染器）
 ```
 
 ## 许可
