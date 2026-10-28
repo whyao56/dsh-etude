@@ -23,6 +23,16 @@
 > Commons 实拍图，每张都人工点过；语音走 Edge TTS（零配置、不要 key），也能接
 > OpenAI 兼容的 TTS。
 
+![卡片工厂面板](docs/assets/panel-wide.jpg)
+
+挑图的那一条会切上下布局，九宫格铺满整卡宽 —— 缩略图太小就等于让人瞎点：
+
+![九宫格挑图](docs/assets/panel-grid.jpg)
+
+窄屏（390px）下卡包列表变成横向一溜，卡片转上下布局：
+
+<img src="docs/assets/panel-narrow.jpg" width="390" alt="窄屏">
+
 ---
 
 ## 为什么这么设计
@@ -193,6 +203,7 @@ lib/
   manifest.js      camelCase → 契约 v2 的 snake_case
 contract/          清单 schema + 两份同源校验器（JS / Python）
 tests/             单元、客户端渲染冒烟、RPC 冒烟、整链路自检、pytest
+docs/              DESIGN（十条决定，每条都写了否掉的另一个选择）、HANDOVER、assets
 ```
 
 ## 许可
