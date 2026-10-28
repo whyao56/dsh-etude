@@ -105,6 +105,18 @@ window.__ModuleLoader__.load({
         flexDirection: 'column',
         gap: 2,
       },
+      // 窄屏：264px 的固定列表会把详情挤成一条缝（360px 时详情只剩不到 100px，
+      // 中文标题会被压成一个字一行）。窄屏改成横向一溜卡片，详情拿满宽度。
+      listNarrow: {
+        width: '100%',
+        flex: '0 0 auto',
+        maxHeight: 120,
+        borderRight: 'none',
+        borderBottom: '1px solid var(--dsw-alias-border-l3)',
+        flexDirection: 'row',
+        overflowX: 'auto',
+        overflowY: 'hidden',
+      },
       detail: { flex: 1, minWidth: 0, overflowY: 'auto', padding: '18px 20px 40px' },
       listItem: (active) => ({
         textAlign: 'left',
@@ -202,6 +214,17 @@ window.__ModuleLoader__.load({
       actions: { marginTop: 'auto', paddingTop: 12, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
       grid: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 3, padding: 3, flex: '0 0 42%', minWidth: 0, alignContent: 'start' },
       gridNarrow: { flex: '1 1 auto', width: '100%' },
+      // 正在挑图时九宫格铺满整张卡：三列挤在 42% 那条里时每格只有一百来像素，
+      // 照片这东西小于 150px 就看不出拍的是什么了，等于让人瞎点。
+      gridWide: {
+        flex: 'none',
+        width: '100%',
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+        gap: 6,
+        padding: '12px 16px 16px',
+        borderTop: '1px solid var(--dsw-alias-border-l2)',
+        alignContent: 'start',
+      },
       cell: (picked) => ({
         position: 'relative',
         aspectRatio: '4 / 3',
@@ -733,7 +756,7 @@ window.__ModuleLoader__.load({
       return btoa(binary)
     }
 
-    function CandidateGrid({ example, busy, handlers, t }) {
+    function CandidateGrid({ example, busy, handlers, t, wide }) {
       const [picked, setPicked] = useState(null)
       const fileRef = useRef(null)
       const narrow = useNarrow()
@@ -747,7 +770,7 @@ window.__ModuleLoader__.load({
 
       return React.createElement(
         'div',
-        { style: narrow ? { ...styles.grid, ...styles.gridNarrow } : styles.grid },
+        { style: wide ? { ...styles.grid, ...styles.gridWide } : narrow ? { ...styles.grid, ...styles.gridNarrow } : styles.grid },
         example.imageCandidates.map((candidate) =>
           React.createElement(
             'button',
@@ -876,10 +899,13 @@ window.__ModuleLoader__.load({
       const narrow = useNarrow()
       const locked = Boolean(example.imageReview?.by)
       const image = example.image
+      // 正在挑图 = 没图但有候选：这时卡片改成上下布局，九宫格铺满整张卡。
+      const picking = !image && example.imageCandidates?.length > 0
+      const stack = narrow || picking
       return React.createElement(
         'div',
-        { style: narrow ? { ...styles.card, ...styles.cardNarrow } : styles.card },
-        React.createElement(ImageSide, { example, busy, handlers, t }),
+        { style: stack ? { ...styles.card, ...styles.cardNarrow } : styles.card },
+        picking ? null : React.createElement(ImageSide, { example, busy, handlers, t }),
         React.createElement(
           'div',
           { style: styles.cardText },
@@ -907,6 +933,9 @@ window.__ModuleLoader__.load({
           ),
           React.createElement('div', { style: styles.actions }, React.createElement(AudioBar, { example, busy, handlers, t })),
         ),
+        picking
+          ? React.createElement(CandidateGrid, { example, busy, handlers, t, wide: !narrow })
+          : null,
       )
     }
 
@@ -990,6 +1019,7 @@ window.__ModuleLoader__.load({
 
     function FactoryPanel({ rpc, t }) {
       const factory = useFactory(rpc)
+      const narrow = useNarrow()
       const { state, detail, selected, setSelected, job, error, setError } = factory
       const [target, setTarget] = useState('')
       const busy = Boolean(job && job.status === 'running')
@@ -1059,15 +1089,19 @@ window.__ModuleLoader__.load({
         ),
         React.createElement(
           'div',
-          { style: styles.body },
+          { style: narrow ? { ...styles.body, flexDirection: 'column' } : styles.body },
           React.createElement(
             'div',
-            { style: styles.list },
+            { style: narrow ? { ...styles.list, ...styles.listNarrow } : styles.list },
             state.packs?.length
               ? state.packs.map((pack) =>
                   React.createElement(
                     'button',
-                    { key: pack.id, style: styles.listItem(selected === pack.id), onClick: () => setSelected(pack.id) },
+                    {
+                      key: pack.id,
+                      style: narrow ? { ...styles.listItem(selected === pack.id), flex: '0 0 auto', width: 208 } : styles.listItem(selected === pack.id),
+                      onClick: () => setSelected(pack.id),
+                    },
                     React.createElement('span', { style: styles.listTarget }, pack.target),
                     React.createElement(
                       'span',
