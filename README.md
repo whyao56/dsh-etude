@@ -1,4 +1,4 @@
-# dsh-etude · 卡片工厂
+﻿# dsh-etude · 卡片工厂
 
 **DeepSeek Harness 插件：把「一个词」做成一整套能练的语言卡片。**
 
@@ -113,7 +113,7 @@ node tests/selftest.mjs --target coffee --examples 8 --export
 **测试**：
 
 ```powershell
-npm test                                    # JS 单元 18 条 + 客户端渲染冒烟 + RPC 冒烟 48 项
+npm test                                    # JS 单元 18 条 + 客户端渲染冒烟 + RPC 冒烟 49 项
 npm run test:py                             # 契约双份校验器 + 像素守卫反证，16 条
 ```
 
