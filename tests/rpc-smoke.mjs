@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RPC 冒烟：把界面会调的每一个端点真调一遍。
  *
  * 为什么值得单独跑一遍：客户端半只通过 `/etude` 这条通道说话，端点名写错一个
@@ -150,6 +150,15 @@ try {
     String(firstExample.audio?.engine))
   check('合成完还没标「听过了」', firstExample.audioReview === null || firstExample.audioReview === undefined,
     JSON.stringify(firstExample.audioReview))
+
+  // 面板播不出声音这件事曾经是真的：`image.bytes` 的文件名校验只放图片扩展名，
+  // 于是每条语音都被判「文件名不合法」。这条断言就是钉住那一次。
+  const audioBytes = await call('image.bytes', { kind: 'audio', file: firstExample.audio.file })
+  check(
+    '宿主能把语音字节传给界面（面板才播得出来）',
+    typeof audioBytes.dataBase64 === 'string' && audioBytes.dataBase64.length > 1000,
+    `${Math.round((audioBytes.dataBase64?.length ?? 0) / 1024)} KB base64`,
+  )
 
   const afterConfirm = await call('pack.confirmAudio', { id: packId, ord: 1, by: 'rpc-smoke' })
   check('标了「我听过了」', afterConfirm.examples[0].audioReview?.listened === true)

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * dsh-etude — Client half.
  *
  * 一个主面板（侧栏「卡片工厂」）+ 一张插件配置卡。
@@ -335,6 +335,100 @@ window.__ModuleLoader__.load({
         background: on ? 'var(--dsw-alias-state-success-primary)' : 'var(--dsw-alias-border-l4)',
         flex: '0 0 auto',
       }),
+      // 两个区：制卡 / 学习。做成顶栏下面一条标签，不是侧栏菜单 ——
+      // 这两件事是完全不同的活儿，但看的是同一批包，来回切要一眼就到。
+      tabs: {
+        display: 'flex',
+        gap: 4,
+        padding: '7px 16px 0',
+        borderBottom: '1px solid var(--dsw-alias-border-l3)',
+      },
+      tab: (active) => ({
+        border: 'none',
+        background: 'transparent',
+        color: active ? 'var(--dsw-alias-label-primary)' : 'var(--dsw-alias-label-tertiary)',
+        borderBottom: active ? '2px solid var(--dsw-alias-brand-primary)' : '2px solid transparent',
+        padding: '6px 10px 7px',
+        fontSize: 13,
+        fontWeight: active ? 600 : 400,
+        cursor: 'pointer',
+        marginBottom: -1,
+      }),
+      searchRow: {
+        display: 'flex',
+        gap: 6,
+        padding: '8px 10px',
+        borderBottom: '1px solid var(--dsw-alias-border-l3)',
+        flex: '0 0 auto',
+      },
+      voiceRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        flexWrap: 'wrap',
+        padding: '7px 0 2px',
+        fontSize: 12,
+        color: 'var(--dsw-alias-label-tertiary)',
+      },
+      select: {
+        height: 28,
+        borderRadius: 6,
+        border: '1px solid var(--dsw-alias-border-l3)',
+        background: 'var(--dsw-alias-bg-layer-3)',
+        color: 'var(--dsw-alias-label-primary)',
+        fontSize: 12,
+        padding: '0 6px',
+        maxWidth: 240,
+      },
+      // 学习区：一屏一张，图大、字大、没有按钮堆。这里只有一个动作 —— 听。
+      study: {
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      },
+      studyStage: {
+        flex: 1,
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 14,
+        padding: '20px 24px',
+      },
+      studyShot: {
+        width: '100%',
+        maxWidth: 720,
+        maxHeight: '58vh',
+        objectFit: 'cover',
+        borderRadius: 12,
+        background: 'var(--dsw-alias-bg-layer-3)',
+      },
+      studySentence: {
+        fontFamily: 'Georgia, "Times New Roman", serif',
+        fontSize: '1.7rem',
+        lineHeight: 1.35,
+        textAlign: 'center',
+        color: 'var(--dsw-alias-label-primary)',
+        maxWidth: 720,
+      },
+      studyScene: {
+        fontSize: 13,
+        lineHeight: 1.7,
+        textAlign: 'center',
+        color: 'var(--dsw-alias-label-tertiary)',
+        maxWidth: 640,
+      },
+      studyBar: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        padding: '10px 16px 14px',
+        borderTop: '1px solid var(--dsw-alias-border-l3)',
+      },
       empty: {
         padding: '40px 20px',
         textAlign: 'center',
@@ -893,6 +987,7 @@ window.__ModuleLoader__.load({
 
     function CandidateGrid({ example, busy, handlers, t, wide }) {
       const [picked, setPicked] = useState(null)
+      const [typed, setTyped] = useState('')
       const fileRef = useRef(null)
       const narrow = useNarrow()
 
@@ -958,6 +1053,41 @@ window.__ModuleLoader__.load({
             style: { display: 'none' },
             onChange: upload,
           }),
+        ),
+        // 机器猜的词经常猜歪（「放弃家人」猜成咖啡座）。所以给一个输入框：
+        // 自己写要搜什么，中英文都行；写中文时图库命中率会低一些，但比
+        // 一遍遍点「换一批」碰运气强。
+        React.createElement(
+          'div',
+          { style: { gridColumn: '1 / -1', display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap', paddingTop: 2 } },
+          React.createElement('input', {
+            style: { ...styles.input, height: 26, fontSize: 11.5, flex: '1 1 150px', minWidth: 120 },
+            value: typed,
+            placeholder: t('hint.searchImage'),
+            'aria-label': t('hint.searchImage'),
+            onChange: (event) => setTyped(event.target.value),
+            onKeyDown: (event) => {
+              if (event.key !== 'Enter') return
+              const text = typed.trim()
+              if (!text) return
+              setTyped('')
+              handlers.candidatesWith(example.ord, text)
+            },
+          }),
+          React.createElement(
+            'button',
+            {
+              style: { ...styles.button, height: 26, fontSize: 11, padding: '0 8px', opacity: typed.trim() ? 1 : 0.45 },
+              disabled: busy || !typed.trim(),
+              onClick: () => {
+                const text = typed.trim()
+                if (!text) return
+                setTyped('')
+                handlers.candidatesWith(example.ord, text)
+              },
+            },
+            t('action.searchThis'),
+          ),
         ),
       )
     }
@@ -1250,7 +1380,214 @@ window.__ModuleLoader__.load({
 
     // ── 主面板 ──────────────────────────────────────────────────────────────
 
+    // ── 学习区 ──────────────────────────────────────────────────────────────
+
+    /**
+     * 学习区只做一件事：把卡一张一张摊开。
+     *
+     * 先给场景，句子藏起来 —— 想一下这个场合怎么说，再翻开对答案，
+     * 这比「图片 + 译文」一起摆着让人读一遍有用得多。
+     */
+    function StudyPanel({ detail, t }) {
+      const [index, setIndex] = useState(0)
+      const [revealed, setRevealed] = useState(false)
+      const examples = detail?.examples ?? []
+      const total = examples.length
+
+      useEffect(() => {
+        setIndex(0)
+        setRevealed(false)
+      }, [detail?.id])
+
+      if (!detail || total === 0) {
+        return React.createElement('div', { style: styles.study }, React.createElement('div', { style: styles.emptyBig },
+          React.createElement('div', { style: styles.emptyTitle }, t('study.emptyTitle')),
+          React.createElement('div', { style: styles.emptyHint }, t('study.empty')),
+        ))
+      }
+
+      const safe = Math.min(Math.max(index, 0), total - 1)
+      const example = examples[safe]
+      const go = (delta) => {
+        const next = Math.min(Math.max(safe + delta, 0), total - 1)
+        setIndex(next)
+        setRevealed(false)
+      }
+
+      return React.createElement(
+        'div',
+        { style: styles.study },
+        React.createElement(
+          'div',
+          { style: styles.studyStage },
+          example.image
+            ? React.createElement(Photo, {
+                source: {
+                  endpoint: 'image.bytes',
+                  payload: { kind: 'images', file: example.image.file },
+                  mediaType: mediaTypeOf(example.image.file),
+                },
+                alt: example.sentence,
+                rounded: 12,
+                style: styles.studyShot,
+              })
+            : React.createElement('div', { style: { ...styles.studyShot, height: 180 } }),
+          revealed
+            ? React.createElement('div', { style: styles.studySentence }, example.sentence)
+            : React.createElement(
+                'button',
+                { style: { ...styles.buttonPrimary, height: 34, fontSize: 13 }, onClick: () => setRevealed(true) },
+                t('study.reveal'),
+              ),
+          React.createElement('div', { style: styles.studyScene }, example.sceneZh || example.sceneEn || ''),
+          revealed ? React.createElement(StudyAudio, { example, t }) : null,
+        ),
+        React.createElement(
+          'div',
+          { style: styles.studyBar },
+          React.createElement(
+            'button',
+            { style: { ...styles.button, height: 30 }, onClick: () => go(-1), disabled: safe === 0 },
+            t('study.prev'),
+          ),
+          React.createElement('span', { style: { fontSize: 12, color: 'var(--dsw-alias-label-tertiary)' } }, `${safe + 1} / ${total}`),
+          React.createElement(
+            'button',
+            { style: { ...styles.button, height: 30 }, onClick: () => go(1), disabled: safe >= total - 1 },
+            t('study.next'),
+          ),
+        ),
+      )
+    }
+
+    /** 学习区里的播放键：没有复核按钮，只有一个会响的按钮。 */
+    function StudyAudio({ example, t }) {
+      const audioRef = useRef(null)
+      const [playing, setPlaying] = useState(false)
+      const [failed, setFailed] = useState(false)
+      const file = example.audio?.file
+      const media = useMedia(file ? { endpoint: 'image.bytes', payload: { kind: 'audio', file }, mediaType: 'audio/mpeg' } : null)
+
+      useEffect(() => {
+        setPlaying(false)
+        setFailed(false)
+      }, [file])
+
+      if (!file) return React.createElement('div', { style: { fontSize: 12, color: 'var(--dsw-alias-label-tertiary)' } }, t('label.noAudio'))
+
+      const toggle = async () => {
+        const element = audioRef.current
+        if (!element) return
+        if (element.paused) {
+          try {
+            await element.play()
+            setFailed(false)
+          } catch {
+            setFailed(true)
+          }
+        } else {
+          element.pause()
+        }
+      }
+
+      return React.createElement(
+        'div',
+        { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+        React.createElement(
+          'button',
+          {
+            style: { ...styles.buttonPrimary, height: 32, display: 'flex', alignItems: 'center', gap: 6 },
+            onClick: media.url ? toggle : undefined,
+            disabled: !media.url,
+          },
+          React.createElement(Icon, { name: playing ? 'stop' : 'play', size: 13 }),
+          secondsText(example.audio.seconds),
+        ),
+        React.createElement(
+          'span',
+          { style: { fontSize: 11, color: 'var(--dsw-alias-label-tertiary)' } },
+          t('study.replay'),
+        ),
+        failed ? React.createElement('span', { style: { fontSize: 11, color: 'var(--dsw-alias-state-error-primary)' } }, t('error.audioUnplayable')) : null,
+        React.createElement('audio', {
+          ref: audioRef,
+          src: media.url || undefined,
+          preload: 'auto',
+          style: { display: 'none' },
+          onPlay: () => setPlaying(true),
+          onPause: () => setPlaying(false),
+          onEnded: () => setPlaying(false),
+          onError: () => {
+            setFailed(true)
+            setPlaying(false)
+          },
+        }),
+      )
+    }
+
+    // ── 一个包 ──────────────────────────────────────────────────────────────
+
+    /**
+     * 音色怎么挑。
+     *
+     * 音色表向服务要一次就有几百个，缓存住别再要；包上已经挑过就用包上的。
+     * 改完不动已经合好的音频 —— 想听到新声音得自己重新合成，所以这里
+     * 明确写出「改完要重新合成」。
+     */
+    let voiceCache = null
+
+    function fetchVoices(handlers) {
+      if (!voiceCache) {
+        voiceCache = handlers
+          .voiceList()
+          .then((value) => value?.voices ?? [])
+          .catch((error) => {
+            voiceCache = null
+            throw error
+          })
+      }
+      return voiceCache
+    }
+
+    function useVoiceChoice(detail, handlers) {
+      const [voices, setVoices] = useState([])
+      const [current, setCurrent] = useState('')
+      const [rate, setRate] = useState('+10%')
+      const [saved, setSaved] = useState(false)
+      const packId = detail?.id
+
+      useEffect(() => {
+        let alive = true
+        fetchVoices(handlers)
+          .then((list) => {
+            if (alive) setVoices(list)
+          })
+          .catch(() => {})
+        return () => {
+          alive = false
+        }
+      }, [handlers])
+
+      useEffect(() => {
+        setCurrent(detail?.voiceChoice?.voice || detail?.voice?.voice || '')
+        setRate(detail?.voiceChoice?.rate || detail?.voice?.rate || '+10%')
+        setSaved(false)
+      }, [packId, detail?.voiceChoice?.voice, detail?.voiceChoice?.rate, detail?.voice?.voice, detail?.voice?.rate])
+
+      const choose = (nextVoice, nextRate) => {
+        const voice = nextVoice ?? current
+        const speed = nextRate ?? rate
+        if (nextVoice !== null) setCurrent(nextVoice)
+        if (nextRate !== null) setRate(nextRate)
+        setSaved(true)
+        handlers.setVoice(voice, speed)
+      }
+
+      return { voices, current, rate, saved, choose }
+    }
+
     function PackDetail({ detail, busy, handlers, t }) {
+      const voice = useVoiceChoice(detail, handlers)
       // 一个包都没有时，中间这块是用户看到的第一屏：一张居中的空态，
       // 说清楚「这里会出现什么」和「第一步做什么」。只写一行小字太像出错了。
       if (!detail) {
@@ -1285,6 +1622,40 @@ window.__ModuleLoader__.load({
           ),
         ),
         detail.gloss ? React.createElement('div', { style: styles.gloss }, detail.gloss) : null,
+        // 音色和语速摆在包头上：换一个说话的人，比在设置页里改全局更像「这一包的事」。
+        React.createElement(
+          'div',
+          { style: styles.voiceRow },
+          React.createElement('span', null, t('label.voice')),
+          React.createElement(
+            'select',
+            {
+              style: styles.select,
+              value: voice.current,
+              onChange: (event) => voice.choose(event.target.value, null),
+              disabled: voice.voices.length === 0,
+            },
+            voice.voices.length === 0
+              ? React.createElement('option', { value: '' }, t('label.voiceLoading'))
+              : voice.voices.map((one) =>
+                  React.createElement('option', { key: one.id, value: one.id }, one.label || one.id),
+                ),
+          ),
+          React.createElement('span', null, t('label.rate')),
+          React.createElement(
+            'select',
+            {
+              style: styles.select,
+              value: voice.rate,
+              onChange: (event) => voice.choose(null, event.target.value),
+            },
+            ['+0%', '+5%', '+10%', '+15%', '+20%'].map((value) =>
+              React.createElement('option', { key: value, value }, value),
+            ),
+          ),
+          voice.saved ? React.createElement('span', { style: { fontSize: 11 } }, t('label.voiceSaved')) : null,
+          React.createElement('span', { style: { fontSize: 11 } }, t('hint.voiceApply')),
+        ),
         total > 0 ? React.createElement(Pipeline, { detail, t }) : null,
         detail.problems?.length
           ? React.createElement(
@@ -1360,12 +1731,79 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function FactoryPanel({ rpc, t }) {
+    // ── 侧栏的找法与排法 ────────────────────────────────────────────────────
+
+    /**
+     * 一个很朴素的相似度：按两个字一组切片做重合率。
+     *
+     * 为什么不用「包含」了事：中文检索经常差一个字，直接包含就一条都搜不到，
+     * 用户会以为库里没这东西。切片重合至少能把「差不多是它」的东西顶上来。
+     */
+    function bigrams(text) {
+      const clean = String(text ?? '')
+        .toLowerCase()
+        .replace(/[\s\p{P}\p{S}]+/gu, '')
+      const out = new Set()
+      for (let index = 0; index < clean.length - 1; index += 1) out.add(clean.slice(index, index + 2))
+      if (clean.length === 1) out.add(clean)
+      return out
+    }
+
+    function similarityScore(haystack, needle) {
+      const hay = bigrams(haystack)
+      const need = bigrams(needle)
+      if (need.size === 0 || hay.size === 0) return 0
+      let hit = 0
+      for (const one of need) if (hay.has(one)) hit += 1
+      return hit / need.size
+    }
+
+    function filterPacks(packs, query) {
+      const text = String(query ?? '').trim()
+      if (!text) return packs
+      const scored = packs
+        .map((pack) => {
+          const hay = `${pack.target} ${pack.gloss ?? ''} ${pack.id}`
+          const direct = hay.toLowerCase().includes(text.toLowerCase()) ? 1 : 0
+          return { pack, score: direct || similarityScore(hay, text) }
+        })
+        .filter((one) => one.score > 0.25)
+        .sort((a, b) => b.score - a.score)
+      return scored.map((one) => one.pack)
+    }
+
+    const SORTS = [
+      { id: 'recent', labelKey: 'sort.recent' },
+      { id: 'name', labelKey: 'sort.name' },
+      { id: 'todo', labelKey: 'sort.todo' },
+      { id: 'progress', labelKey: 'sort.progress' },
+    ]
+
+    function sortPacks(packs, sort) {
+      const list = [...packs]
+      const todoOf = (pack) => pack.progress.total - Math.min(pack.progress.images, pack.progress.audios)
+      const doneOf = (pack) => (pack.status === 'exported' ? 2 : pack.status === 'packed' ? 1 : 0)
+      if (sort === 'name') list.sort((a, b) => a.target.localeCompare(b.target, 'zh'))
+      else if (sort === 'todo') list.sort((a, b) => todoOf(b) - todoOf(a) || String(b.updatedAt).localeCompare(String(a.updatedAt)))
+      else if (sort === 'progress') list.sort((a, b) => doneOf(b) - doneOf(a) || String(b.updatedAt).localeCompare(String(a.updatedAt)))
+      else list.sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? '')))
+      return list
+    }
+
+    function FactoryPanel({ rpc, t, initialZone }) {
       const factory = useFactory(rpc)
       const narrow = useNarrow()
       const { state, detail, selected, setSelected, job, error, setError } = factory
       const [target, setTarget] = useState('')
+      const [zone, setZone] = useState(initialZone === 'study' ? 'study' : 'factory')
+      const [query, setQuery] = useState('')
+      const [sort, setSort] = useState('recent')
       const busy = Boolean(job && job.status === 'running')
+
+      const visible = useMemo(
+        () => sortPacks(filterPacks(state.packs ?? [], query), sort),
+        [state.packs, query, sort],
+      )
 
       useEffect(() => {
         if (!selected && state.packs?.length > 0) setSelected(state.packs[0].id)
@@ -1374,6 +1812,9 @@ window.__ModuleLoader__.load({
       const handlers = useMemo(
         () => ({
           candidates: (ord) => factory.runJob('pack.candidates', { id: selected, ord }),
+          candidatesWith: (ord, text) => factory.runJob('pack.candidates', { id: selected, ord, query: text }),
+          voiceList: () => callRpc(rpc, 'pack.voice.list', {}),
+          setVoice: (voice, rate) => factory.act('pack.voice', { id: selected, voice, rate }),
           candidatesAll: () => factory.runJob('pack.candidatesAll', { id: selected }),
           pick: (ord, stagedName) => factory.act('pack.pick', { id: selected, ord, stagedName }),
           unlockImage: (ord) => factory.act('pack.unlockImage', { id: selected, ord }),
@@ -1391,7 +1832,7 @@ window.__ModuleLoader__.load({
             setSelected(null)
           },
         }),
-        [factory, selected, state.packs, t, setSelected],
+        [factory, selected, state.packs, t, setSelected, rpc],
       )
 
       const create = async () => {
@@ -1435,6 +1876,14 @@ window.__ModuleLoader__.load({
             React.createElement(Icon, { name: 'refresh', size: 14 }),
           ),
         ),
+        // 两个区：制卡 / 学习。顶栏下面一条标签，切的是中间整块内容，
+        // 左边的包列表两边共用 —— 都是同一批包，只是看它的方式不同。
+        React.createElement(
+          'div',
+          { style: styles.tabs },
+          React.createElement('button', { style: styles.tab(zone === 'factory'), onClick: () => setZone('factory') }, t('zone.factory')),
+          React.createElement('button', { style: styles.tab(zone === 'study'), onClick: () => setZone('study') }, t('zone.study')),
+        ),
         // 任务条必须在顶上：原来它挂在整页最底部，而一页卡片有三千像素高，
         // 站在顶上点「造一个包」的人什么都看不见，会以为按钮没反应。
         job
@@ -1473,8 +1922,31 @@ window.__ModuleLoader__.load({
           React.createElement(
             'div',
             { style: narrow ? { ...styles.list, ...styles.listNarrow } : styles.list },
-            state.packs?.length
-              ? state.packs.map((pack) =>
+            // 检索与排序放在列表顶上：包多了以后，翻找比造卡更花时间。
+            // 检索支持中文，也接受「记不太清」—— 找不到字面命中就按相似度挑。
+            React.createElement(
+              'div',
+              { style: styles.searchRow },
+              React.createElement('input', {
+                style: { ...styles.input, height: 26, fontSize: 12, flex: 1, minWidth: 0 },
+                value: query,
+                placeholder: t('hint.searchPacks'),
+                'aria-label': t('hint.searchPacks'),
+                onChange: (event) => setQuery(event.target.value),
+              }),
+              React.createElement(
+                'select',
+                {
+                  style: { ...styles.select, height: 26, flex: '0 0 auto' },
+                  value: sort,
+                  onChange: (event) => setSort(event.target.value),
+                  'aria-label': t('label.sort'),
+                },
+                SORTS.map((one) => React.createElement('option', { key: one.id, value: one.id }, t(one.labelKey))),
+              ),
+            ),
+            visible.length
+              ? visible.map((pack) =>
                   React.createElement(
                     'button',
                     {
@@ -1490,14 +1962,17 @@ window.__ModuleLoader__.load({
                     ),
                   ),
                 )
-              // 空列表时左边保持安静 —— 指引只写在中间那一块，写两遍像两个错。
-              : state.status === 'loading'
-                ? // 正在取数据的时候必须说话。一块什么都没有的空白，
-                  // 用户分不清是「真的没有包」还是「界面死了」。
-                  React.createElement('div', { style: styles.listNote }, t('label.loading'))
-                : state.status === 'error'
-                  ? React.createElement('div', { style: styles.listNote }, t('label.loadFailed'))
-                  : null,
+              // 有包但被检索条件筛空了：这时候必须说一句，否则用户会以为包没了。
+              : (state.packs?.length ?? 0) > 0
+                ? React.createElement('div', { style: styles.listNote }, t('label.noMatch'))
+                // 空列表时左边保持安静 —— 指引只写在中间那一块，写两遍像两个错。
+                : state.status === 'loading'
+                  ? // 正在取数据的时候必须说话。一块什么都没有的空白，
+                    // 用户分不清是「真的没有包」还是「界面死了」。
+                    React.createElement('div', { style: styles.listNote }, t('label.loading'))
+                  : state.status === 'error'
+                    ? React.createElement('div', { style: styles.listNote }, t('label.loadFailed'))
+                    : null,
           ),
           React.createElement(
             'div',
@@ -1515,7 +1990,9 @@ window.__ModuleLoader__.load({
                   ),
                 )
               : null,
-            React.createElement(PackDetail, { detail, busy, handlers, t }),
+            zone === 'study'
+              ? React.createElement(StudyPanel, { detail, t })
+              : React.createElement(PackDetail, { detail, busy, handlers, t }),
           ),
         ),
       )
@@ -1653,6 +2130,28 @@ window.__ModuleLoader__.load({
         'stage.allDone': '五步都做完了。想再改就点某条卡片换一张图。',
         'label.loading': '正在向宿主取数据……',
         'label.loadFailed': '取不到数据。看右边那条红字，点上面那个圆圈重试。',
+        'label.noMatch': '没有对得上的包。换个说法，或者清空检索框。',
+        'label.sort': '排序',
+        'label.voice': '音色',
+        'label.rate': '语速',
+        'label.voiceLoading': '正在取音色表……',
+        'label.voiceSaved': '已记住',
+        'zone.factory': '制卡',
+        'zone.study': '学习',
+        'sort.recent': '最近动过',
+        'sort.name': '按名字',
+        'sort.todo': '欠得最多的在前',
+        'sort.progress': '做得最全的在前',
+        'hint.searchPacks': '搜目标 / 释义 / 中文',
+        'hint.searchImage': '自己写要搜什么，中英文都行',
+        'hint.voiceApply': '改完重新合成才会变',
+        'action.searchThis': '按这个词找图',
+        'study.emptyTitle': '还没有能练的包',
+        'study.empty': '先去「制卡」造一个包，配好图和音，再回来练。',
+        'study.reveal': '想好了？看答案',
+        'study.replay': '再听一遍',
+        'study.prev': '上一张',
+        'study.next': '下一张',
         'label.examples': '例句',
         'label.generatingHint': '模型正在写例句，一般十几秒，句子多的时候一分钟。写完这一屏会自动出现卡片。',
         'label.reviewed': '已确认',
@@ -1748,6 +2247,28 @@ window.__ModuleLoader__.load({
         'stage.allDone': 'All five steps are done. Click any card to swap its photo.',
         'label.loading': 'Talking to the host…',
         'label.loadFailed': 'Could not load. Read the red line, then hit the round button above to retry.',
+        'label.noMatch': 'No pack matches. Try another word, or clear the search box.',
+        'label.sort': 'Sort',
+        'label.voice': 'Voice',
+        'label.rate': 'Speed',
+        'label.voiceLoading': 'Loading voices…',
+        'label.voiceSaved': 'saved',
+        'zone.factory': 'Make',
+        'zone.study': 'Study',
+        'sort.recent': 'Recently touched',
+        'sort.name': 'By name',
+        'sort.todo': 'Most unfinished first',
+        'sort.progress': 'Most finished first',
+        'hint.searchPacks': 'Target / gloss / Chinese',
+        'hint.searchImage': 'Type what to search — English or Chinese',
+        'hint.voiceApply': 'takes effect after re-synthesizing',
+        'action.searchThis': 'Search this',
+        'study.emptyTitle': 'Nothing to practise yet',
+        'study.empty': 'Make a pack first, then come back here to drill it.',
+        'study.reveal': 'Ready? Show the sentence',
+        'study.replay': 'play again',
+        'study.prev': 'Previous',
+        'study.next': 'Next',
         'label.examples': 'Examples',
         'label.generatingHint': 'The model is writing the sentences — usually ten-odd seconds, up to a minute. They appear here on their own.',
         'label.reviewed': 'confirmed',
