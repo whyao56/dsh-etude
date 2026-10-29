@@ -208,7 +208,9 @@ const finishedExample = {
   ord: 1,
   sentence: 'We had to abandon the car in the snow.',
   image: { file: 'images/commons-34958284bf84a30c8729.jpg' },
+  imageReview: { by: '本机用户', at: '2026-10-29T12:00:00.000Z', candidates: 9, picked: 'a-1-1.jpg' },
   audio: { file: 'audio/edge-1587b6105fb7f373b0dc.mp3', seconds: 2.74 },
+  audioReview: { by: '本机用户', at: '2026-10-29T12:00:01.000Z', listened: true },
 }
 
 test('打包完、图音齐的包才能拿去练', () => {
@@ -222,6 +224,13 @@ test('还在制卡的包不进学习区', () => {
   assert.equal(isLearnable({ status: 'text', examples: [finishedExample] }), false)
   assert.equal(isLearnable({ status: 'generating', examples: [] }), false)
   assert.equal(isLearnable({ status: 'failed', examples: [finishedExample] }), false)
+})
+
+test('有文件但没人点过头 / 没人听过，也不算成品', () => {
+  const noImageReview = { status: 'packed', examples: [{ ...finishedExample, imageReview: null }] }
+  const noAudioReview = { status: 'packed', examples: [{ ...finishedExample, audioReview: { by: 'x', at: 'y', listened: false } }] }
+  assert.equal(isLearnable(noImageReview), false)
+  assert.equal(isLearnable(noAudioReview), false)
 })
 
 test('缺一张图或缺一条音就整包不算成品', () => {
