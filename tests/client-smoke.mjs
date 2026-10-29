@@ -36,6 +36,13 @@ function slotOf(create) {
 }
 
 const React = {
+  // 面板里有一个 class 组件（渲染兜底边界），替身得给个 Component 基类，
+  // 否则载入 client.js 的时候就 TypeError 了。
+  Component: class Component {
+    constructor(props) {
+      this.props = props
+    }
+  },
   createElement(type, props, ...children) {
     const flat = children.length === 0 ? undefined : children.length === 1 ? children[0] : children
     return { __el: true, type, props: { ...(props ?? {}), children: flat } }
@@ -204,7 +211,9 @@ function render(node, path) {
     currentInstance = instances.get(key)
     currentIndex = 0
     try {
-      render(type(props), key)
+      // class 组件要 new 出来再 render（面板里那层渲染兜底边界就是 class）。
+      const isClass = type.prototype && typeof type.prototype.render === 'function'
+      render(isClass ? new type(props).render() : type(props), key)
     } finally {
       currentInstance = savedInstance
       currentIndex = savedIndex

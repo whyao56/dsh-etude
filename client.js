@@ -273,9 +273,61 @@ window.__ModuleLoader__.load({
         background: 'var(--dsw-alias-bg-layer-3)',
         color: 'var(--dsw-alias-label-secondary)',
       },
-      dot: (on) => ({
-        width: 7,
-        height: 7,
+      // 五步流水线：横向摊开，每一步自己一句话说清「缺什么/要你做什么」。
+      pipeline: { marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 },
+      pipelineRow: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+        gap: 6,
+      },
+      stage: (state) => ({
+        border: `1px solid ${state === 'todo' ? 'var(--dsw-alias-border-l3)' : 'var(--dsw-alias-border-l4)'}`,
+        background: state === 'gate' || state === 'ready' ? 'var(--dsw-alias-bg-layer-3)' : 'transparent',
+        borderRadius: 8,
+        padding: '8px 9px 9px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 5,
+        minWidth: 0,
+      }),
+      stageHead: { display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 },
+      stageNo: {
+        fontSize: 10,
+        color: 'var(--dsw-alias-label-tertiary)',
+        fontVariantNumeric: 'tabular-nums',
+      },
+      stageLabel: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: 'var(--dsw-alias-label-primary)',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        flex: 1,
+      },
+      stageCount: { fontSize: 11, color: 'var(--dsw-alias-label-secondary)', fontVariantNumeric: 'tabular-nums' },
+      stageHint: {
+        fontSize: 11,
+        lineHeight: 1.55,
+        color: 'var(--dsw-alias-label-tertiary)',
+        overflowWrap: 'anywhere',
+      },
+      pipelineNow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        fontSize: 11.5,
+        color: 'var(--dsw-alias-label-secondary)',
+        padding: '6px 9px',
+        borderRadius: 6,
+        background: 'var(--dsw-alias-bg-layer-3)',
+      },
+      listNote: {
+        padding: '14px 12px',
+        fontSize: 11.5,
+        lineHeight: 1.7,
+        color: 'var(--dsw-alias-label-tertiary)',
+      },      dot: (on) => ({        width: 7,        height: 7,
         borderRadius: 999,
         background: on ? 'var(--dsw-alias-state-success-primary)' : 'var(--dsw-alias-border-l4)',
         flex: '0 0 auto',
@@ -325,9 +377,25 @@ window.__ModuleLoader__.load({
 
     // ── 数据 ────────────────────────────────────────────────────────────────
 
+    // `rpc` 可能是通道本身，也可能是一个「取通道」的函数。
+    // 后者是为了不在 apply 那一刻就把 connection 抓成常量 —— 那个时机
+    // 万一 connection 还没就绪，抓到的就是 undefined，然后界面永久空着，
+    // 用户只看见一块没有内容的区域，跟坏了没区别。
     async function callRpc(rpc, endpoint, payload) {
-      if (!rpc) throw new Error('这个运行时没有 RPC 通道，界面拿不到数据。')
-      const result = await rpc.call(RPC_CHANNEL, endpoint, payload)
+      const bridge = typeof rpc === 'function' ? rpc() : rpc
+      if (!bridge || typeof bridge.call !== 'function') {
+        throw new Error('宿主连接还没就绪。刷新一下页面再点我；还是空的话，去 设置 → 插件 看 dsh-etude 是不是 active。')
+      }
+      let timer = null
+      const timeout = new Promise((_resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(`宿主 15 秒没回应（${endpoint}）。看一眼宿主日志，或者刷新页面重试。`)), 15000)
+      })
+      let result
+      try {
+        result = await Promise.race([bridge.call(RPC_CHANNEL, endpoint, payload), timeout])
+      } finally {
+        if (timer) clearTimeout(timer)
+      }
       if (!result || result.ok !== true) {
         const error = new Error(result?.error?.message ?? '接口调用失败')
         error.code = result?.error?.code
@@ -382,8 +450,16 @@ window.__ModuleLoader__.load({
       useEffect(() => {
         if (!job || job.status !== 'running') return undefined
         let alive = true
+        let tick = 0
         const timer = setInterval(async () => {
+          tick += 1
           try {
+            // 边做边看：任务还在跑的时候也把详情拉一遍，让已经落地的
+            // 候选图/语音当场出现在卡片上，不用等整个任务结束。
+            if (selected && tick % 3 === 0) {
+              const live = await callRpc(rpc, 'pack.get', { id: selected }).catch(() => null)
+              if (alive && live) setDetail(live)
+            }
             const next = await callRpc(rpc, 'job.get', { id: job.id })
             if (!alive) return
             if (next.status === 'running') {
@@ -844,7 +920,9 @@ window.__ModuleLoader__.load({
             'button',
             {
               style: { ...styles.buttonPrimary, height: 26, fontSize: 11, padding: '0 8px', opacity: picked ? 1 : 0.45 },
-              disabled: !picked || busy,
+              // 故意不随 busy 禁用：批量找图的时候人正是要边等边点。
+              // 一键灰掉等于逼人干等到整批跑完才能动手。
+              disabled: !picked,
               onClick: () => handlers.pick(example.ord, picked),
             },
             t('action.lockImage'),
@@ -984,6 +1062,178 @@ window.__ModuleLoader__.load({
       )
     }
 
+    // ── 兜底：渲染炸了也要看得见 ────────────────────────────────────────────
+    // 不加这一层的话，任何一处渲染异常都会让整块面板变成空白，
+    // 用户看到的就是「点了卡片工厂，里面什么都没有」—— 报不出原因，
+    // 也看不出是 bug。宁可摊一句丑话，也不给一块白板。
+    class PanelBoundary extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = { failure: null }
+      }
+
+      static getDerivedStateFromError(failure) {
+        return { failure }
+      }
+
+      render() {
+        if (this.state.failure) {
+          return React.createElement(
+            'div',
+            { style: { padding: 20 } },
+            React.createElement(
+              'div',
+              { style: styles.banner('error') },
+              React.createElement(Icon, { name: 'warning', size: 13 }),
+              React.createElement(
+                'span',
+                { style: { flex: 1 } },
+                `面板渲染出错：${this.state.failure?.message ?? String(this.state.failure)}`,
+              ),
+            ),
+            React.createElement(
+              'div',
+              { style: { marginTop: 10, fontSize: 12, lineHeight: 1.8, color: 'var(--dsw-alias-label-tertiary)' } },
+              '把上面这句原文发给我就行。想先自救就刷新页面。',
+            ),
+          )
+        }
+        return this.props.children
+      }
+    }
+
+    // ── 流水线 ──────────────────────────────────────────────────────────────
+    // 一个包从「一个词」到「一堆文件」要走五步，其中两步必须人来做。
+    // 原来只看得到一句「4/8 已确认」，人根本不知道自己卡在哪一步、
+    // 下一步该点哪里 —— 所以把五步摊开：每步的进度、状态、以及
+    // 「这一步要你做什么」都写在一条上。
+
+    const STAGE_ORDER = ['words', 'images', 'audio', 'pack', 'export']
+
+    function buildStages(detail, t) {
+      const total = detail.examples.length
+      const withImage = detail.examples.filter((one) => one.image).length
+      const withAudio = detail.examples.filter((one) => one.audio).length
+      const picked = detail.examples.filter((one) => one.imageReview?.by).length
+      const listened = detail.examples.filter((one) => one.audioReview?.listened === true).length
+      // 有候选图但还没定图的条数 —— 这些正等着人点。
+      const awaitingPick = detail.examples.filter((one) => !one.image && (one.imageCandidates?.length ?? 0) > 0).length
+      const awaitingListen = detail.examples.filter((one) => one.audio && one.audioReview?.listened !== true).length
+      const hasCandidates = detail.examples.some((one) => (one.imageCandidates?.length ?? 0) > 0 || one.image)
+      const packed = Boolean(detail.pack?.dir)
+      const exported = detail.export?.dir ?? null
+
+      const stages = []
+      stages.push({
+        key: 'words',
+        label: t('stage.words'),
+        count: total ? `${total}` : '0',
+        state: total === 0 ? 'doing' : 'done',
+        hint: total === 0 ? t('stage.wordsDoing') : t('stage.wordsDone'),
+      })
+      stages.push({
+        key: 'images',
+        label: t('stage.images'),
+        count: `${withImage}/${total || 0}`,
+        state: total === 0 ? 'todo' : withImage === total ? 'done' : awaitingPick > 0 || hasCandidates ? 'gate' : 'todo',
+        hint:
+          total === 0
+            ? t('stage.imagesWait')
+            : withImage === total
+              ? `${t('stage.imagesDone')}${picked === total ? '' : ` · ${t('stage.imagesUnreviewed').replace('{n}', String(total - picked))}`}`
+              : awaitingPick > 0
+                ? t('stage.imagesGate').replace('{n}', String(awaitingPick))
+                : t('stage.imagesNeed'),
+      })
+      stages.push({
+        key: 'audio',
+        label: t('stage.audio'),
+        count: `${withAudio}/${total || 0}`,
+        state: total === 0 ? 'todo' : withAudio === total ? 'done' : awaitingListen > 0 ? 'gate' : 'todo',
+        hint:
+          total === 0
+            ? t('stage.audioWait')
+            : awaitingListen > 0
+              ? t('stage.audioGate').replace('{n}', String(awaitingListen))
+              : withAudio === total
+                ? t('stage.audioDone')
+                : t('stage.audioNeed'),
+      })
+      stages.push({
+        key: 'pack',
+        label: t('stage.pack'),
+        count: packed ? '✓' : '—',
+        state: packed ? 'done' : withImage === total && withAudio === total && total > 0 ? 'ready' : 'todo',
+        hint: packed ? t('stage.packDone') : t('stage.packNeed'),
+      })
+      stages.push({
+        key: 'export',
+        label: t('stage.export'),
+        count: exported ? '✓' : '—',
+        state: exported ? 'done' : packed ? 'ready' : 'todo',
+        hint: exported ? t('stage.exportDone') : packed ? t('stage.exportNeed') : t('stage.exportWait'),
+      })
+      return stages
+    }
+
+    function StageDot({ state }) {
+      const color =
+        state === 'done'
+          ? 'var(--dsw-alias-state-success-primary)'
+          : state === 'gate' || state === 'ready'
+            ? 'var(--dsw-alias-brand-primary)'
+            : state === 'doing'
+              ? 'var(--dsw-alias-state-warning-primary, var(--dsw-alias-brand-primary))'
+              : 'var(--dsw-alias-border-l4)'
+      const ring = state === 'doing'
+      return React.createElement('span', {
+        style: {
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          flex: '0 0 auto',
+          background: color,
+          boxShadow: ring ? `0 0 0 3px ${color}22` : 'none',
+        },
+      })
+    }
+
+    function Pipeline({ detail, t }) {
+      const stages = buildStages(detail, t)
+      const current = stages.find((one) => one.state !== 'done')
+      return React.createElement(
+        'div',
+        { style: styles.pipeline },
+        React.createElement(
+          'div',
+          { style: styles.pipelineRow },
+          stages.map((stage, index) =>
+            React.createElement(
+              'div',
+              { key: stage.key, style: styles.stage(stage.state) },
+              React.createElement(
+                'div',
+                { style: styles.stageHead },
+                React.createElement(StageDot, { state: stage.state }),
+                React.createElement('span', { style: styles.stageNo }, String(index + 1)),
+                React.createElement('span', { style: styles.stageLabel }, stage.label),
+                React.createElement('span', { style: styles.stageCount }, stage.count),
+              ),
+              React.createElement('div', { style: styles.stageHint }, stage.hint),
+            ),
+          ),
+        ),
+        current
+          ? React.createElement(
+              'div',
+              { style: styles.pipelineNow },
+              React.createElement(Icon, { name: 'warning', size: 12 }),
+              React.createElement('span', null, `${t('stage.now')}：${current.label} — ${current.hint}`),
+            )
+          : React.createElement('div', { style: styles.pipelineNow }, `${t('stage.allDone')}`),
+      )
+    }
+
     // ── 主面板 ──────────────────────────────────────────────────────────────
 
     function PackDetail({ detail, busy, handlers, t }) {
@@ -1021,6 +1271,7 @@ window.__ModuleLoader__.load({
           ),
         ),
         detail.gloss ? React.createElement('div', { style: styles.gloss }, detail.gloss) : null,
+        total > 0 ? React.createElement(Pipeline, { detail, t }) : null,
         detail.problems?.length
           ? React.createElement(
               'div',
@@ -1144,7 +1395,11 @@ window.__ModuleLoader__.load({
           { style: styles.header },
           React.createElement(Icon, { name: 'factory', size: 17 }),
           React.createElement('span', { style: styles.title }, t('nav.title')),
-          React.createElement('span', { style: styles.subtitle }, state.root || t('nav.subtitle')),
+          React.createElement(
+            'span',
+            { style: styles.subtitle },
+            state.root ? `${state.root} · ${state.packs?.length ?? 0} 个包` : t('nav.subtitle'),
+          ),
           React.createElement('input', {
             style: styles.input,
             value: target,
@@ -1222,7 +1477,13 @@ window.__ModuleLoader__.load({
                   ),
                 )
               // 空列表时左边保持安静 —— 指引只写在中间那一块，写两遍像两个错。
-              : null,
+              : state.status === 'loading'
+                ? // 正在取数据的时候必须说话。一块什么都没有的空白，
+                  // 用户分不清是「真的没有包」还是「界面死了」。
+                  React.createElement('div', { style: styles.listNote }, t('label.loading'))
+                : state.status === 'error'
+                  ? React.createElement('div', { style: styles.listNote }, t('label.loadFailed'))
+                  : null,
           ),
           React.createElement(
             'div',
@@ -1353,6 +1614,31 @@ window.__ModuleLoader__.load({
         'status.failed': '失败',
         'label.emptyTitle': '还没有卡片包',
         'label.empty': '在上面输入一个词、一个固定说法，或者一整句，回车就会开始造。',
+        'stage.words': '例句',
+        'stage.wordsDoing': '模型正在写',
+        'stage.wordsDone': '例句齐了',
+        'stage.images': '配图',
+        'stage.imagesWait': '等着',
+        'stage.imagesNeed': '还没取候选图',
+        'stage.imagesGate': '{n} 条等你点头',
+        'stage.imagesDone': '都定了',
+        'stage.imagesUnreviewed': '{n} 条没复核',
+        'stage.audio': '语音',
+        'stage.audioWait': '等着',
+        'stage.audioNeed': '还没合成',
+        'stage.audioGate': '{n} 条等你试听',
+        'stage.audioDone': '都听过了',
+        'stage.pack': '打包',
+        'stage.packNeed': '图音齐了才能打',
+        'stage.packDone': '已打包',
+        'stage.export': '导出',
+        'stage.exportWait': '先打包',
+        'stage.exportNeed': '打完就能导出',
+        'stage.exportDone': '已导出',
+        'stage.now': '现在这一步',
+        'stage.allDone': '五步都做完了。想再改就点某条卡片换一张图。',
+        'label.loading': '正在向宿主取数据……',
+        'label.loadFailed': '取不到数据。看右边那条红字，点上面那个圆圈重试。',
         'label.examples': '例句',
         'label.generatingHint': '模型正在写例句，一般十几秒，句子多的时候一分钟。写完这一屏会自动出现卡片。',
         'label.reviewed': '已确认',
@@ -1423,6 +1709,31 @@ window.__ModuleLoader__.load({
         'status.failed': 'Failed',
         'label.emptyTitle': 'No packs yet',
         'label.empty': 'Type a word, a fixed phrase, or a whole sentence above and press Enter.',
+        'stage.words': 'Sentences',
+        'stage.wordsDoing': 'model is writing',
+        'stage.wordsDone': 'all here',
+        'stage.images': 'Photos',
+        'stage.imagesWait': 'waiting',
+        'stage.imagesNeed': 'no candidates yet',
+        'stage.imagesGate': '{n} waiting for your pick',
+        'stage.imagesDone': 'all chosen',
+        'stage.imagesUnreviewed': '{n} unreviewed',
+        'stage.audio': 'Audio',
+        'stage.audioWait': 'waiting',
+        'stage.audioNeed': 'not synthesised',
+        'stage.audioGate': '{n} waiting for your ear',
+        'stage.audioDone': 'all listened',
+        'stage.pack': 'Pack',
+        'stage.packNeed': 'needs photos and audio',
+        'stage.packDone': 'packed',
+        'stage.export': 'Export',
+        'stage.exportWait': 'pack first',
+        'stage.exportNeed': 'ready to export',
+        'stage.exportDone': 'exported',
+        'stage.now': 'Now',
+        'stage.allDone': 'All five steps are done. Click any card to swap its photo.',
+        'label.loading': 'Talking to the host…',
+        'label.loadFailed': 'Could not load. Read the red line, then hit the round button above to retry.',
         'label.examples': 'Examples',
         'label.generatingHint': 'The model is writing the sentences — usually ten-odd seconds, up to a minute. They appear here on their own.',
         'label.reviewed': 'confirmed',
@@ -1465,10 +1776,31 @@ window.__ModuleLoader__.load({
     const inject = ['slots', 'locale', 'connection']
 
     function apply(ctx) {
-      const connection = ctx.get('connection')
-      const rpc = connection?.rpc
+      // 每次要用的时候再取：apply 的时刻 connection 不一定已经就绪，
+      // 那一刻抓成常量的话，面板会永久拿到 undefined（看不到任何卡片，
+      // 也不报错 —— 用户报「点了卡片工厂看不见卡片」就是这么来的）。
+      const getRpc = () => {
+        try {
+          return ctx.get('connection')?.rpc
+        } catch {
+          return undefined
+        }
+      }
+      const rpc = getRpc
       // 组件的 media 读取走这个模块级引用（一个页面只有一条连接）。
-      rpcRef = rpc ?? null
+      rpcRef = getRpc() ?? null
+      const refreshRpc = () => {
+        const next = getRpc() ?? null
+        if (next) rpcRef = next
+        return next
+      }
+      // 连接晚到时补一次：媒体读取用得到它。
+      if (!rpcRef && typeof ctx.effect === 'function') {
+        const timer = setInterval(() => {
+          if (refreshRpc()) clearInterval(timer)
+        }, 500)
+        ctx.effect(() => () => clearInterval(timer), 'dsh-etude: wait for rpc')
+      }
 
       ctx.effect(() => ctx.locale.register(NS, { zh: LOCALE.zh, en: LOCALE.en }), 'dsh-etude: copy')
       const bound = ctx.locale.bind(NS)
@@ -1484,7 +1816,7 @@ window.__ModuleLoader__.load({
 
       ctx.slots.inject('main', () =>
         ctx.slots.register({ name: 'main', key: NS, locale: NS }, (owner) =>
-          React.createElement(FactoryPanel, { rpc, t, ...owner }),
+          React.createElement(PanelBoundary, null, React.createElement(FactoryPanel, { rpc, t, ...owner })),
         ),
       )
 
