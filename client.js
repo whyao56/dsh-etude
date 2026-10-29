@@ -1,4 +1,4 @@
-/**
+﻿/**
  * dsh-etude — Client half.
  *
  * 一个主面板（侧栏「卡片工厂」）+ 一张插件配置卡。
@@ -327,7 +327,10 @@ window.__ModuleLoader__.load({
         fontSize: 11.5,
         lineHeight: 1.7,
         color: 'var(--dsw-alias-label-tertiary)',
-      },      dot: (on) => ({        width: 7,        height: 7,
+      },
+      dot: (on) => ({
+        width: 7,
+        height: 7,
         borderRadius: 999,
         background: on ? 'var(--dsw-alias-state-success-primary)' : 'var(--dsw-alias-border-l4)',
         flex: '0 0 auto',
@@ -390,14 +393,23 @@ window.__ModuleLoader__.load({
       const timeout = new Promise((_resolve, reject) => {
         timer = setTimeout(() => reject(new Error(`宿主 15 秒没回应（${endpoint}）。看一眼宿主日志，或者刷新页面重试。`)), 15000)
       })
+      // payload 一定要是个对象。发 `undefined` 的时候，宿主的请求校验会
+      // 直接回一句 `invalid client-request message` —— 面板上就只剩这行
+      // 字，什么数据都拿不到。宁可发包空的 `{}`。
+      const body = payload === undefined || payload === null ? {} : payload
       let result
       try {
-        result = await Promise.race([bridge.call(RPC_CHANNEL, endpoint, payload), timeout])
+        result = await Promise.race([bridge.call(RPC_CHANNEL, endpoint, body), timeout])
       } finally {
         if (timer) clearTimeout(timer)
       }
       if (!result || result.ok !== true) {
-        const error = new Error(result?.error?.message ?? '接口调用失败')
+        const message = result?.error?.message ?? '接口调用失败'
+        const error = new Error(
+          message === 'invalid client-request message'
+            ? `宿主说请求格式不对（${endpoint}）。把这句话发给我。`
+            : message,
+        )
         error.code = result?.error?.code
         throw error
       }
@@ -611,7 +623,9 @@ window.__ModuleLoader__.load({
     // 请求不会带上页面 URL 里的 token —— 于是界面上就是一片空白。
     // 而「图看不到、声听不到」正是上一版最大的毛病，所以这里一律走 RPC 拿字节、
     // 转成 blob URL：跟鉴权无关，一定显示得出来。
-    let rpcRef = null
+    // 取 RPC 通道的函数（不是通道本身）：apply 那一刻 connection 可能还没就绪，
+    // 抓成常量就会永久 undefined。
+    let rpcGetter = null
     const mediaCache = new Map()
     const MEDIA_CACHE_LIMIT = 80
 
@@ -664,7 +678,7 @@ window.__ModuleLoader__.load({
         let alive = true
         setUrl(null)
         setFailed(false)
-        callRpc(rpcRef, source.endpoint, source.payload)
+        callRpc(rpcGetter, source.endpoint, source.payload)
           .then((value) => {
             if (!alive) return
             const next = URL.createObjectURL(base64ToBlob(value.dataBase64, source.mediaType))
@@ -1787,20 +1801,9 @@ window.__ModuleLoader__.load({
         }
       }
       const rpc = getRpc
-      // 组件的 media 读取走这个模块级引用（一个页面只有一条连接）。
-      rpcRef = getRpc() ?? null
-      const refreshRpc = () => {
-        const next = getRpc() ?? null
-        if (next) rpcRef = next
-        return next
-      }
-      // 连接晚到时补一次：媒体读取用得到它。
-      if (!rpcRef && typeof ctx.effect === 'function') {
-        const timer = setInterval(() => {
-          if (refreshRpc()) clearInterval(timer)
-        }, 500)
-        ctx.effect(() => () => clearInterval(timer), 'dsh-etude: wait for rpc')
-      }
+      // 媒体读取也用同一个 getter，用到的时候再取。不在这里开任何定时器 ——
+      // 插件在 apply 阶段做多余的事，出错时是整个 App 一起坏，不该冒险。
+      rpcGetter = getRpc
 
       ctx.effect(() => ctx.locale.register(NS, { zh: LOCALE.zh, en: LOCALE.en }), 'dsh-etude: copy')
       const bound = ctx.locale.bind(NS)

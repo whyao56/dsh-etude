@@ -152,10 +152,14 @@ API key 不写在设置里，只写「存哪个环境变量名」，值放 DSH �
 
 ```
 coffee-13f770d580a24fc4/
+├── cards.html          双击就能看：图、句子、播放器都在这一页
 ├── manifest.json        清单：包里有什么、谁点过头
 ├── images/              每条例句一张实拍图
 └── audio/               每条例句一条 mp3
 ```
+
+`cards.html` 是导出时顺手生成的静态页：不联网、不依赖任何服务，图片音频走同目录
+相对路径，整个文件夹拷走也能看。包是给人用的，不该只有一堆哈希命名的文件。
 
 `format: "card-pack"`、`format_version: 2`。结构在
 [`contract/manifest.schema.json`](contract/manifest.schema.json)，表达不出来的规矩在

@@ -217,7 +217,8 @@ async function main() {
       step('导出成品包')
       const exported = await exportPack({ root, packId: created.id, exportDir: exportDir })
       check('导出目录建出来了', Boolean(exported.dir), exported.dir)
-      check('导出里的文件数和包一致', exported.files === packedFiles, `${exported.files}/${packedFiles}`)
+      // 导出比包多一个文件：多出来的那张是 cards.html（给人双击看的）。
+      check('导出里的文件数 = 包 + 1（cards.html）', exported.files === packedFiles + 1, `${exported.files}/${packedFiles + 1}`)
       check('导出字节不为零', exported.bytes > 0, `${Math.round(exported.bytes / 1024)} KB`)
 
       const exportedManifestPath = join(exported.dir, 'manifest.json')
