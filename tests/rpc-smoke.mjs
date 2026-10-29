@@ -261,6 +261,19 @@ try {
   check('失败原因说的是副本没过校验', brokenExport.code === 'export-invalid', String(brokenExport.code))
   await writeFile(sourceImage, original)
 
+  // 学习区只认成品包；「打回制卡」要把它退回素材阶段，状态与账本都得跟着变。
+  console.log('— 打回制卡 —')
+  const beforeReopen = await call('state')
+  check('打完包的包在学习区里算能练的', beforeReopen.packs[0].learnable === true, String(beforeReopen.packs[0].learnable))
+  const reopened = await call('pack.reopen', { id: packId })
+  check('打回制卡返回新状态', reopened.status === 'media', String(reopened.status))
+  check('打回时说明它原来导出过', reopened.hadExport === true, String(reopened.hadExport))
+  const afterReopen = await call('state')
+  check('打回之后不再算能练的', afterReopen.packs[0].learnable === false, String(afterReopen.packs[0].learnable))
+  check('打回之后导出记录清掉了', afterReopen.packs[0].exportDir === null, String(afterReopen.packs[0].exportDir))
+  // 磁盘上那份导出的副本不跟着删 —— 别人可能已经拷走了。
+  check('打回不动磁盘上已导出的那份', await exists(join(exportedDir, 'manifest.json')), exportedDir)
+
   console.log('— 收摊 —')
   await call('pack.delete', { id: packId })
   const afterDelete = await call('state')

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 纯 JS 那几块的单元测试：跑 `node --test tests/`。
  *
  * 挑着测的原则是「错了会静默地错」：MP3 时长算错，界面显示的秒数就是假的，
@@ -15,6 +15,7 @@ import { PROMPT_VERSION, SYSTEM, buildMessages, schema, targetInstruction } from
 import { generateSecMsGec, tokenSalt } from '../lib/edge-token.js'
 import { idempotencyKey, sha256Hex, shortDigest } from '../lib/sha.js'
 import { normalizeSpace, similarity, wordCount } from '../lib/util.js'
+import { isLearnable } from '../lib/packs.js'
 
 // ── MP3 时长 ───────────────────────────────────────────────────────────────
 
@@ -200,3 +201,37 @@ test('similarity 落在 0–1 且明显句子不判成相似', () => {
   assert.equal(same, 1)
   assert.ok(other < 0.5, `不同句子居然相似度 ${other}`)
 })
+
+// ── 学习区只认成品包 ─────────────────────────────────────────────────────────
+
+const finishedExample = {
+  ord: 1,
+  sentence: 'We had to abandon the car in the snow.',
+  image: { file: 'images/commons-34958284bf84a30c8729.jpg' },
+  audio: { file: 'audio/edge-1587b6105fb7f373b0dc.mp3', seconds: 2.74 },
+}
+
+test('打包完、图音齐的包才能拿去练', () => {
+  const pack = { status: 'packed', examples: [finishedExample] }
+  assert.equal(isLearnable(pack), true)
+  assert.equal(isLearnable({ ...pack, status: 'exported' }), true)
+})
+
+test('还在制卡的包不进学习区', () => {
+  assert.equal(isLearnable({ status: 'media', examples: [finishedExample] }), false)
+  assert.equal(isLearnable({ status: 'text', examples: [finishedExample] }), false)
+  assert.equal(isLearnable({ status: 'generating', examples: [] }), false)
+  assert.equal(isLearnable({ status: 'failed', examples: [finishedExample] }), false)
+})
+
+test('缺一张图或缺一条音就整包不算成品', () => {
+  const noImage = { status: 'packed', examples: [finishedExample, { ...finishedExample, ord: 2, image: null }] }
+  const noAudio = { status: 'packed', examples: [finishedExample, { ...finishedExample, ord: 2, audio: { file: '', seconds: 0 } }] }
+  const zeroLength = { status: 'packed', examples: [{ ...finishedExample, audio: { file: 'audio/x.mp3', seconds: 0 } }] }
+  assert.equal(isLearnable(noImage), false)
+  assert.equal(isLearnable(noAudio), false)
+  assert.equal(isLearnable(zeroLength), false)
+  assert.equal(isLearnable({ status: 'packed', examples: [] }), false)
+  assert.equal(isLearnable(null), false)
+})
+

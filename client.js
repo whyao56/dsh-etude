@@ -1,4 +1,4 @@
-/**
+﻿/**
  * dsh-etude — Client half.
  *
  * 一个主面板（侧栏「卡片工厂」）+ 一张插件配置卡。
@@ -381,6 +381,45 @@ window.__ModuleLoader__.load({
         maxWidth: 240,
       },
       // 学习区：一屏一张，图大、字大、没有按钮堆。这里只有一个动作 —— 听。
+      studyHead: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '10px 16px',
+        borderBottom: '1px solid var(--dsw-alias-border-l3)',
+      },
+      studyTarget: {
+        fontSize: '1.15rem',
+        fontWeight: 600,
+        color: 'var(--dsw-alias-label-primary)',
+      },
+      studyKeys: {
+        fontSize: 11,
+        color: 'var(--dsw-alias-label-tertiary)',
+      },
+      studyCount: {
+        fontSize: 12,
+        color: 'var(--dsw-alias-label-tertiary)',
+      },
+      studyAnswer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 10,
+      },
+      studyZh: {
+        fontSize: 14,
+        lineHeight: 1.6,
+        textAlign: 'center',
+        color: 'var(--dsw-alias-label-secondary)',
+        maxWidth: 640,
+      },
+      studyTags: {
+        display: 'flex',
+        gap: 6,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      },
       study: {
         flex: 1,
         minWidth: 0,
@@ -397,14 +436,19 @@ window.__ModuleLoader__.load({
         justifyContent: 'center',
         gap: 14,
         padding: '20px 24px',
+        // 翻开之后内容变多（句子 + 中文 + 标签 + 播放键），一屏放不下时
+        // 让这一块自己滚，别把底下的「上一张 / 下一张」顶出去。
+        overflowY: 'auto',
       },
       studyShot: {
         width: '100%',
         maxWidth: 720,
-        maxHeight: '58vh',
+        maxHeight: '52vh',
+        minHeight: 0,
         objectFit: 'cover',
         borderRadius: 12,
         background: 'var(--dsw-alias-bg-layer-3)',
+        flex: '0 0 auto',
       },
       studySentence: {
         fontFamily: 'Georgia, "Times New Roman", serif',
@@ -1388,7 +1432,7 @@ window.__ModuleLoader__.load({
      * 先给场景，句子藏起来 —— 想一下这个场合怎么说，再翻开对答案，
      * 这比「图片 + 译文」一起摆着让人读一遍有用得多。
      */
-    function StudyPanel({ detail, t }) {
+    function StudyPanel({ detail, t, onReopen }) {
       const [index, setIndex] = useState(0)
       const [revealed, setRevealed] = useState(false)
       const examples = detail?.examples ?? []
@@ -1399,24 +1443,68 @@ window.__ModuleLoader__.load({
         setRevealed(false)
       }, [detail?.id])
 
-      if (!detail || total === 0) {
+      const safe = total === 0 ? 0 : Math.min(Math.max(index, 0), total - 1)
+      const go = (delta) => {
+        if (total === 0) return
+        setIndex(Math.min(Math.max(safe + delta, 0), total - 1))
+        setRevealed(false)
+      }
+
+      // 手放在键盘上练的时候不该去够鼠标：← → 换卡，空格翻开。
+      useEffect(() => {
+        if (total === 0 || typeof window === 'undefined') return undefined
+        const onKey = (event) => {
+          if (event.altKey || event.ctrlKey || event.metaKey) return
+          const tag = event.target?.tagName
+          if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            go(-1)
+          } else if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            go(1)
+          } else if (event.key === ' ') {
+            event.preventDefault()
+            setRevealed(true)
+          }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+      })
+
+      if (!detail) {
+        return React.createElement('div', { style: styles.study }, React.createElement('div', { style: styles.emptyBig },
+          React.createElement('div', { style: styles.emptyTitle }, t('study.noneTitle')),
+          React.createElement('div', { style: styles.emptyHint }, t('study.none')),
+        ))
+      }
+
+      if (total === 0) {
         return React.createElement('div', { style: styles.study }, React.createElement('div', { style: styles.emptyBig },
           React.createElement('div', { style: styles.emptyTitle }, t('study.emptyTitle')),
           React.createElement('div', { style: styles.emptyHint }, t('study.empty')),
         ))
       }
 
-      const safe = Math.min(Math.max(index, 0), total - 1)
       const example = examples[safe]
-      const go = (delta) => {
-        const next = Math.min(Math.max(safe + delta, 0), total - 1)
-        setIndex(next)
-        setRevealed(false)
-      }
+      const variants = example.zhVariants ?? []
+      const zh = variants.length > 0 ? variants[safe % variants.length] : ''
 
       return React.createElement(
         'div',
         { style: styles.study },
+        React.createElement(
+          'div',
+          { style: styles.studyHead },
+          React.createElement('span', { style: styles.studyTarget }, detail.target),
+          React.createElement('span', { style: styles.tag }, t(`kind.${detail.kind}`)),
+          React.createElement('div', { style: { flex: 1 } }),
+          React.createElement(
+            'button',
+            { style: { ...styles.button, height: 26, fontSize: 12 }, onClick: onReopen, title: t('study.reopenHint') },
+            t('study.reopen'),
+          ),
+        ),
         React.createElement(
           'div',
           { style: styles.studyStage },
@@ -1432,15 +1520,30 @@ window.__ModuleLoader__.load({
                 style: styles.studyShot,
               })
             : React.createElement('div', { style: { ...styles.studyShot, height: 180 } }),
+          // 场景是「提示」：翻开之前给场合，翻开之后就该让位给答案，
+          // 不然跟中文说法一起摆着，同一句话读两遍。
           revealed
-            ? React.createElement('div', { style: styles.studySentence }, example.sentence)
+            ? null
+            : React.createElement('div', { style: styles.studyScene }, example.sceneZh || example.sceneEn || ''),
+          revealed
+            ? React.createElement(
+                'div',
+                { style: styles.studyAnswer },
+                React.createElement('div', { style: styles.studySentence }, example.sentence),
+                zh ? React.createElement('div', { style: styles.studyZh }, zh) : null,
+                React.createElement(
+                  'div',
+                  { style: styles.studyTags },
+                  example.register ? React.createElement('span', { style: styles.tag }, example.register) : null,
+                  example.voiceHint ? React.createElement('span', { style: styles.tag }, example.voiceHint) : null,
+                ),
+                React.createElement(StudyAudio, { example, t }),
+              )
             : React.createElement(
                 'button',
                 { style: { ...styles.buttonPrimary, height: 34, fontSize: 13 }, onClick: () => setRevealed(true) },
                 t('study.reveal'),
               ),
-          React.createElement('div', { style: styles.studyScene }, example.sceneZh || example.sceneEn || ''),
-          revealed ? React.createElement(StudyAudio, { example, t }) : null,
         ),
         React.createElement(
           'div',
@@ -1450,12 +1553,13 @@ window.__ModuleLoader__.load({
             { style: { ...styles.button, height: 30 }, onClick: () => go(-1), disabled: safe === 0 },
             t('study.prev'),
           ),
-          React.createElement('span', { style: { fontSize: 12, color: 'var(--dsw-alias-label-tertiary)' } }, `${safe + 1} / ${total}`),
+          React.createElement('span', { style: styles.studyCount }, `${safe + 1} / ${total}`),
           React.createElement(
             'button',
             { style: { ...styles.button, height: 30 }, onClick: () => go(1), disabled: safe >= total - 1 },
             t('study.next'),
           ),
+          React.createElement('span', { style: styles.studyKeys }, t('study.keys')),
         ),
       )
     }
@@ -1800,14 +1904,23 @@ window.__ModuleLoader__.load({
       const [sort, setSort] = useState('recent')
       const busy = Boolean(job && job.status === 'running')
 
+      // 学习区只认成品包：图齐全、音齐全、已经打过包（宿主那边算好的 `learnable`）。
+      // 素材还在补的包留在制卡区 —— 拿去练，练到一半发现没声，人就不练了。
+      const pool = useMemo(() => {
+        const all = state.packs ?? []
+        return zone === 'study' ? all.filter((one) => one.learnable === true) : all
+      }, [state.packs, zone])
+
       const visible = useMemo(
-        () => sortPacks(filterPacks(state.packs ?? [], query), sort),
-        [state.packs, query, sort],
+        () => sortPacks(filterPacks(pool, query), sort),
+        [pool, query, sort],
       )
 
       useEffect(() => {
-        if (!selected && state.packs?.length > 0) setSelected(state.packs[0].id)
-      }, [state.packs, selected, setSelected])
+        if (selected && pool.some((one) => one.id === selected)) return
+        if (pool.length > 0) setSelected(pool[0].id)
+        else if (zone === 'study') setSelected(null)
+      }, [pool, selected, setSelected, zone])
 
       const handlers = useMemo(
         () => ({
@@ -1825,6 +1938,11 @@ window.__ModuleLoader__.load({
           unlockAudio: (ord) => factory.act('pack.unlockAudio', { id: selected, ord }),
           pack: () => factory.runJob('pack.pack', { id: selected }),
           exportPack: () => factory.runJob('pack.export', { id: selected }),
+          // 打回制卡区：状态退回素材阶段，人接着改；同时把界面切回制卡区。
+          reopen: async () => {
+            await factory.act('pack.reopen', { id: selected })
+            setZone('factory')
+          },
           remove: async () => {
             const pack = state.packs?.find((one) => one.id === selected)
             if (!window.confirm(`${t('action.deleteConfirm')}\n${pack?.target ?? ''}`)) return
@@ -1963,16 +2081,19 @@ window.__ModuleLoader__.load({
                   ),
                 )
               // 有包但被检索条件筛空了：这时候必须说一句，否则用户会以为包没了。
-              : (state.packs?.length ?? 0) > 0
+              : pool.length > 0
                 ? React.createElement('div', { style: styles.listNote }, t('label.noMatch'))
-                // 空列表时左边保持安静 —— 指引只写在中间那一块，写两遍像两个错。
-                : state.status === 'loading'
-                  ? // 正在取数据的时候必须说话。一块什么都没有的空白，
-                    // 用户分不清是「真的没有包」还是「界面死了」。
-                    React.createElement('div', { style: styles.listNote }, t('label.loading'))
-                  : state.status === 'error'
-                    ? React.createElement('div', { style: styles.listNote }, t('label.loadFailed'))
-                    : null,
+                // 学习区里一个能练的都没有：也别空着，说清这里是按什么筛的。
+                : zone === 'study' && (state.packs?.length ?? 0) > 0
+                  ? React.createElement('div', { style: styles.listNote }, t('label.studyPoolEmpty'))
+                  // 空列表时左边保持安静 —— 指引只写在中间那一块，写两遍像两个错。
+                  : state.status === 'loading'
+                    ? // 正在取数据的时候必须说话。一块什么都没有的空白，
+                      // 用户分不清是「真的没有包」还是「界面死了」。
+                      React.createElement('div', { style: styles.listNote }, t('label.loading'))
+                    : state.status === 'error'
+                      ? React.createElement('div', { style: styles.listNote }, t('label.loadFailed'))
+                      : null,
           ),
           React.createElement(
             'div',
@@ -1991,7 +2112,7 @@ window.__ModuleLoader__.load({
                 )
               : null,
             zone === 'study'
-              ? React.createElement(StudyPanel, { detail, t })
+              ? React.createElement(StudyPanel, { detail, t, onReopen: handlers.reopen })
               : React.createElement(PackDetail, { detail, busy, handlers, t }),
           ),
         ),
@@ -2131,6 +2252,7 @@ window.__ModuleLoader__.load({
         'label.loading': '正在向宿主取数据……',
         'label.loadFailed': '取不到数据。看右边那条红字，点上面那个圆圈重试。',
         'label.noMatch': '没有对得上的包。换个说法，或者清空检索框。',
+        'label.studyPoolEmpty': '还没有能练的包。打完包的会出现在这里。',
         'label.sort': '排序',
         'label.voice': '音色',
         'label.rate': '语速',
@@ -2148,6 +2270,11 @@ window.__ModuleLoader__.load({
         'action.searchThis': '按这个词找图',
         'study.emptyTitle': '还没有能练的包',
         'study.empty': '先去「制卡」造一个包，配好图和音，再回来练。',
+        'study.noneTitle': '这里只放打完包的卡',
+        'study.none': '学习区只列图、音、打包都齐了的包。还在制卡的那些在左边「制卡」里。',
+        'study.reopen': '打回制卡',
+        'study.reopenHint': '退回制卡区重新编辑（导出过的那份不动）',
+        'study.keys': '← → 换卡 · 空格看答案',
         'study.reveal': '想好了？看答案',
         'study.replay': '再听一遍',
         'study.prev': '上一张',
@@ -2248,6 +2375,7 @@ window.__ModuleLoader__.load({
         'label.loading': 'Talking to the host…',
         'label.loadFailed': 'Could not load. Read the red line, then hit the round button above to retry.',
         'label.noMatch': 'No pack matches. Try another word, or clear the search box.',
+        'label.studyPoolEmpty': 'Nothing to practise yet. Finished packs show up here.',
         'label.sort': 'Sort',
         'label.voice': 'Voice',
         'label.rate': 'Speed',
@@ -2265,6 +2393,11 @@ window.__ModuleLoader__.load({
         'action.searchThis': 'Search this',
         'study.emptyTitle': 'Nothing to practise yet',
         'study.empty': 'Make a pack first, then come back here to drill it.',
+        'study.noneTitle': 'Only finished packs show up here',
+        'study.none': 'Practice lists only packs with every image, every audio and a built pack. Work in progress stays in Make.',
+        'study.reopen': 'Send back to Make',
+        'study.reopenHint': 'Reopen for editing (an exported copy stays where it is)',
+        'study.keys': '← → switch · Space to reveal',
         'study.reveal': 'Ready? Show the sentence',
         'study.replay': 'play again',
         'study.prev': 'Previous',
