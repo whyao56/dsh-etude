@@ -262,6 +262,17 @@ window.__ModuleLoader__.load({
         gap: 10,
         alignItems: 'center',
       },
+      // 顶上的任务条：一眼能看见、不占高度、跑完自动消失。
+      jobBar: {
+        display: 'flex',
+        gap: 10,
+        alignItems: 'center',
+        padding: '8px 16px',
+        fontSize: 12,
+        borderBottom: '1px solid var(--dsw-alias-border-l3)',
+        background: 'var(--dsw-alias-bg-layer-3)',
+        color: 'var(--dsw-alias-label-secondary)',
+      },
       dot: (on) => ({
         width: 7,
         height: 7,
@@ -1155,6 +1166,38 @@ window.__ModuleLoader__.load({
             React.createElement(Icon, { name: 'refresh', size: 14 }),
           ),
         ),
+        // 任务条必须在顶上：原来它挂在整页最底部，而一页卡片有三千像素高，
+        // 站在顶上点「造一个包」的人什么都看不见，会以为按钮没反应。
+        job
+          ? React.createElement(
+              'div',
+              { style: styles.jobBar },
+              React.createElement('span', { style: styles.dot(job.status !== 'running') }),
+              React.createElement('span', { style: { flex: '0 0 auto', fontWeight: 600 } }, job.label),
+              job.progress
+                ? React.createElement(
+                    'span',
+                    { style: { flex: '0 0 auto', color: 'var(--dsw-alias-label-tertiary)' } },
+                    `${job.progress.done}/${job.progress.total}`,
+                  )
+                : null,
+              React.createElement(
+                'span',
+                { style: { flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--dsw-alias-label-secondary)' } },
+                job.log?.length ? job.log[job.log.length - 1] : '',
+              ),
+              job.status === 'running'
+                ? React.createElement(
+                    'button',
+                    {
+                      style: { ...styles.button, height: 22, padding: '0 8px', fontSize: 11 },
+                      onClick: () => callRpc(rpc, 'job.cancel', { id: job.id }).catch(() => {}),
+                    },
+                    t('action.cancel'),
+                  )
+                : null,
+            )
+          : null,
         React.createElement(
           'div',
           { style: narrow ? { ...styles.body, flexDirection: 'column' } : styles.body },
@@ -1200,30 +1243,6 @@ window.__ModuleLoader__.load({
             React.createElement(PackDetail, { detail, busy, handlers, t }),
           ),
         ),
-        job
-          ? React.createElement(
-              'div',
-              { style: styles.jobStrip },
-              React.createElement('span', { style: styles.dot(job.status !== 'running') }),
-              React.createElement('span', { style: { flex: '0 0 auto' } }, job.label),
-              job.progress ? React.createElement('span', null, `${job.progress.done}/${job.progress.total}`) : null,
-              React.createElement(
-                'span',
-                { style: { flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } },
-                job.log?.length ? job.log[job.log.length - 1] : '',
-              ),
-              job.status === 'running'
-                ? React.createElement(
-                    'button',
-                    {
-                      style: { ...styles.button, height: 22, padding: '0 8px', fontSize: 11 },
-                      onClick: () => callRpc(rpc, 'job.cancel', { id: job.id }).catch(() => {}),
-                    },
-                    t('action.cancel'),
-                  )
-                : null,
-            )
-          : null,
       )
     }
 
