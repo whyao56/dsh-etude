@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><title>卡片工厂-测试 · cards</title>
+<link rel="stylesheet" href="./app.css?v=vmvxye9x4">
+<script src="./app.js?v=vmvxye9x4"></script><script src="./app2.js?v=vmvxye9x4"></script><script src="./stats.js?v=vmvxye9x4"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:14px;bottom:14px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./decks.js?v=vmvxye9x4"></script><script src="./help.js?v=vmvxye9x4"></script><script src="./pick.js?v=vmvxye9x4"></script><script src="./palette.js?v=vmvxye9x4"></script><script src="./factory.js?v=vmvxye9x4"></script><script src="./fx.js?v=vmvxye9x4"></script><script src="./rows.js?v=vmvxye9x4"></script><script src="./rain.js?v=vmvxye9x4"></script>
+</head><body>
+<canvas class="liquid" aria-hidden="true"></canvas>
+<canvas class="rain" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"><i></i><i></i></div>
+<div class="page">
+<div class="topbar">
+  <div class="tb-left"><details class="menu" id="plugin">
+  <summary class="tbtn"><svg viewBox="0 0 18 18"><rect x="3" y="3" width="5" height="5" rx="1.4"/><rect x="10" y="3" width="5" height="5" rx="1.4"/><rect x="3" y="10" width="5" height="5" rx="1.4"/><rect x="10" y="10" width="5" height="5" rx="1.4"/></svg>插件</summary>
+  <div class="menu-list">
+    <a class="mi" href="./tutorial.html">教程</a>
+    <a class="mi" href="https://github.com/" target="_blank" rel="noreferrer">社区<span class="sp"></span><span class="ext">↗</span></a>
+    <div class="msep"></div>
+    <a class="mi" href="#import">导入…<span class="sp"></span><span class="ext">.srt .txt</span></a>
+    <a class="mi" href="#export">导出…<span class="sp"></span><span class="ext">.json</span></a>
+    <div class="msep"></div>
+    <details class="sub" id="help">
+      <summary class="mi">帮助<span class="chev">›</span></summary>
+      <div class="menu-list">
+        <a class="mi" href="./tutorial.html#use">使用指南</a>
+        <a class="mi" href="https://github.com/whyao56/dsh-etude/issues" target="_blank" rel="noreferrer">报告问题<span class="ext" style="margin-left:auto">↗</span></a>
+        <a class="mi" href="#feedback">意见反馈</a>
+        <a class="mi" href="#diag">诊断<span class="sp"></span><span class="ext">看状态</span></a>
+      </div>
+    </details>
+    <a class="mi" href="#sync">同步…<span class="sp"></span><span class="ext">未接</span></a>
+    <div class="msep"></div>
+    <a class="mi" href="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
+  </div>
+</details></div>
+  <nav class="tabs"><a class="on" href="./cards.html">卡片</a><a class="" href="./factory.html">工厂</a><a class="" href="./stats.html">统计</a></nav>
+  <div class="tb-right"><button class="iconbtn" type="button" data-pal title="搜索 · Ctrl K"><svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="4.8"/><path d="M11.6 11.6L15.4 15.4"/></svg></button><a class="iconbtn" href="./settings.html" title="全局设置 · Ctrl Alt ,"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></a></div>
+</div>
+
+<main class="screen half">
+  <header class="hdr">
+    <div><h1>卡片</h1></div>
+    <div class="act">
+      <span class="chip live"><i></i>Anki 已连 · 8765</span>
+    </div>
+  </header>
+
+  <div class="cards2">
+  <div class="c-l">
+  <section class="card deckcard">
+    <div class="deckhead">
+      <span class="dname">牌组</span>
+      <span class="dnum">未学习</span>
+      <span class="dnum">学习中</span>
+      <span class="dnum due">待复习</span>
+      <span class="dgear"></span>
+    </div>
+
+        <div class="drow parent" data-go="./study.html?deck=testing" tabindex="0">
+      <span class="dname"><i class="caret open"></i>测试牌组<span class="chip">样例</span></span>
+      <span class="dnum">4</span>
+      <span class="dnum learn">2</span>
+      <span class="dnum due">12</span>
+      <span class="dgear"><button class="gear" type="button" title="牌组设置"><svg viewBox="0 0 18 18" width="15" height="15"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></button></span>
+    </div>
+    <div class="drow child" data-go="./study.html?w=abandon" tabindex="0">
+      <span class="dname"><a href="./study.html?w=abandon">abandon</a></span>
+      <span class="dnum">3</span>
+      <span class="dnum learn">1</span>
+      <span class="dnum due">8</span>
+      <span class="dgear"><button class="gear" type="button"><svg viewBox="0 0 18 18" width="15" height="15"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></button></span>
+    </div>
+    <div class="drow child" data-go="./study.html?w=succumb" tabindex="0">
+      <span class="dname"><a href="./study.html?w=succumb">succumb</a></span>
+      <span class="dnum">1</span>
+      <span class="dnum learn">1</span>
+      <span class="dnum due">4</span>
+      <span class="dgear"><button class="gear" type="button"><svg viewBox="0 0 18 18" width="15" height="15"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></button></span>
+    </div>
+    <div class="drow parent">
+      <span class="dname"><i class="caret"></i>还没归类的</span>
+      <span class="dnum">0</span>
+      <span class="dnum learn">0</span>
+      <span class="dnum due">0</span>
+      <span class="dgear"><button class="gear" type="button"><svg viewBox="0 0 18 18" width="15" height="15"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></button></span>
+    </div>
+
+  </section>
+
+  <p class="deckstat">随包是空的。这个「测试牌组」是给你试手的样例（2 个词 · 6 句），练完可以直接删。</p>
+
+  </div>
+
+  <aside class="c-r">
+    <section class="card nextup">
+      <div class="row"><span class="sec-title">接着练</span></div>
+      <div class="word">abandon</div>
+      <p class="qline">The crew abandoned ship within minutes.</p>
+      <p class="mut">傍晚，救生艇刚解开缆绳，船长的最后一道命令就是这个。</p>
+      <div class="nextup-foot">
+        <span class="nextup-face"><div class="faces"><div class="face"><span class="pip ok"></span><span>听</span></div><div class="face"><span class="pip warn"></span><span>说</span></div><div class="face"><span class="pip "></span><span>读</span></div><div class="face"><span class="pip now"></span><span>写</span></div><div class="face"><span class="pip "></span><span>改</span></div></div></span>
+        <a class="btn primary" href="./study.html">练这一句</a>
+      </div>
+    </section>
+  </aside>
+</div>
+
+  <div class="deckfoot">
+    <a class="btn ghost" href="https://ankiweb.net/shared/decks" target="_blank" rel="noreferrer">获取牌组</a>
+    <button class="btn ghost" type="button" data-newdeck>创建牌组</button>
+    <button class="btn ghost" type="button">导入牌组</button>
+  </div>
+
+  <div class="guide" id="guide" hidden>
+    <div class="gcard">
+      <div class="geyebrow">欢迎 · 三步</div>
+
+      <div class="gbody">
+        <div class="gstep on">
+          <div class="gtitle">先选你学的语言</div>
+          <div class="gdesc">只影响怎么给例句、场景和语音；后面随时能改。</div>
+          <div class="gfield" style="margin-top:16px"><span class="glab2">要学的语言</span></div>
+          <div class="gpick">
+            <span class="chip accent">English</span><span class="chip">简体中文</span><span class="chip">日本語</span><span class="chip">한국어</span>
+            <span class="chip">Español</span><span class="chip">Français</span><span class="chip">Deutsch</span>
+          </div>
+          <div class="gfield" style="margin-top:14px"><span class="glab2">界面语言</span></div>
+          <div class="gpick">
+            <span class="chip accent">简体中文</span><span class="chip">English</span>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gtitle">再挑个样子</div>
+          <div class="gdesc">点一下整页就换，跟着变的是底色和光晕，不是贴一张图。</div>
+          <div class="gpick" style="margin-top:16px">
+            <span class="chip accent">深色 · 雾蓝</span><span class="chip">浅色 · 雾蓝</span><span class="chip">深色 · 暮紫</span>
+            <span class="chip">深色 · 松石</span><span class="chip">深色 · 琥珀</span>
+          </div>
+        </div>
+        <div class="gstep">
+          <div class="gtitle">东西放哪儿</div>
+          <div class="gdesc">默认就放本机应用数据里；想换地方，点「选择…」挑个目录。</div>
+          <div class="gfield" style="margin-top:16px"><span class="glab2">存放位置</span></div>
+          <div class="gpath">
+            <span class="inp wide" contenteditable="true">%LOCALAPPDATA%/dsh-etude-test/</span>
+            <button class="btn ghost" type="button" id="g-pick">选择…</button>
+            <button class="btn ghost" type="button" id="g-reset">默认</button>
+          </div>
+          <span class="mut" style="font-size:11.5px;display:block;margin-top:8px">换位置会把账本、素材、音频一起搬过去。不建议放网盘同步目录 —— 会被同步工具改坏。</span>
+        </div>
+      </div>
+      <div class="gfoot">
+        <button class="btn ghost" id="g-skip" type="button">跳过，直接进</button>
+        <div class="gdots"><i class="gdot on"></i><i class="gdot"></i><i class="gdot"></i></div>
+        <button class="btn primary" id="g-next" type="button">下一步</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="deckmenu" id="deckmenu" hidden>
+    <button type="button" data-act="subdeck">创建子牌组</button>
+    <button type="button" data-act="rename">重命名</button>
+    <button type="button" data-act="options">选项</button>
+    <button type="button" data-act="export">导出</button>
+    <button type="button" data-act="delete" class="danger">删除</button>
+  </div>
+
+<div class="mask" id="m-newdeck" hidden>
+  <div class="sheet" role="dialog" aria-label="新建牌组">
+    <div class="shead">
+      <div><h2>新建牌组</h2><div class="mut">Anki 的命名规则：父牌组::子牌组，层级不限</div></div>
+      <button class="x" type="button" data-close aria-label="关闭">✕</button>
+    </div>
+    <div class="sbody">
+      <div class="srow">
+        <div><div class="sl">放哪儿</div><div class="sd">选「顶层」就是一级牌组；选一个牌组，就建成它的子牌组。</div></div>
+        <div class="sr"><select class="inp wide" id="nd-parent"></select></div>
+      </div>
+      <div class="srow">
+        <div><div class="sl">名称</div><div class="sd">只写这一段，前面那一串自动接上。</div></div>
+        <div class="sr"><input class="inp wide" id="nd-name" type="text" placeholder="老友记 S02E03" autocomplete="off"></div>
+      </div>
+      <div class="srow">
+        <div><div class="sl">完整名字</div><div class="sd">以后在 Anki 里、在导出文件里，都是这个名字。</div></div>
+        <div class="sr"><span class="nd-preview" id="nd-preview">老友记 S02E03</span></div>
+      </div>
+    </div>
+    <div class="sfoot">
+      <button class="btn ghost" type="button" data-close>取消</button>
+      <button class="btn primary" type="button" id="nd-ok">创建</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="m-deckopt" hidden>
+  <div class="sheet lg" role="dialog" aria-label="牌组选项">
+    <div class="shead">
+      <div><h2>牌组选项</h2><div class="mut">卡片工厂 · 只影响这个牌组</div></div>
+      <button class="x" type="button" data-close aria-label="关闭">×</button>
+    </div>
+    <div class="sbody deckopt">
+      <section class="oset">
+        <h3>每日上限</h3>
+        <div class="srow"><div class="sl">每日新卡片上限（张/天）</div><div class="sd"><input class="inp sm" value="20"></div></div>
+        <div class="srow"><div class="sl">每日复习上限（次/天）</div><div class="sd"><input class="inp sm" value="200"></div></div>
+        <div class="srow"><div class="sl">新卡片不受复习上限影响</div><div class="sd"><span class="sw"><i></i></span></div></div>
+        <div class="srow"><div class="sl">使用顶层牌组的上限</div><div class="sd"><span class="sw"><i></i></span></div></div>
+      </section>
+      <section class="oset">
+        <h3>新卡片</h3>
+        <div class="srow"><div class="sl">初学间隔</div><div class="sd"><input class="inp sm" value="1m 10m"></div></div>
+        <div class="srow"><div class="sl">「毕业」卡片再现间隔</div><div class="sd"><input class="inp sm" value="1"></div></div>
+        <div class="srow"><div class="sl">「简单」卡片再现间隔</div><div class="sd"><input class="inp sm" value="4"></div></div>
+        <div class="srow"><div class="sl">插入位置</div><div class="sd"><select class="sel sm"><option>顺序插入（旧卡片在前）</option><option>随机插入</option><option>插在最前</option></select></div></div>
+      </section>
+      <section class="oset">
+        <h3>遗忘</h3>
+        <div class="srow"><div class="sl">重学间隔</div><div class="sd"><input class="inp sm" value="10m"></div></div>
+        <div class="srow"><div class="sl">最小间隔</div><div class="sd"><input class="inp sm" value="1"></div></div>
+        <div class="srow"><div class="sl">记忆难点（leech）阈值</div><div class="sd"><input class="inp sm" value="8"></div></div>
+        <div class="srow"><div class="sl">记忆难点（leech）处理</div><div class="sd"><select class="sel sm"><option>仅加标签</option><option>暂停这张卡</option><option>降低难度重排</option></select></div></div>
+      </section>
+      <section class="oset">
+        <h3>展示顺序</h3>
+        <div class="srow"><div class="sl">新卡片抽取顺序</div><div class="sd"><select class="sel sm"><option>按牌组顺序</option><option>随机</option><option>按加入时间</option></select></div></div>
+        <div class="srow"><div class="sl">新卡片排列顺序</div><div class="sd"><select class="sel sm"><option>先按卡片模板，再按抽取顺序</option><option>完全随机</option><option>难的多排前面</option></select></div></div>
+        <div class="srow"><div class="sl">学新/复习的先后顺序</div><div class="sd"><select class="sel sm"><option>学新与复习混合</option><option>先学新卡</option><option>先复习到期</option></select></div></div>
+        <div class="srow"><div class="sl">跨日卡片展示顺序</div><div class="sd"><select class="sel sm"><option>按到期时间排</option><option>先做今天的，昨天的往后放</option><option>不分日期混在一起</option></select></div></div>
+        <div class="srow"><div class="sl">复习卡片排列顺序</div><div class="sd"><select class="sel sm"><option>先按到期日期排序，再随机排序</option><option>按到期日期</option><option>随机</option><option>按上次的评分</option></select></div></div>
+      </section>
+      <section class="oset">
+        <h3>高级</h3>
+        <div class="srow"><div class="sl">复习卡片的最大间隔（天）</div><div class="sd"><input class="inp sm" value="36500"></div></div>
+        <div class="srow"><div class="sl">初始简易度</div><div class="sd"><input class="inp sm" value="2.50"></div></div>
+        <div class="srow"><div class="sl">「简单」复习间隔乘数</div><div class="sd"><input class="inp sm" value="1.30"></div></div>
+        <div class="srow"><div class="sl">全局间隔乘数</div><div class="sd"><input class="inp sm" value="1.00"></div></div>
+        <div class="srow"><div class="sl">「困难」复习间隔乘数</div><div class="sd"><input class="inp sm" value="1.20"></div></div>
+        <div class="srow"><div class="sl">「重来」复习间隔乘数</div><div class="sd"><input class="inp sm" value="0.00"></div></div>
+        <div class="srow"><div class="sl">FSRS（按记忆稳定性排期）</div><div class="sd"><span class="sw"><i></i></span></div></div>
+      </section>
+    </div>
+    <div class="sfoot">
+      <button class="btn ghost" type="button" data-close>取消</button>
+      <button class="btn primary" type="button" data-close>保存</button>
+    </div>
+  </div>
+</div>
+
+
+</main>
+</div><script>
+(function(){
+  var h = location.hash.replace('#','');
+  if (!h) return;
+  var el = document.getElementById(h);
+  if (el && el.tagName === 'DETAILS') el.open = true;
+  if (h === 'plugin') { var help = document.getElementById('help'); if (help) help.open = true; }
+})();
+</script></body></html>
