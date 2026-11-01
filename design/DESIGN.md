@@ -1842,3 +1842,25 @@ document.addEventListener('click', function (e) {
 **学习页认参数**：`?w=` 决定练哪一张。内置两张样例（abandon / succumb），换的是：单词、音标、词性、英文释义、中文释义、句子、图、时长、资源链接、改写词与改写结果、背景六条、面包屑里的序号、侧栏「句子 N 词」。默认（没参数）是 abandon。
 
 **踩的坑**：`gen.mjs` 里这一页整个写在模板字符串里，我给 succumb 的句子写 `'I\'m afraid I …'`，反斜杠被模板字符串吃掉，生成出来的 JS 变成 `'I'm afraid …'` —— 页面直接 `SyntaxError: Unexpected identifier 'm'`，整页不动（五块全露、按钮全没反应）。改成 `&#39;` 之后正常：JS 字符串合法，浏览器渲染时又会还原成撇号。
+### 上传到 GitHub
+
+用户：「先把这个上传到 github，dsh-etude」。
+
+最后落到 `github.com/whyao56/dsh-etude` 的 `design/` 目录，两次提交：
+
+- `0a701da` 样式稿：15 个页面 + `app.css` + 全套 js + `gen.mjs` + `DESIGN.md` + `assets/factory/c1..c3.jpg`，34 个文件、1.9 MB
+- `b82343a` 主 README 加一句指向 `design/index.html`
+
+**没进去的东西**（都有理由）：
+
+| 排除 | 为什么 |
+|---|---|
+| `shots/`（13.3 MB 截图） | 我自己核视图用的，不该进仓库 |
+| `gen.mjs.bak-*`（七八份） | 每轮改之前的手备，历史留在 commit 里就够 |
+| `_click-probe.html`、`_look-*.html`、`_menu-open.html` | 早期的探针页，早该删 |
+
+**顺手修的一处**：`index.html`（开场页）还引着 `./charts.js`，那个文件在做动画时被内联进页面后就删了 —— 仓库里会是个 404。删掉这一个 `<script>` 再生成。
+
+**新增 `design/README.md`**：说明这是样式稿不是插件本体、按什么顺序点、五个面各给什么、以及「改样式稿必须改 `gen.mjs`，直接改 `.html` 下次生成就没了」。
+
+**踩的坑**：`git push` 在 PowerShell 里必然报红 —— git 把进度写 stderr，`2>&1 |` 会让 PowerShell 把它当错误（`NativeCommandError`）。看最后一行 `0a701da..b82343a  main -> main` 才是真结果。
