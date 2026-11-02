@@ -1,4 +1,4 @@
-﻿/* 卡片工厂-测试 · 样式稿
+/* 卡片工厂-测试 · 样式稿
    配色与材质参照 dsh-Go 的「雾蓝玻璃 Mist Glass」：
    深海石板底 + 竖向渐变 + 两团极淡的光 + 白 5% 玻璃卡。
    70% 中性面 / 25% 文字细线 / ≤5% 强调色。 */
@@ -3929,3 +3929,395 @@ body.igniting .sp2-act .btn{opacity:.0;transform:scale(.94)}
 .stage2 .drw.open .drw-h{color:rgba(var(--w),.95)!important}
 .stage2 .drw::before{opacity:.4}
 .stage2 .drw.lit::before{opacity:.85}
+
+/* 学习页 v62 · 原骨架不动，只改细节
+   五面横条 / 七块抽屉 / 右栏 / 底部四格评分，位置和顺序全保留。
+   动的只有：颜色收敛、间距取 4 的倍数、字号收敛成 6 级、右栏触控尺寸、900 宽那一栏的折法。 */
+
+/* ── 1 五面横条 ───────────────────────────── */
+.fbar{gap:8px;margin:12px 0 12px;padding:8px;border-radius:14px}
+.fb{padding:8px 16px;border-radius:999px;gap:4px;min-height:44px;justify-content:center}
+.fb b{font-size:14px;font-weight:500}
+.fb i{font-size:11px}
+.fb.on{border-radius:999px}
+.fb.on i{color:rgba(var(--accent-rgb),.75)}
+.fb.done{background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.20)}
+.fb.done b,.fb.done{color:var(--fg2)}
+.fb.done.on{background:rgba(var(--accent-rgb),.16);border-color:rgba(var(--accent-rgb),.32)}
+
+/* ── 2 七块抽屉：七个色相 → 一个中性点，当前块才给主色 ────── */
+.stage2 .drw{--dot:var(--fg3)}
+.stage2 .drw::before{width:6px;height:6px;border-radius:999px;opacity:.45}
+.stage2 .drw:hover::before{opacity:.75;background:var(--fg2)}
+.stage2 .drw.lit::before{opacity:1;background:var(--accent)}
+.stage2 .drw.open::before{opacity:1;background:var(--accent)}
+.stage2 .drw.off::before{background:var(--danger);opacity:1}
+.stage2 .drw .drw-h{padding:12px 16px 12px 36px!important;gap:8px}
+.stage2 .drw .drw-h b{font-size:14px;font-weight:500;color:var(--fg2)!important;letter-spacing:0}
+.stage2 .drw.open .drw-h b{color:var(--fg)!important}
+/* 说明原来被 display:none!important 吃掉了，接回来，右对齐贴到折叠箭头左边 */
+.stage2 .drw .drw-h .mut{display:block!important;flex:1;min-width:0;margin-left:12px;text-align:right;
+  font-size:11px;color:var(--ghost);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stage2 .drw.open .drw-h .mut{color:var(--fg3)}
+.stage2 .drw .drw-p,.stage2 .drw.open .drw-p{padding-left:36px!important}
+.stage2 .big{font-size:20px;line-height:1.5}
+
+/* ── 3 右栏：32 高、字号 12，全是 4 的倍数 ────────────── */
+.drail{gap:4px}
+.drail .side-h{margin:12px 0 8px;font-size:11px;font-weight:500;letter-spacing:.06em;color:var(--fg3)}
+.drail .side-h:first-child{margin-top:0}
+.drail .exrow{gap:8px;margin-bottom:0}
+.drail .ex{height:32px;padding:0 12px;border-radius:6px;font-size:12px}
+.drail .ex i{font-size:11px}
+.drail .rv{height:32px;padding:0 12px;border-radius:6px;font-size:12px;
+  background:transparent;border-color:rgba(var(--w),.08);color:var(--fg2)}
+.drail .rv i{font-size:11px}
+/* 高亮跟着真正展开的那一块（静态页展开的是「句子」），不再固定在第一项 */
+.drail .rv[data-drw="sent"]{color:var(--accent);border-color:rgba(var(--accent-rgb),.30);background:rgba(var(--accent-rgb),.12)}
+.drail .rv[data-drw="sent"] i{color:rgba(var(--accent-rgb),.75)}
+.drail .rv:hover{color:var(--fg);border-color:rgba(var(--w),.20)}
+.drail .allbtn{height:32px;margin-top:8px;padding:0 12px;border-radius:6px;font-size:12px}
+.drail .side-n{margin-top:8px;font-size:11px;line-height:1.6}
+
+/* ── 4 评分四档：四个色相 → 主色明度阶，推荐档最实 ────────── */
+.st-rate{gap:12px;margin-top:12px}
+.st-r{padding:12px 8px;border-radius:14px;gap:4px;border:1px solid rgba(var(--w),.10);
+  background:transparent;color:var(--fg3);filter:none;box-shadow:none}
+.st-r b{font-size:14px;font-weight:500}
+.st-r em{font-size:11px;color:inherit;opacity:.6}
+.st-r:nth-child(1){color:var(--fg3);border-color:rgba(var(--w),.10);background:transparent}
+.st-r:nth-child(2){color:var(--fg2);border-color:rgba(var(--w),.16);background:rgba(var(--w),.03)}
+.st-r:nth-child(3),.st-r.good{color:var(--on-accent);border-color:var(--accent);background:var(--accent);box-shadow:none}
+.st-r:nth-child(4){color:var(--fg2);border-color:rgba(var(--accent-rgb),.40);background:rgba(var(--accent-rgb),.10)}
+.st-r:hover{filter:none;background:rgba(var(--w),.06)}
+.st-r.good:hover{filter:brightness(1.06);background:var(--accent)}
+
+/* ── 5 字阶收敛成 28 / 20 / 14 / 12 / 11 / 10 ─────────── */
+.st-crumb,.st-crumb a{font-size:11px;color:var(--ghost)}
+.st-idx{display:flex;align-items:baseline;gap:12px}
+.st-idx .wd{font-size:28px;font-weight:600;line-height:1.15}
+.st-where{font-size:11px;color:var(--ghost)}
+.hdr .btn.ghost{padding:8px 16px;font-size:12px;border-radius:999px}
+.st-keys{margin-top:8px;font-size:11px;color:var(--ghost)}
+.st-keys .kbd{font-size:10px;min-width:16px;height:16px;line-height:16px}
+.navstep,.wordnav{font-size:12px}
+
+/* ── 6 窄屏：右栏原来掉成两列按钮墙，改成抽屉下面横着滚一条 ── */
+/* 1024~1200 这一段内容会顶到两侧的悬浮翻页钮，给页面留出 56 的侧边 */
+@media (max-width:1200px){
+  .screen.study{padding-left:56px;padding-right:56px}
+}
+@media (max-width:1100px){
+  /* 两侧已经有 ‹ › 翻单词，底部这两个大按钮是重复的，还会压住评分键与快捷键行 */
+  .navstep{display:none}
+}
+@media (max-width:1000px){
+  .st2{display:flex;flex-direction:column;gap:16px}
+  .drail{order:2;display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:8px;
+    position:static;padding-bottom:4px}
+  .drail .side-h,.drail .side-n{display:none}
+  .drail .exrow{display:contents}
+  .drail .rv,.drail .allbtn,.drail .ex{flex:0 0 auto;width:auto;height:36px;margin:0;white-space:nowrap}
+  .st-rate{gap:8px;grid-template-columns:repeat(4,1fr);margin-bottom:16px}
+  .st-r{padding:12px 4px}
+}
+
+/* ===== v63 · 工厂页（原骨架不动，只改细节） ===== */
+
+/* ── 1 面板与标题：圆角归 14，内边距归 4 的倍数 ───────────── */
+.fx-blk{padding:12px 16px 16px;border-radius:14px}
+.fx-bh{font-size:12px;font-weight:500;gap:8px;margin-bottom:12px;color:var(--fg2)}
+.fx-bh b,.fx-bh strong{font-weight:500}
+.fx-blk>.fx-row{gap:8px}
+.fx-row{border-radius:14px}
+.mcard{padding:0}
+.mhd{padding:16px 16px 12px}
+
+/* ── 2 五维度：行高收紧，块和开关都收进规格 ─────────────── */
+.f5row{gap:12px;padding:8px 0;min-height:52px}
+.f5name{width:40px;height:32px;border-radius:6px;font-size:12px;display:flex;align-items:center;justify-content:center}
+.f5row .mut{font-size:11px}
+.f5row .fdot{width:6px;height:6px;margin-left:0}
+.f5row>span.sp{flex:1}
+.sw{width:40px;height:24px;border-radius:999px;transition:background .16s cubic-bezier(.22,.9,.18,1)}
+.sw::after{width:16px;height:16px;border-radius:999px;transition:transform .16s cubic-bezier(.22,.9,.18,1)}
+.sw.on::after{transform:translateX(16px)}
+
+/* ── 3 状态 chip：绿/琥珀 → 主色 / 警示（用现成 token，不写新色） ── */
+.chip{border-radius:999px;font-size:11px;line-height:1;padding:5px 8px;gap:4px;height:22px}
+.chip.ok{background:var(--accent-cont);color:var(--accent);border-color:transparent}
+.chip.warn{background:var(--danger-cont);color:var(--danger);border-color:transparent}
+.chip.bad{background:var(--danger-cont);color:var(--danger);border-color:transparent}
+.chip.ok i,.chip.warn i,.chip.bad i{display:none}
+
+/* ── 4 面板右上那些彩色小动作：一律中性描边，主色只留给真主动作 ── */
+.mini.c-teal,.mini.go,.mini.xs.go{color:var(--fg2);border-color:rgba(var(--w),.12);background:transparent}
+.mini.c-teal:hover,.mini.go:hover,.mini.xs.go:hover{color:var(--fg);border-color:rgba(var(--w),.24);background:rgba(var(--w),.04)}
+.mini.xs.danger{color:var(--danger);border-color:rgba(var(--w),.12);background:transparent}
+.mini.xs.danger:hover{color:var(--danger);border-color:var(--danger-cont);background:var(--danger-cont)}
+.mini{border-radius:6px;height:28px;padding:0 12px;font-size:11px;
+  transition:color .16s cubic-bezier(.22,.9,.18,1),border-color .16s cubic-bezier(.22,.9,.18,1),
+             background .16s cubic-bezier(.22,.9,.18,1)}
+.mini.xs{height:28px;padding:0 8px}
+.mini.ic{width:28px;padding:0}
+.btn.sm{height:28px;padding:0 12px;font-size:12px;border-radius:999px}
+.btn.sm.primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+
+/* ── 5 义项与句子行：字阶收敛到 12/11，行距统一 ──────────── */
+.fx-sense{border-radius:14px}
+.fx-sense .dh,.fx-sense .dn{font-size:12px}
+.dsent{font-size:20px;line-height:1.4}
+.fx-foot{margin:12px 0 0;font-size:11px;line-height:1.6}
+
+/* ── 6 左栏词列表：小圆点统一 6px，选中行才给主色 ─────────── */
+.ords .fdot,.ords .pl .fdot{width:6px;height:6px;background:rgba(var(--w),.18)}
+.ords .pl.on .fdot{background:var(--accent)}
+.ords .pl{height:32px;border-radius:6px}
+
+/* ── 7 状态反馈：只做位移与底色，不弹跳 ────────────────── */
+.fx-blk{transition:border-color .18s cubic-bezier(.22,.9,.18,1),background .18s cubic-bezier(.22,.9,.18,1)}
+.fx-blk:hover{border-color:rgba(var(--w),.10)}
+.f5row:hover .f5name{background:rgba(var(--accent-rgb),.14)}
+
+/* ===== v63b · 工厂页状态色与彩色小动作（补第一次没打中的那些类） ===== */
+
+/* 状态文字：齐了 / 差 N 个 —— 绿色下线，齐了用主色，缺口用警示 */
+.f5row em.ok,.olist em.ok,.fx-sense em.ok{color:var(--accent);background:var(--accent-cont);border-radius:999px;
+  padding:4px 8px;font-size:11px;line-height:1;font-style:normal}
+.f5row em.warn,.olist em.warn,.fx-sense em.warn{color:var(--danger);background:var(--danger-cont);border-radius:999px;
+  padding:4px 8px;font-size:11px;line-height:1;font-style:normal}
+
+/* 五维进度点：ok 主色 / warn 警示 / 空 中性 */
+.pips i{width:12px;height:4px;border-radius:99px;background:rgba(var(--w),.14);box-shadow:none}
+.pips i.ok{background:var(--accent)}
+.pips i.warn{background:var(--danger)}
+.pips i.bad{background:var(--danger)}
+
+/* 左栏词表的小圆点：有缺口才给色，其余中性 */
+.fdot.ok{background:var(--accent)}
+.fdot.warn{background:var(--danger)}
+li.on>.fdot,li.on .fdot.ok{background:var(--accent)}
+
+/* 琥珀/松石描边小按钮 → 中性；琥珀那只（免费鸡蛋）用警示色，因为它花钱/花额度 */
+.mini.c-amber{color:var(--danger);border-color:var(--danger-cont);background:transparent}
+.mini.c-amber:hover{color:var(--danger);border-color:var(--danger);background:var(--danger-cont)}
+.mini.c-teal{color:var(--fg2);border-color:rgba(var(--w),.12);background:transparent}
+.mini.c-teal:hover{color:var(--fg);border-color:rgba(var(--w),.24);background:rgba(var(--w),.04)}
+
+/* ===== v63c · 工厂页五维方块回到主色 ===== */
+.f5name{color:var(--accent);background:rgba(var(--accent-rgb),.10);border-color:transparent}
+.f5name b{color:inherit;font-weight:500;font-size:12px}
+.f5name:hover{background:rgba(var(--accent-rgb),.18)}
+.f5name .cor{color:rgba(var(--accent-rgb),.55);font-size:9px}
+/* 五个方块现在带底，行里再 hover 换底会跳，去掉那条 */
+.f5row:hover .f5name{background:rgba(var(--accent-rgb),.18)}
+
+/* ===== v63d · 工厂页：状态条分组、义项折叠钮 ===== */
+
+/* 状态条：总数 | 三个子集 | 语言，用细分隔线分组，数字不再看起来并列 */
+.fx-info{gap:12px}
+.fx-info>span{font-size:12px;color:var(--fg3);display:inline-flex;align-items:baseline;gap:4px}
+.fx-info>span b{font-family:var(--mono);font-size:12px;color:var(--fg);font-weight:500}
+.fx-info>span.sub b{color:var(--fg2)}
+.fx-info>span.sub{color:var(--fg3)}
+.fx-info .sep{width:1px;height:12px;background:var(--line);display:inline-block;align-self:center}
+
+/* 义项折叠钮：24 的命中区，展开时箭头朝下，收起时朝右 */
+.sense-tg{width:24px;height:24px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  border-radius:6px;border:1px solid transparent;background:transparent;color:var(--fg3);cursor:pointer;
+  transition:color .16s cubic-bezier(.22,.9,.18,1),background .16s cubic-bezier(.22,.9,.18,1)}
+.sense-tg i{font-style:normal;font-size:10px;line-height:1;display:block;
+  transition:transform .18s cubic-bezier(.22,.9,.18,1);transform:rotate(0deg)}
+.sense-tg[aria-expanded="false"] i{transform:rotate(-90deg)}
+.sense-tg:hover{color:var(--fg);background:rgba(var(--w),.06);border-color:rgba(var(--w),.10)}
+.fx-def{gap:8px}
+
+/* ===== v64 · 统计页：六色相收成主色明度阶 =====
+   原则：1 主色（#97B1F0）的明度阶 + 1 警示（--danger）+ 中性（--fg3/--ghost）。
+   形态不变，只换图的颜色和表格里两列的色，图例跟着走。 */
+
+/* 环图 + 图例：一张图一套阶，占比越大越深 */
+.legend .c1{background:#7E93C8}
+.legend .c2{background:#656971}
+.legend .c3{background:#97B1F0}
+.legend .c4{background:#E69089}
+.legend .c5{background:#55689A}
+.legend .c6{background:#3F4E72}
+.legend .c7{background:#B9C9F6}
+.legend .c8{background:#4A4F5A}
+.legend .c9{background:#8FA6DE}
+.legend .c10{background:#D5DFFA}
+.legend .c11{background:#6E82BA}
+.legend .c12{background:#B9C9F6}
+.legend .c13{background:#8FA6DE}
+
+/* 面积 / 堆叠 / 散点 */
+.c1{fill:#7E93C8} .c2{fill:#656971} .c3{fill:#97B1F0} .c4{fill:#E69089}
+.c5{fill:#55689A} .c6{fill:#3F4E72} .c7{fill:#B9C9F6} .c8{fill:#4A4F5A}
+.c9{fill:#8FA6DE} .c10{fill:#D5DFFA} .c11{fill:#6E82BA} .c12{fill:#B9C9F6} .c13{fill:#8FA6DE}
+
+/* 柱：原来六条彩色渐变，改成一个阶的实色（渐变只留给主色那一根） */
+.bar.c1{fill:url(#grad-blue)}
+.bar.c2{fill:#656971}
+.bar.c3{fill:#97B1F0}
+.bar.c4{fill:#E69089}
+.bar.c5{fill:#55689A}
+.bar.c6{fill:#3F4E72}
+
+/* 环：段与段之间留 2.4 的缺口，深色底上不描边也不会糊 */
+.donut .dc.c1{stroke:#7E93C8}
+.donut .dc.c2{stroke:#656971}
+.donut .dc.c3{stroke:#97B1F0}
+.donut .dc.c4{stroke:#E69089}
+.donut .dc.c5{stroke:#55689A}
+.donut .dc.c6{stroke:#3F4E72}
+.donut .dc.c7{stroke:#B9C9F6}
+.donut .dc.c8{stroke:#4A4F5A}
+
+/* 记忆保留率：绿 / 蓝两列改成「主色阶 」与「中性」 */
+table.rt thead th.g{color:#7E93C8}
+table.rt thead th.b{color:var(--fg3)}
+table.rt td.g{color:#B9C9F6}
+table.rt td.b{color:var(--fg3)}
+
+/* ===== v64b · 统计页色阶微调：主色给最大块，越熟越浅 =====
+   v64 里把 70% 的「欠熟练」放在最深的 #3F4E72，深底上糊成一块；
+   改成主色给最大块，浅阶往「已熟练」方向走，读起来是「越亮越熟」。 */
+.c1{fill:#6E82BA}
+.c3{fill:#B9C9F6}
+.c6{fill:#97B1F0}
+.c7{fill:#D5DFFA}
+
+.legend .c1{background:#6E82BA}
+.legend .c3{background:#B9C9F6}
+.legend .c6{background:#97B1F0}
+.legend .c7{background:#D5DFFA}
+
+.donut .dc.c1{stroke:#6E82BA}
+.donut .dc.c3{stroke:#B9C9F6}
+.donut .dc.c6{stroke:#97B1F0}
+.donut .dc.c7{stroke:#D5DFFA}
+
+/* ===== v61 · 打磨第一屏：卡片页（候选 C「今日先」） =====
+   注意：这一段在 app.css 被 git 恢复时丢过一次，这里按当时定版重建。 */
+
+:root{--r-sm:6px;--r-md:14px;--r-lg:14px;--r-xl:14px}
+
+/* 页宽与节奏 */
+.screen.half{max-width:1040px;gap:24px;padding:0 0 32px}
+.screen.half .hdr{flex-direction:row;align-items:flex-start;justify-content:space-between;flex-wrap:nowrap;gap:12px}
+.screen.half .hdr h1{white-space:nowrap;font-size:24px}
+.screen.half .hdr .act{width:auto;justify-content:flex-end}
+.cards2{grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
+.c-l{gap:12px}
+.c-r{top:16px;gap:16px}
+
+/* 牌组表：撑开行高、数字换 mono、待复习收成主色胶囊 */
+.deckcard{padding:0;border-radius:14px}
+.deckhead,.drow{grid-template-columns:minmax(0,1fr) 64px 64px 80px 36px;gap:8px;padding:0 16px}
+.deckhead{height:36px;border-bottom:1px solid var(--line)}
+.deckhead .dname{font-size:11px;color:var(--fg3)}
+.deckhead>.dnum{text-align:right;justify-self:stretch;font-size:11px;color:var(--fg3)}
+.deckhead>.dnum.due{color:var(--accent)}
+.drow{height:44px}
+.drow+.drow{border-top:1px solid rgba(var(--w),.05)}
+.drow .dname{font-size:14px}
+.drow.child .dname{font-size:13px}
+.dnum{font-family:var(--mono);font-size:12px;color:var(--fg3);justify-self:end}
+.drow>.dnum:nth-child(2),
+.drow>.dnum:nth-child(3){color:var(--fg3)}
+.dnum.due{color:var(--accent);font-weight:600;justify-self:center;
+  min-width:32px;padding:4px 8px;border-radius:999px;background:rgba(var(--accent-rgb),.14)}
+.dnum.due.z{background:none!important;color:var(--ghost)!important;font-weight:400;min-width:0;padding:0}
+.drow .chip{padding:4px 8px;font-size:11px}
+.gear{width:28px;height:28px}
+.deckstat{font-size:12px;color:var(--fg3);padding:8px 4px 0}
+
+/* 接着练：放大成主角 */
+.nextup{padding:24px;gap:16px;border-radius:14px}
+.nextup .sec-title{font-size:11px;color:var(--fg3)}
+.nextup .word{font-size:28px;font-weight:600}
+.nextup .qline{font-size:16px;color:var(--fg2)}
+.nextup .mut{font-size:13px;color:var(--fg3)}
+.nextup-foot{gap:16px;margin-top:8px}
+.nextup-foot .btn{padding:12px 16px;font-size:14px;width:100%}
+.faces{gap:16px}
+.face{font-size:12px;color:var(--fg3)}
+
+/* 状态点：绿下线，主色 = 齐、白 = 待、警示 = 缺 */
+.pip{width:8px;height:8px;border-radius:999px}
+.pip.ok{background:var(--accent);box-shadow:none}
+.pip.warn{background:rgba(var(--w),.34);box-shadow:none}
+.pip.bad{background:var(--danger);box-shadow:none}
+.pip.now{background:var(--accent);animation:none}
+.chip.live i{width:6px;height:6px;background:var(--accent);box-shadow:0 0 0 2px rgba(var(--accent-rgb),.16)}
+
+/* 底部三个入口：左对齐贴底 */
+.deckfoot{justify-content:flex-start;gap:8px;padding:0 4px 8px}
+.deckfoot .btn{padding:4px 12px;font-size:12px}
+
+/* 窄屏 */
+@media (max-width:1100px){#animToggle{display:none}}
+@media (max-width:1024px){
+  .cards2{grid-template-columns:minmax(0,1fr);gap:16px;align-content:start}
+  .c-r{position:static}
+}
+@media (max-width:900px){
+  .deckhead,.drow{grid-template-columns:minmax(0,1fr) 48px 48px 64px 32px}
+  .nextup{padding:16px}
+  .nextup .word{font-size:24px}
+}
+.drow .dname a{text-decoration:none}
+
+/* ===== v65 · 学习页评分四键：先保证看得清，再谈层级 =====
+   毛病：v62 把「良好」做成主色实心底，但文字颜色还是 v60 的浅蓝 #b9caff，
+   浅蓝落浅蓝 = 糊成一片；另外三档底色几乎等于背景，字也压得太淡。
+   改法：四档同一套底与边，只有「良好」带主色淡底 + 主色边来突出；
+   字色跟底色脱钩，永远用 fg/fg2/fg3，谁也不会再互相踩。 */
+
+.st-rate{grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;padding:0 56px}
+.st-r{
+  background:rgba(var(--w),.03);
+  border:1px solid rgba(var(--w),.10);
+  border-radius:14px;
+  padding:12px 8px;
+  color:var(--fg2);
+  transition:background .16s cubic-bezier(.22,.9,.18,1),
+             border-color .16s cubic-bezier(.22,.9,.18,1),
+             color .16s cubic-bezier(.22,.9,.18,1);
+}
+.st-r b{color:var(--fg);font-size:16px;font-weight:500;display:block}
+.st-r em{color:var(--fg2);font-size:12px;font-style:normal;display:block;margin-top:4px}
+.st-r:hover{background:rgba(var(--w),.06);border-color:rgba(var(--w),.18);color:var(--fg)}
+.st-r:hover b{color:var(--fg)}
+
+/* 推荐档：主色淡底 + 主色边，字仍然是 fg，对比度不吃亏 */
+.st-r.good,
+.st-r:nth-child(3){
+  background:rgba(var(--accent-rgb),.14);
+  border-color:rgba(var(--accent-rgb),.42);
+  box-shadow:none;
+  color:var(--fg);
+  filter:none;
+}
+.st-r.good b,
+.st-r:nth-child(3) b{color:var(--fg)}
+.st-r.good em,
+.st-r:nth-child(3) em{color:var(--fg2)}
+.st-r.good:hover,
+.st-r:nth-child(3):hover{
+  background:rgba(var(--accent-rgb),.20);
+  border-color:rgba(var(--accent-rgb),.55);
+  filter:none;
+}
+
+/* v60 留下的四色相与亮色描边，这里全部清掉 */
+.st-r:nth-child(1),
+.st-r:nth-child(2),
+.st-r:nth-child(4){color:var(--fg2)}
+.st-r:nth-child(1) b,
+.st-r:nth-child(2) b,
+.st-r:nth-child(4) b{color:var(--fg)}
+.st-r:nth-child(1) em,
+.st-r:nth-child(2) em,
+.st-r:nth-child(4) em{color:var(--fg3)}

@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 
 const VER = 'v' + Math.floor(fs.statSync(new URL('./app.css', import.meta.url)).mtimeMs).toString(36)
@@ -243,7 +243,7 @@ screens.cards = shell('cards.html', 'cards', `
       <span class="dname"><i class="caret"></i>还没归类的</span>
       <span class="dnum">0</span>
       <span class="dnum learn">0</span>
-      <span class="dnum due">0</span>
+      <span class="dnum due z">0</span>
       <span class="dgear"><button class="gear" type="button">${`<svg viewBox="0 0 18 18" width="15" height="15">${ICON.gear}</svg>`}</button></span>
     </div>
 
@@ -706,7 +706,7 @@ screens.factory = shell('factory.html', 'factory', `
   </div>
 
   <div class="fx-src">
-    <input class="inp" value="abandon" placeholder="一个词、一个说法，或者一整句" />
+    <input class="inp" value="abandon" placeholder="造一个新词、一个说法，或一整句" aria-label="要造料的词" title="这里只用来造新料；要筛左边的词表，用左边那个框" />
     <button class="btn primary" type="button">造料</button>
     <button class="btn batch" type="button" data-sheet="sh-batch">批量造</button>
     <button class="q" type="button" data-pop="q-batch">?</button>
@@ -723,7 +723,7 @@ screens.factory = shell('factory.html', 'factory', `
   <div class="fx-grid">
     <aside class="fx-side">
       <div class="fx-sidehd">单词 <span class="mut">5</span></div>
-      <input class="inp sm" placeholder="搜单词或释义…" />
+      <input class="inp sm" placeholder="在 5 个词里筛…" aria-label="筛词表" title="只筛左边这张词表，不造新料" />
       <div class="fx-mini"><button class="mini on">按最近</button><button class="mini">按欠的</button></div>
       <ul class="fx-words">
         <li class="on"><b>abandon</b><i class="fdot ok"></i></li>
@@ -744,21 +744,24 @@ screens.factory = shell('factory.html', 'factory', `
       </div>
 
       <div class="fx-info">
-        <span><b>8</b> 已有句子</span>
-        <span><b>2</b> 正在加工</span>
-        <span><b>4</b> 未加工完</span>
+        <span><b>8</b> 句</span>
+        <i class="sep"></i>
+        <span class="sub"><b>3</b> 已出厂</span>
+        <span class="sub"><b>3</b> 有缺口</span>
+        <span class="sub"><b>2</b> 正在加工</span>
+        <i class="sep"></i>
         <span><b>en</b> 英语</span>
-        <span><b>3</b> 已出厂</span>
         <span class="sp"></span>
         <button class="q" type="button" data-pop="q-info">?</button>
       </div>
       <div class="pop" id="q-info">
-        <b>这五个数从哪来</b>
+        <b>这几个数从哪来</b>
         <ul class="pl">
-          <li><u>已有句子</u>：句库里属于这个词的句子总数，没有就是 0</li>
-          <li><u>正在加工</u>：还在补图 / 补声的</li>
-          <li><u>未加工完</u>：五维度没齐，但不急着的</li>
+          <li><u>句</u>：句库里属于这个词的句子总数</li>
           <li><u>已出厂</u>：已经进了学习牌组</li>
+          <li><u>有缺口</u>：五维没齐、还没出厂的</li>
+          <li><u>正在加工</u>：正在补图、补声的</li>
+          <li>三个数加起来就是第一项。五维里「差 N 个」指的是同一批，将来由后端实时算。</li>
         </ul>
       </div>
 
@@ -777,6 +780,7 @@ screens.factory = shell('factory.html', 'factory', `
             <div class="fx-list">
         <div class="fx-sense">
         <div class="fx-def">
+          <button class="sense-tg" type="button" aria-expanded="true" title="收起这一义项的句子"><i>▾</i></button>
           <span class="dn">义项 1</span>
           <span class="dt">丢下不管，走了不再回来</span>
           <span class="prob"><i title="日常">日常 <b>78</b></i><i title="职场">职场 <b>45</b></i><i title="四六级">四六级 <b>35</b></i><button class="morep" type="button" data-sheet="sh-prob">+7</button></span>
@@ -960,6 +964,7 @@ screens.factory = shell('factory.html', 'factory', `
         </div>
         <div class="fx-sense">
         <div class="fx-def">
+          <button class="sense-tg" type="button" aria-expanded="false" title="展开这一义项的句子"><i>▾</i></button>
           <span class="dn">义项 2</span>
           <span class="dt">放弃（计划、希望）</span>
           <span class="prob"><i title="书面">书面 <b>62</b></i><i title="新闻">新闻 <b>55</b></i><i title="考研">考研 <b>48</b></i><button class="morep" type="button" data-sheet="sh-prob">+6</button></span>
@@ -992,6 +997,7 @@ screens.factory = shell('factory.html', 'factory', `
         </div>
         <div class="fx-sense">
         <div class="fx-def">
+          <button class="sense-tg" type="button" aria-expanded="false" title="展开这一义项的句子"><i>▾</i></button>
           <span class="dn">义项 3</span>
           <span class="dt">放纵（with abandon）</span>
           <span class="prob"><i title="文学">文学 <b>70</b></i><i title="影视">影视 <b>44</b></i><i title="俚语">俚语 <b>30</b></i><button class="morep" type="button" data-sheet="sh-prob">+5</button></span>
@@ -2945,6 +2951,7 @@ screens.study = shell('study.html', 'cards', `
       <button class="rv" type="button" data-drw="audio"><span>声音</span><i>3.3s</i></button>
       <button class="rv" type="button" data-drw="rec"><span>录音</span><i>跟着读</i></button>
       <button class="rv" type="button" data-drw="type"><span>打字</span><i>写一遍</i></button>
+      <button class="rv" type="button" data-drw="vary"><span>换一个说法</span><i>3 个</i></button>
     <button class="mini allbtn" type="button" data-all="1">全揭开</button>
       <p class="side-n fold">点一下拉开，再点一下收起来。灰的是这一面不鼓励先看的，照样能拉。</p>
     </aside>

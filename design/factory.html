@@ -2,8 +2,8 @@
 <html lang="zh-CN"><head>
 <meta charset="utf-8">
 <script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂-测试 · factory</title>
-<link rel="stylesheet" href="./app.css?v=vmvzanu97">
-<script src="./app.js?v=vmvzanu97"></script><script src="./app2.js?v=vmvzanu97"></script><script src="./stats.js?v=vmvzanu97"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./transit.js?v=vmvzanu97"></script><script src="./smooth.js?v=vmvzanu97"></script><script src="./decks.js?v=vmvzanu97"></script><script src="./help.js?v=vmvzanu97"></script><script src="./pick.js?v=vmvzanu97"></script><script src="./palette.js?v=vmvzanu97"></script><script src="./factory.js?v=vmvzanu97"></script><script src="./fx.js?v=vmvzanu97"></script><script src="./rows.js?v=vmvzanu97"></script><script src="./bgrows.js?v=vmvzanu97"></script><script>
+<link rel="stylesheet" href="./app.css?v=vmvzfyc65">
+<script src="./app.js?v=vmvzfyc65"></script><script src="./app2.js?v=vmvzfyc65"></script><script src="./stats.js?v=vmvzfyc65"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./transit.js?v=vmvzfyc65"></script><script src="./smooth.js?v=vmvzfyc65"></script><script src="./decks.js?v=vmvzfyc65"></script><script src="./help.js?v=vmvzfyc65"></script><script src="./pick.js?v=vmvzfyc65"></script><script src="./palette.js?v=vmvzfyc65"></script><script src="./factory.js?v=vmvzfyc65"></script><script src="./fx.js?v=vmvzfyc65"></script><script src="./rows.js?v=vmvzfyc65"></script><script src="./bgrows.js?v=vmvzfyc65"></script><script>
 /* 说明性小字一律收成一个 ?：页面里只留符号，原文塞进 .pop 里给 help.js 用 */
 (function () {
   var n = 0
@@ -63,7 +63,7 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run)
   else run()
 })()
-</script><script src="./rain.js?v=vmvzanu97"></script>
+</script><script src="./rain.js?v=vmvzfyc65"></script>
 </head><body>
 <canvas class="liquid" aria-hidden="true"></canvas>
 <canvas class="rain" aria-hidden="true"></canvas>
@@ -115,7 +115,7 @@
   </div>
 
   <div class="fx-src">
-    <input class="inp" value="abandon" placeholder="一个词、一个说法，或者一整句" />
+    <input class="inp" value="abandon" placeholder="造一个新词、一个说法，或一整句" aria-label="要造料的词" title="这里只用来造新料；要筛左边的词表，用左边那个框" />
     <button class="btn primary" type="button">造料</button>
     <button class="btn batch" type="button" data-sheet="sh-batch">批量造</button>
     <button class="q" type="button" data-pop="q-batch">?</button>
@@ -132,7 +132,7 @@
   <div class="fx-grid">
     <aside class="fx-side">
       <div class="fx-sidehd">单词 <span class="mut">5</span></div>
-      <input class="inp sm" placeholder="搜单词或释义…" />
+      <input class="inp sm" placeholder="在 5 个词里筛…" aria-label="筛词表" title="只筛左边这张词表，不造新料" />
       <div class="fx-mini"><button class="mini on">按最近</button><button class="mini">按欠的</button></div>
       <ul class="fx-words">
         <li class="on"><b>abandon</b><i class="fdot ok"></i></li>
@@ -153,21 +153,24 @@
       </div>
 
       <div class="fx-info">
-        <span><b>8</b> 已有句子</span>
-        <span><b>2</b> 正在加工</span>
-        <span><b>4</b> 未加工完</span>
+        <span><b>8</b> 句</span>
+        <i class="sep"></i>
+        <span class="sub"><b>3</b> 已出厂</span>
+        <span class="sub"><b>3</b> 有缺口</span>
+        <span class="sub"><b>2</b> 正在加工</span>
+        <i class="sep"></i>
         <span><b>en</b> 英语</span>
-        <span><b>3</b> 已出厂</span>
         <span class="sp"></span>
         <button class="q" type="button" data-pop="q-info">?</button>
       </div>
       <div class="pop" id="q-info">
-        <b>这五个数从哪来</b>
+        <b>这几个数从哪来</b>
         <ul class="pl">
-          <li><u>已有句子</u>：句库里属于这个词的句子总数，没有就是 0</li>
-          <li><u>正在加工</u>：还在补图 / 补声的</li>
-          <li><u>未加工完</u>：五维度没齐，但不急着的</li>
+          <li><u>句</u>：句库里属于这个词的句子总数</li>
           <li><u>已出厂</u>：已经进了学习牌组</li>
+          <li><u>有缺口</u>：五维没齐、还没出厂的</li>
+          <li><u>正在加工</u>：正在补图、补声的</li>
+          <li>三个数加起来就是第一项。五维里「差 N 个」指的是同一批，将来由后端实时算。</li>
         </ul>
       </div>
 
@@ -186,6 +189,7 @@
             <div class="fx-list">
         <div class="fx-sense">
         <div class="fx-def">
+          <button class="sense-tg" type="button" aria-expanded="true" title="收起这一义项的句子"><i>▾</i></button>
           <span class="dn">义项 1</span>
           <span class="dt">丢下不管，走了不再回来</span>
           <span class="prob"><i title="日常">日常 <b>78</b></i><i title="职场">职场 <b>45</b></i><i title="四六级">四六级 <b>35</b></i><button class="morep" type="button" data-sheet="sh-prob">+7</button></span>
@@ -369,6 +373,7 @@
         </div>
         <div class="fx-sense">
         <div class="fx-def">
+          <button class="sense-tg" type="button" aria-expanded="false" title="展开这一义项的句子"><i>▾</i></button>
           <span class="dn">义项 2</span>
           <span class="dt">放弃（计划、希望）</span>
           <span class="prob"><i title="书面">书面 <b>62</b></i><i title="新闻">新闻 <b>55</b></i><i title="考研">考研 <b>48</b></i><button class="morep" type="button" data-sheet="sh-prob">+6</button></span>
@@ -401,6 +406,7 @@
         </div>
         <div class="fx-sense">
         <div class="fx-def">
+          <button class="sense-tg" type="button" aria-expanded="false" title="展开这一义项的句子"><i>▾</i></button>
           <span class="dn">义项 3</span>
           <span class="dt">放纵（with abandon）</span>
           <span class="prob"><i title="文学">文学 <b>70</b></i><i title="影视">影视 <b>44</b></i><i title="俚语">俚语 <b>30</b></i><button class="morep" type="button" data-sheet="sh-prob">+5</button></span>
