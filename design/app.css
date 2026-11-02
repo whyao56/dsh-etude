@@ -3191,3 +3191,741 @@ body::before{animation:none!important}
 .drow[data-go]:focus-visible{outline:2px solid rgba(138,169,255,.55);outline-offset:-2px}
 .drow[data-go] .dname a{border-bottom-color:rgba(var(--w),.18)}
 .drow[data-go]:hover .dname a{border-bottom-color:rgba(138,169,255,.55)}
+/* ── 工厂：四个来路四色，块内别挤 ── */
+.src4{gap:10px;margin-bottom:4px}
+.vopts{margin-top:12px;gap:8px}
+.fx-blk{padding:12px 13px 14px}
+.fx-bh{gap:8px;margin-bottom:10px}
+.fx-bh .mini{margin-left:2px}
+.mini.own{margin-top:10px}
+
+/* 四个来路各一个色相：只用描边 + 淡底，不加光 */
+.mini.c-blue{color:#b9caff;border-color:rgba(111,139,255,.42);background:rgba(111,139,255,.10)}
+.mini.c-blue:hover{background:rgba(111,139,255,.18);border-color:rgba(138,169,255,.6)}
+.mini.c-violet{color:#cbb6ff;border-color:rgba(160,124,255,.42);background:rgba(160,124,255,.10)}
+.mini.c-violet:hover{background:rgba(160,124,255,.18);border-color:rgba(180,150,255,.6)}
+.mini.c-amber{color:#f3c98a;border-color:rgba(226,163,74,.42);background:rgba(226,163,74,.10)}
+.mini.c-amber:hover{background:rgba(226,163,74,.18);border-color:rgba(240,186,110,.6)}
+.mini.c-teal{color:#96ddcf;border-color:rgba(70,190,170,.42);background:rgba(70,190,170,.10)}
+.mini.c-teal:hover{background:rgba(70,190,170,.18);border-color:rgba(110,210,190,.6)}
+/* ── 图表演示：慢一点、轻一点 ──
+   原来热力图 364 个 <rect> 各自动一次（每个都带 transform + opacity），
+   一屏这么多动画必然掉帧；现在按「周」分组成 52 个 <g>，一次动一列。 */
+.cv-js .hcol, .cv-play .hcol{animation:hcol-in .5s cubic-bezier(.22,.61,.36,1) both;animation-delay:var(--d,0ms)}
+@keyframes hcol-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.cv-js .heat rect, .cv-play .heat rect{animation:none!important}
+.heat rect{transition:fill .18s ease}
+.heat rect:hover{filter:brightness(1.25)}
+
+/* 柱子和折线放慢一档 */
+.cv-js .bar, .cv-play .bar{animation-duration:1.05s!important}
+.cv-js .line2, .cv-play .line2{animation-duration:1.35s!important}
+.cv-js .area2, .cv-play .area2{animation-duration:1.05s!important}
+.cv-js .dspin, .cv-play .dspin{animation-duration:1.2s!important}
+.cv-js .adot, .cv-play .adot{animation-duration:.42s!important}
+
+/* 别让浏览器为整片图缓存图层 */
+.chart, .chart *{will-change:auto}
+/* ── 学习页：发光层级 + 评分四色 + 录音 ── */
+/* 四档评分各自一个色：重来红、困难橙、良好蓝、简单绿 */
+.st-r{border-color:rgba(var(--w),.10)}
+.st-r:nth-child(1){color:#ffb4b4;border-color:rgba(255,120,120,.30);background:rgba(255,120,120,.09)}
+.st-r:nth-child(2){color:#f3c98a;border-color:rgba(226,163,74,.30);background:rgba(226,163,74,.09)}
+.st-r:nth-child(3),
+.st-r.good{color:#b9caff;border-color:rgba(111,139,255,.45);background:rgba(111,139,255,.16)}
+.st-r:nth-child(4){color:#9ee0c8;border-color:rgba(70,190,170,.30);background:rgba(70,190,170,.09)}
+.st-r:hover{filter:brightness(1.14)}
+
+/* 右栏两段：解释（青）与还藏着什么（蓝）分开 */
+.st-side .ex-h{margin-top:0}
+.exrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.ex{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border-radius:9px;cursor:pointer;
+  font:inherit;font-size:12px;color:var(--fg2);background:rgba(var(--w),.05);border:1px solid rgba(var(--w),.09);
+  transition:background-color .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease),box-shadow .16s var(--ease);
+}
+.ex i{font-size:10.5px;color:var(--ghost);font-style:normal}
+.ex:hover{border-color:rgba(70,190,170,.45);color:#c8f0e6}
+.ex.on{
+  color:#d7fff4;background:rgba(70,190,170,.16);border-color:rgba(70,190,170,.55);
+  box-shadow:0 0 0 1px rgba(70,190,170,.20),0 0 20px -8px rgba(70,190,170,.85);
+}
+.st-side .side-h+.exrow{margin-top:2px}
+
+/* 点开的：亮但偏暗；这一面该用的：发光 */
+.rv.on{color:var(--fg2);background:rgba(var(--w),.075);border-color:rgba(var(--w),.16)}
+.rv.lit,.bgb.lit{
+  color:#eaf0ff;background:rgba(111,139,255,.17);border-color:rgba(138,169,255,.55);
+  box-shadow:0 0 0 1px rgba(138,169,255,.22),0 0 22px -8px rgba(111,139,255,.9);
+}
+.st-r.good{box-shadow:0 0 0 1px rgba(111,139,255,.22),0 0 22px -9px rgba(111,139,255,.8)}
+
+/* 写框：靠下，写这一面时边框发光 */
+.b-type{margin-top:4px}
+.tin{transition:border-color .2s var(--ease),box-shadow .2s var(--ease),background-color .2s var(--ease)}
+.blk.b-type.lead .tin,.blk.b-type.lead .tl{color:#eaf0ff}
+.blk.b-type.lead .tin{
+  border-color:rgba(138,169,255,.6);background:rgba(111,139,255,.10);
+  box-shadow:0 0 0 1px rgba(138,169,255,.25),0 0 26px -8px rgba(111,139,255,.95);
+}
+.blk.b-type.soft .tin{background:rgba(var(--w),.028);border-color:rgba(var(--w),.08)}
+.blk.b-type.soft .tl{color:var(--ghost)}
+
+/* 录音块 */
+.b-rec{display:flex;align-items:center;gap:14px}
+.mic{
+  width:46px;height:46px;border-radius:50%;flex:0 0 auto;cursor:pointer;
+  color:#cfd8ea;background:rgba(var(--w),.06);border:1px solid rgba(var(--w),.12);
+  transition:background-color .16s var(--ease),border-color .16s var(--ease),box-shadow .16s var(--ease);
+}
+.mic span{font-size:11px}
+.b-rec.lead .mic{
+  color:#fff;background:rgba(240,110,110,.20);border-color:rgba(255,130,130,.55);
+  box-shadow:0 0 0 1px rgba(255,130,130,.25),0 0 24px -8px rgba(255,110,110,.9);
+}
+.rechint{display:flex;flex-direction:column;gap:2px;font-size:12px}
+.rechint .mut{font-size:11px}
+
+/* 直接给的块：轻描一下，跟藏起来的分开 */
+.blk.lead .big{text-shadow:0 0 26px rgba(111,139,255,.35)}
+/* ── 浮动小窗：小、透明、可拖可拉（英释 / 中译） ── */
+.popwin{
+  position:fixed;z-index:70;
+  width:320px;min-width:230px;max-width:620px;
+  min-height:110px;max-height:72vh;
+  display:flex;flex-direction:column;
+  border-radius:13px;overflow:hidden;
+  background:rgba(24,27,36,.62);
+  border:1px solid rgba(var(--w),.14);
+  box-shadow:0 18px 44px -18px rgba(0,0,0,.75),inset 0 1px 0 rgba(var(--w),.10);
+  backdrop-filter:blur(14px) saturate(125%);
+  -webkit-backdrop-filter:blur(14px) saturate(125%);
+  resize:both;
+}
+.popwin[hidden]{display:none!important}
+.pw-hd{
+  display:flex;align-items:center;gap:7px;padding:8px 10px 7px;flex:0 0 auto;
+  cursor:grab;user-select:none;
+  border-bottom:1px solid rgba(var(--w),.08);
+  background:rgba(var(--w),.035);
+}
+.pw-hd:active{cursor:grabbing}
+.pw-hd b{font-size:12.5px;font-weight:600;color:var(--fg)}
+.pw-hd .ph{font-size:11px;color:var(--ghost);font-family:var(--mono)}
+.pw-hd .tag{font-size:10px;padding:1px 5px}
+.pw-hd .mx{margin-left:auto}
+.pw-bd{padding:10px 12px 11px;overflow:auto;flex:1 1 auto;min-height:0}
+.pw-bd .en-def{font-size:12.5px;line-height:1.62;color:var(--fg2);margin:0}
+.pw-bd .zhbox{margin-top:9px;padding-top:9px;border-top:1px dashed rgba(var(--w),.12)}
+.pw-ft{display:flex;align-items:center;gap:7px;margin-top:10px}
+.pw-ft .mini{font-size:11px;padding:4px 9px}
+.pwtip{font-size:10px;color:var(--ghost)}
+
+/* 收进 ? 的那颗：贴在块标题行末尾 */
+.q.hq{margin-left:6px;width:15px;height:15px;font-size:10px}
+
+/* ── 编辑面板 ── */
+.edwarn{
+  margin:0 0 12px;padding:9px 11px;border-radius:9px;font-size:11.5px;line-height:1.62;
+  color:#d8e2ff;background:rgba(111,139,255,.10);border:1px solid rgba(138,169,255,.22);
+}
+.edwarn b{color:#fff}
+.edtxt,.edbg{min-height:54px;padding:8px 10px;line-height:1.55;resize:vertical;font:inherit;font-size:12px}
+.edbg{min-height:86px;font-family:var(--mono);font-size:11.5px}
+.edimg{display:inline-flex;align-items:center;gap:9px}
+.edimg img{width:78px;height:54px;object-fit:cover;border-radius:7px;border:1px solid rgba(var(--w),.10)}
+.edf5{display:inline-flex;gap:6px}
+.edf5 .chip{font-size:11.5px;padding:4px 10px}
+/* ── 学习页：完成绿勾 / 关掉的感叹号 / 两侧词导航 / 底部面导航 ── */
+.fb.done::after{
+  content:"✓";position:absolute;top:3px;right:4px;
+  font-size:9.5px;font-weight:700;line-height:1;color:#0e1a13;
+  background:#6fd29a;border-radius:50%;width:13px;height:13px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 10px -2px rgba(111,210,154,.9);
+}
+.fb{position:relative}
+.fb.done{background:rgba(111,210,154,.10);border-color:rgba(111,210,154,.30)}
+.fb.done b,.fb.done{color:#c8f2db}
+.fb.done.on{background:rgba(111,210,154,.16)}
+
+.rv.off::after{
+  content:"!";position:absolute;top:6px;right:6px;
+  font-size:9.5px;font-weight:700;line-height:1;color:#2a0d0d;
+  background:#ff8b8b;border-radius:50%;width:13px;height:13px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 10px -2px rgba(255,120,120,.9);
+}
+.rv{position:relative}
+.rv.off{color:var(--ghost);background:rgba(0,0,0,.18);border-color:rgba(255,120,120,.26);border-style:dashed}
+
+.wordnav{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:30;
+  display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:99px;cursor:pointer;
+  font:inherit;font-size:11.5px;color:var(--fg3);
+  background:rgba(24,27,36,.62);border:1px solid rgba(var(--w),.12);
+  backdrop-filter:blur(12px);
+  transition:color .16s var(--ease),border-color .16s var(--ease),background-color .16s var(--ease);
+}
+.wordnav.prev{left:12px}
+.wordnav.next{right:12px}
+.wordnav:hover{color:var(--fg);border-color:rgba(138,169,255,.45);background:rgba(111,139,255,.14)}
+
+.navstep{
+  position:fixed;bottom:16px;z-index:30;
+  display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;cursor:pointer;
+  font:inherit;font-size:11.5px;color:var(--fg3);
+  background:rgba(24,27,36,.62);border:1px solid rgba(var(--w),.12);
+  backdrop-filter:blur(12px);
+  transition:color .16s var(--ease),border-color .16s var(--ease),background-color .16s var(--ease);
+}
+.navstep.prev{left:16px}
+.navstep.next{right:16px}
+.navstep:hover{color:var(--fg);border-color:rgba(138,169,255,.45);background:rgba(111,139,255,.14)}
+
+.mini.on{color:#eaf0ff;background:rgba(111,139,255,.18);border-color:rgba(138,169,255,.55)}
+
+@media (max-width:900px){
+  .wordnav{padding:7px 9px;font-size:10.5px}
+  .wordnav.prev{left:6px}
+  .wordnav.next{right:6px}
+  .navstep{bottom:10px;padding:7px 11px}
+  .navstep.prev{left:10px}
+  .navstep.next{right:10px}
+}
+/* 两侧单词导航收成圆钮，别压住正文 */
+.wordnav{
+  width:34px;height:34px;padding:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;line-height:1;color:var(--fg2);
+}
+.wordnav span{display:none}
+.wordnav.prev{left:10px}
+.wordnav.next{right:10px}
+.wordnav:hover{color:#eaf0ff}
+/* ══ v46 ══ */
+
+/* 1) 五维度：框做大、行距拉开 */
+.fx-blk.b5 .f5row{padding:11px 0;gap:12px}
+.fx-blk.b5 .f5row .f5name{width:36px;height:36px;border-radius:11px}
+.fx-blk.b5 .f5row .f5name b{font-size:15px}
+.fx-blk.b5 .f5row .f5name .cor{top:-6px;right:-7px;font-size:10px}
+.fx-blk.b5 .f5row em{font-size:11.5px;padding:4px 11px;margin-left:2px}
+.fx-blk.b5 .f5row .d{font-size:12px}
+.fx-blk.b5 .f5row .sw{--sw-w:38px;--sw-h:21px;--sw-k:15px;margin-left:8px}
+.fx-blk.b5 .f5row .sw::after{left:3px}
+.fx-blk.b5 .f5row .sw.on::after{left:3px;transform:translateX(calc(38px - 15px - 6px))}
+
+/* 2) 工厂背景：一条一个框，带编辑 / 减 */
+.bgl{gap:8px}
+.bgl li{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:8px 9px 8px 11px;border-radius:9px;
+  background:rgba(0,0,0,.16);border:1px solid rgba(var(--w),.07);
+  transition:background-color .16s var(--ease),border-color .16s var(--ease);
+}
+.bgl li:hover{background:rgba(var(--w),.05);border-color:rgba(var(--w),.13)}
+.bgl b{flex:0 0 34px;color:var(--fg2)}
+.bgl li span{flex:1 1 auto;min-width:0}
+.bgl .bops{display:flex;gap:4px;flex:0 0 auto;opacity:.55;transition:opacity .16s var(--ease)}
+.bgl li:hover .bops{opacity:1}
+.bgl .bops button{
+  width:20px;height:20px;border-radius:6px;cursor:pointer;
+  font-size:11px;line-height:1;color:var(--fg3);
+  background:rgba(var(--w),.05);border:1px solid rgba(var(--w),.08);
+}
+.bgl .bops button:hover{color:var(--fg);border-color:rgba(138,169,255,.45);background:rgba(111,139,255,.14)}
+.bgl .bops button[data-bgdel]:hover{color:#ffb4b4;border-color:rgba(255,120,120,.45);background:rgba(255,120,120,.14)}
+.bgadd{
+  margin-top:8px;padding:6px 10px;border-radius:8px;cursor:pointer;
+  font:inherit;font-size:11.5px;color:var(--fg3);
+  background:transparent;border:1px dashed rgba(var(--w),.16);
+  transition:color .16s var(--ease),border-color .16s var(--ease),background-color .16s var(--ease);
+}
+.bgadd:hover{color:var(--fg);border-color:rgba(138,169,255,.45);background:rgba(111,139,255,.08)}
+
+/* 3) 浮动小窗：分块 + 每块一个框 + 编辑/加/减 */
+.pw-bd{padding:9px 10px 10px}
+.pw-list{display:flex;flex-direction:column;gap:8px}
+.pw-blk{
+  border-radius:9px;background:rgba(0,0,0,.20);
+  border:1px solid rgba(var(--w),.09);
+  transition:border-color .16s var(--ease),background-color .16s var(--ease);
+}
+.pw-blk:hover{border-color:rgba(var(--w),.16)}
+.pw-blk-h{
+  display:flex;align-items:center;gap:6px;padding:5px 7px 5px 9px;
+  border-bottom:1px solid rgba(var(--w),.07);
+}
+.pw-blk-h b{font-size:10.5px;font-weight:600;color:var(--fg3);letter-spacing:.04em}
+.pw-blk-h .sp{flex:1 1 auto}
+.pw-blk-h button{
+  width:19px;height:19px;border-radius:6px;cursor:pointer;
+  font-size:10.5px;line-height:1;color:var(--fg3);
+  background:rgba(var(--w),.05);border:1px solid rgba(var(--w),.08);
+  transition:color .16s var(--ease),border-color .16s var(--ease),background-color .16s var(--ease);
+}
+.pw-blk-h button:hover{color:var(--fg);border-color:rgba(138,169,255,.45);background:rgba(111,139,255,.14)}
+.pw-blk-h button[data-pwdel]:hover{color:#ffb4b4;border-color:rgba(255,120,120,.45);background:rgba(255,120,120,.14)}
+.pw-blk-b{padding:8px 10px 9px;font-size:12.5px;line-height:1.62;color:var(--fg2)}
+.pw-blk-b[contenteditable="true"]{
+  outline:none;background:rgba(111,139,255,.08);
+  box-shadow:inset 0 0 0 1px rgba(138,169,255,.45);
+}
+.pw-blk.editing{border-color:rgba(138,169,255,.5)}
+.pw-add{display:flex;gap:6px;margin-top:9px}
+.pw-add button{
+  flex:1 1 auto;padding:5px 8px;border-radius:7px;cursor:pointer;
+  font:inherit;font-size:11px;color:var(--fg3);
+  background:transparent;border:1px dashed rgba(var(--w),.16);
+}
+.pw-add button:hover{color:var(--fg);border-color:rgba(138,169,255,.45);background:rgba(111,139,255,.08)}
+.pw-bd .zhbox{margin:0;padding:0;border:0}
+
+/* 拖动时把模糊关掉，跟手 */
+.popwin.dragging{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(26,29,38,.94);box-shadow:0 24px 50px -18px rgba(0,0,0,.85)}
+.popwin{will-change:transform}
+
+/* 5) 学习页：两侧圆钮再往外，四个按钮四色 */
+.wordnav.prev{left:2px}
+.wordnav.next{right:2px}
+.wordnav{width:36px;height:36px;font-size:17px}
+.navstep{font-weight:600}
+.navstep.prev{
+  color:#f6d9b0;border-color:rgba(226,163,74,.42);
+  background:linear-gradient(180deg,rgba(226,163,74,.20),rgba(226,163,74,.08));
+  box-shadow:0 0 0 1px rgba(226,163,74,.12),0 6px 18px -10px rgba(226,163,74,.8);
+}
+.navstep.next{
+  color:#cfdcff;border-color:rgba(138,169,255,.55);
+  background:linear-gradient(180deg,rgba(111,139,255,.34),rgba(111,139,255,.16));
+  box-shadow:0 0 0 1px rgba(138,169,255,.18),0 6px 18px -10px rgba(111,139,255,.95);
+}
+.wordnav.prev{
+  color:#d9c6f2;border-color:rgba(184,171,210,.48);
+  background:linear-gradient(180deg,rgba(184,171,210,.26),rgba(184,171,210,.10));
+  box-shadow:0 0 0 1px rgba(184,171,210,.14),0 6px 18px -10px rgba(184,171,210,.9);
+}
+.wordnav.next{
+  color:#b8e8dd;border-color:rgba(70,190,170,.48);
+  background:linear-gradient(180deg,rgba(70,190,170,.26),rgba(70,190,170,.10));
+  box-shadow:0 0 0 1px rgba(70,190,170,.14),0 6px 18px -10px rgba(70,190,170,.9);
+}
+.navstep.prev:hover,.navstep.next:hover,.wordnav.prev:hover,.wordnav.next:hover{filter:brightness(1.18)}
+/* 背景带框之后 3 列太挤，改 2 列 */
+.fx-blk.bbg .bgl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:900px){.fx-blk.bbg .bgl{grid-template-columns:1fr}}
+/* ── v47 三处 ── */
+/* 1) 四个导航离屏幕边远一点，但不压进正文 */
+.wordnav.prev{left:14px}
+.wordnav.next{right:14px}
+.navstep.prev{left:14px}
+.navstep.next{right:14px}
+
+/* 2) 关掉的高亮按钮：红边 + 中间一个发光的红 ! */
+.rv.off{
+  color:rgba(255,190,190,.55);
+  border-color:rgba(255,110,110,.55)!important;
+  background:rgba(255,80,80,.07)!important;
+  box-shadow:0 0 0 1px rgba(255,110,110,.18),0 0 18px -6px rgba(255,80,80,.75);
+}
+.rv.off span,.rv.off i{opacity:.30}
+.rv.off>span:first-child{color:transparent}
+.rv.off::after{
+  content:'!';
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:19px;height:19px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;line-height:1;color:#fff;
+  background:radial-gradient(circle at 50% 35%,#ff6a6a,#d8323a);
+  box-shadow:0 0 0 1px rgba(255,140,140,.5),0 0 16px 2px rgba(255,70,70,.65);
+  animation:offpulse 2.4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes offpulse{
+  0%,100%{box-shadow:0 0 0 1px rgba(255,140,140,.5),0 0 12px 1px rgba(255,70,70,.5)}
+  50%{box-shadow:0 0 0 1px rgba(255,160,160,.7),0 0 20px 3px rgba(255,70,70,.85)}
+}
+.rv{position:relative}
+
+/* 3) 搜索层：背景不模糊，透出下面的页面 */
+.palmask{
+  background:rgba(6,8,13,.34);
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.palette{cursor:grab}
+.palette.dragging{cursor:grabbing;box-shadow:0 34px 80px rgba(0,0,0,.7)}
+/* ── v50：六个抽屉 ── */
+.st2{display:block;padding:0}
+.stage2{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+
+.dbar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:4px}
+.db{
+  display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+  padding:9px 11px;border-radius:11px;cursor:pointer;font:inherit;text-align:left;
+  background:rgba(var(--w),.04);border:1px solid rgba(var(--w),.08);color:var(--fg3);
+  transition:background-color .18s var(--ease),border-color .18s var(--ease),color .18s var(--ease),box-shadow .18s var(--ease);
+}
+.db b{font-size:12.5px;font-weight:600;color:var(--fg2)}
+.db i{font-size:10.5px;font-style:normal;color:var(--ghost)}
+.db:hover{border-color:rgba(var(--w),.16);color:var(--fg2)}
+.db.on{background:rgba(var(--w),.08);border-color:rgba(var(--w),.20);color:var(--fg)}
+.db.on b{color:#fff}
+.db.lit{
+  background:rgba(111,139,255,.15);border-color:rgba(138,169,255,.5);
+  box-shadow:0 0 0 1px rgba(138,169,255,.18),0 0 18px -8px rgba(111,139,255,.9);
+}
+.db.lit b{color:#e6eeff}
+.db.lit i{color:#a9bbf2}
+
+/* 抽屉本体：grid-rows 0fr→1fr 才是真的“拉开”，比 max-height 顺 */
+.drw{
+  border:1px solid rgba(var(--w),.075);border-radius:12px;overflow:hidden;
+  background:rgba(var(--w),.022);
+  transition:border-color .2s var(--ease),box-shadow .2s var(--ease),background-color .2s var(--ease);
+}
+.drw.lit{border-color:rgba(138,169,255,.34);box-shadow:0 0 22px -12px rgba(111,139,255,.9)}
+.drw.off{border-color:rgba(255,110,110,.55);background:rgba(255,80,80,.06)}
+.drw-h{
+  width:100%;display:flex;align-items:center;gap:9px;padding:10px 13px;cursor:pointer;
+  font:inherit;text-align:left;background:none;border:0;color:var(--fg3);
+}
+.drw-h b{font-size:12px;font-weight:600;color:var(--fg2)}
+.drw-h .mut{font-size:11px;color:var(--ghost);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drw-h .car{font-size:10px;color:var(--ghost);transition:transform .3s var(--ease)}
+.drw.open .drw-h .car{transform:rotate(180deg)}
+.drw-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .38s var(--ease)}
+.drw.open .drw-b{grid-template-rows:1fr}
+.drw-p{overflow:hidden;min-height:0}
+.drw.open .drw-p{padding:0 13px 13px}
+.drw-p>*:first-child{margin-top:2px}
+.dlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.dlist li{
+  display:flex;gap:8px;padding:7px 10px;border-radius:8px;
+  background:rgba(0,0,0,.18);border:1px solid rgba(var(--w),.06);font-size:12px;color:var(--fg2);
+}
+.dlist li b{flex:0 0 auto;color:var(--fg3);font-weight:600;font-size:11.5px}
+.arow{display:flex;align-items:center;gap:14px}
+.shot{margin:0}
+.shot img{width:100%;max-height:340px;object-fit:cover;border-radius:10px;display:block}
+.rlink{margin:10px 0 0}
+
+@media (max-width:720px){
+  .dbar{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dlist{grid-template-columns:1fr}
+}
+/* ── v51：按钮回右栏，主体改窗帘式展开 ── */
+.st2{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:26px;align-items:start;max-width:1180px;margin:0 auto}
+.stage2{max-width:none;display:flex;flex-direction:column;gap:0;border:1px solid rgba(var(--w),.075);border-radius:14px;overflow:hidden;background:rgba(var(--w),.018)}
+
+.drail{position:sticky;top:14px;display:flex;flex-direction:column;gap:5px}
+.drail .side-h{margin:10px 0 4px;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--fg3)}
+.drail .side-h:first-child{margin-top:0}
+.drail .exrow{margin-bottom:2px}
+.drail .side-n{margin-top:8px;font-size:10.5px;line-height:1.6;color:var(--ghost)}
+
+/* 抽屉：不要自己的边框，靠分隔线；展开像拉窗帘 */
+.drw{
+  border:0;border-radius:0;background:transparent;overflow:visible;
+  border-top:1px solid rgba(var(--w),.07);
+  box-shadow:none;
+}
+.drw:first-child{border-top:0}
+.drw.lit{box-shadow:inset 3px 0 0 rgba(138,169,255,.55)}
+.drw.off{box-shadow:inset 3px 0 0 rgba(255,110,110,.55)}
+
+.drw-h{padding:11px 15px;gap:10px}
+.drw-h b{font-size:12.5px}
+.drw.open .drw-h{background:rgba(var(--w),.03)}
+.drw-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .52s cubic-bezier(.22,.9,.18,1)}
+.drw.open .drw-b{grid-template-rows:1fr}
+.drw-p{overflow:hidden;min-height:0;position:relative;padding:0 15px}
+.drw.open .drw-p{padding:2px 15px 15px}
+/* 拉开时一条亮边从上往下扫，像布被拉开 */
+.drw-p::after{
+  content:'';position:absolute;left:0;right:0;top:0;height:70%;pointer-events:none;
+  background:linear-gradient(180deg,rgba(var(--w),.16),rgba(var(--w),0));
+  opacity:0;transform:translateY(-100%);
+}
+.drw.opening .drw-p::after{animation:curtain .52s cubic-bezier(.22,.9,.18,1)}
+@keyframes curtain{
+  0%{opacity:.9;transform:translateY(-100%)}
+  60%{opacity:.45}
+  100%{opacity:0;transform:translateY(120%)}
+}
+/* 内容跟着窗帘一点点出来 */
+.drw-p>*{opacity:0;transform:translateY(-7px);transition:opacity .34s var(--ease),transform .34s var(--ease)}
+.drw.open .drw-p>*{opacity:1;transform:none;transition-delay:.1s}
+
+@media (max-width:1000px){
+  .st2{grid-template-columns:minmax(0,1fr)}
+  .drail{position:static;order:-1;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px}
+  .drail .side-h,.drail .side-n{display:none}
+  .drail .exrow{flex:0 0 auto}
+  .drail .rv{flex:0 0 auto}
+}
+@media (max-width:1000px){
+  .drail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:4px}
+  .drail .exrow{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .drail .rv{width:auto}
+}
+/* ── v52：两栏对齐、面板变宽、右栏收窄；小窗「钉」 ── */
+.st2{
+  grid-template-columns:minmax(0,1fr) 168px;
+  gap:16px;
+  max-width:none;
+  margin:8px 0 0;
+  align-items:start;
+}
+.stage2{margin-top:0}
+.drail{top:10px;gap:4px}
+.drail .rv{padding:7px 10px;font-size:11.5px}
+.drail .rv i{font-size:10px}
+.drail .side-h{font-size:10.5px;margin:8px 0 3px}
+
+/* 小窗标题栏那颗「钉」 */
+.pw-hd .pin{
+  margin-left:2px;padding:1px 7px;border-radius:6px;cursor:pointer;
+  font:inherit;font-size:10.5px;line-height:1.6;color:var(--fg3);
+  background:rgba(var(--w),.05);border:1px solid rgba(var(--w),.10);
+  transition:color .16s var(--ease),background-color .16s var(--ease),border-color .16s var(--ease);
+}
+.pw-hd .pin:hover{color:var(--fg);border-color:rgba(var(--w),.2)}
+.pw-hd .pin.on{
+  color:#cfe0ff;background:rgba(111,139,255,.20);border-color:rgba(138,169,255,.55);
+  box-shadow:0 0 0 1px rgba(138,169,255,.2);
+}
+/* 拖动时：关掉模糊换实底，跟手 */
+.popwin.dragging{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(22,25,34,.97)}
+.popwin{transition:box-shadow .18s var(--ease)}
+.stage2{margin:0;max-width:none;width:100%}
+/* ── v53 · 工厂：按钮别挤 ── */
+.src4{gap:12px;margin-top:14px}
+.src4 .mini{padding:9px 12px}
+.vopts{margin-top:16px;gap:10px}
+.vopts .mini{padding:7px 12px}
+.mini.own{margin-top:16px}
+.fx-blk .fx-bh .mini{font-size:11.5px;padding:5px 10px}
+.fx-blk .fx-bh{gap:8px}
+.vline{gap:10px;margin-top:12px}
+
+/* ── v53 · 统计：再慢一档，少压一点帧 ── */
+.cv-play .bar,.cv-play .darc,.cv-play .hcol,.cv-play .dot,.cv-play .line2,.cv-play .area2{will-change:transform,opacity}
+/* v53：统计演示再慢一档（用户说太快、掉帧） */
+.cv-js .bar, .cv-play .bar{animation-duration:1.55s}
+.cv-js .line2, .cv-play .line2{animation-duration:1.9s}
+.cv-js .area2, .cv-play .area2{animation-duration:1.7s}
+.cv-js .donut .dc, .cv-play .donut .dc{animation-duration:.85s}
+.cv-js .hcol, .cv-play .hcol{animation-duration:.8s}
+.cv-js .dot, .cv-play .dot{animation-duration:.6s}
+.chart,.chart *{will-change:auto}
+.cv-play .bar,.cv-play .dc,.cv-play .dot{will-change:transform,opacity}
+/* ── v53 · 抽屉改成「细横条 + 角落小字」 ── */
+.drw{position:relative;border-top:none!important;padding:0!important;min-height:0}
+.drw::before{
+  content:'';display:block;height:2px;border-radius:2px;
+  margin:7px 10px 0;opacity:.45;
+  transition:opacity .2s var(--ease),height .2s var(--ease),margin .2s var(--ease);
+}
+.drw[data-drw=bg]::before{background:rgba(226,163,74,.9)}
+.drw[data-drw=media]::before{background:rgba(70,190,170,.9)}
+.drw[data-drw=sent]::before{background:rgba(111,139,255,.9)}
+.drw[data-drw=audio]::before{background:rgba(184,171,210,.95)}
+.drw[data-drw=rec]::before{background:rgba(240,110,110,.85)}
+.drw[data-drw=type]::before{background:rgba(110,200,140,.9)}
+.drw[data-drw=vary]::before{background:rgba(200,140,220,.9)}
+.drw.open::before{opacity:.9}
+.drw.lit::before{opacity:1;height:3px}
+.drw.off::before{opacity:.85;background:rgba(255,110,110,.8)!important}
+
+/* 标题收成右上角的小字 */
+.drw-h{
+  position:absolute;top:6px;right:10px;left:auto;z-index:3;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:0;background:none;border:none;box-shadow:none;
+  font-size:10px;line-height:1;color:var(--ghost);opacity:.5;
+  transition:opacity .2s var(--ease),color .2s var(--ease);
+}
+.drw-h b{font-weight:600;font-size:10px;letter-spacing:.04em}
+.drw-h .mut,.drw-h .car,.drw-h .sp{display:none}
+.drw-h:hover{opacity:1;color:var(--fg2)}
+.drw.open .drw-h{opacity:.42}
+.drw-b{margin-top:2px}
+.drw.open{padding-bottom:10px!important}
+.drw-p{padding:0 14px}
+
+/* 句子里那个词：同色系，只比整句亮一点点 */
+#sentLine .tgt, .sent .tgt, p.big .tgt{
+  color:#cfd8f5;text-decoration:none;
+  border-bottom:1px solid rgba(138,169,255,.55);
+  padding-bottom:1px;
+}
+/* 让角落标签真的靠右（有旧规则给了 left:10px，两个都写就横向拉满） */
+.stage2 .drw .drw-h{left:auto!important;right:10px;width:auto;max-width:none}
+/* 全揭开挪到右栏按钮下面，铺满一列 */
+.drail .allbtn{width:100%;justify-content:center;margin-top:6px;padding:8px 10px;font-size:11.5px}
+.drail .allbtn.on{color:#dfe8ff;background:rgba(111,139,255,.16);border-color:rgba(138,169,255,.5)}
+/* ── 启动页：星轨 / 吸积盘 / 黑洞 ── */
+body.splash-body{background:#020307;overflow:hidden}
+#sky{position:fixed;inset:0;z-index:0;display:block}
+body.splash-body .splash2{background:none}
+body.splash-body .splash2::before,
+body.splash-body .splash2::after{display:none}
+.splash-body .sp2-inner{position:relative;z-index:2}
+.splash-body .sp2-wordmark,
+.splash-body .sp2-title{transition:opacity .5s var(--ease),transform .5s var(--ease)}
+/* 入场动画的 fill-mode 会压住 opacity，点火前得先把它关掉 */
+body.igniting .sp2-wordmark,
+body.igniting .sp2-title{animation:none!important;opacity:0;transform:translateY(-10px)}
+body.igniting .sp2-act .btn{opacity:.0;transform:scale(.94)}
+.splash-body .sp2-act .btn{transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.splash-body .sp2-act .btn.busy{pointer-events:none}
+/* 中心压暗一层，标题和按钮才压得住星轨 */
+.sky-veil{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(44% 38% at 50% 47%, rgba(2,3,7,.86), rgba(2,3,7,.5) 58%, rgba(2,3,7,0) 80%);
+}
+/* 压暗要更宽更透，边缘才看不出一个圆盘 */
+.sky-veil{
+  background:radial-gradient(58% 52% at 50% 45%, rgba(2,3,7,.9), rgba(2,3,7,.6) 42%, rgba(2,3,7,.22) 68%, rgba(2,3,7,0) 88%);
+}
+/* ── 进出场：方格翻面 ── */
+#trwave{
+  position:fixed;inset:0;z-index:9000;pointer-events:none;
+  perspective:900px;overflow:hidden;
+}
+#trwave i{
+  position:absolute;display:block;
+  width:64px;height:64px;
+  background:#05060a;
+  transform-origin:center center;
+  backface-visibility:hidden;
+  will-change:transform,opacity;
+  opacity:0;transform:rotateX(90deg);
+}
+#trwave.out i{animation:tr-flip-in .38s cubic-bezier(.4,0,.2,1) forwards}
+#trwave.in  i{opacity:1;transform:rotateX(0deg);animation:tr-flip-out .34s cubic-bezier(.4,0,.2,1) forwards}
+#trwave.hold i{opacity:1;transform:rotateX(0deg);animation:none}
+@keyframes tr-flip-in{
+  0%{opacity:0;transform:rotateX(88deg) scale(.98)}
+  60%{opacity:1}
+  100%{opacity:1;transform:rotateX(0deg) scale(1)}
+}
+@keyframes tr-flip-out{
+  0%{opacity:1;transform:rotateX(0deg)}
+  40%{opacity:1}
+  100%{opacity:0;transform:rotateX(-88deg) scale(.98)}
+}
+@media (prefers-reduced-motion: reduce){
+  #trwave.out i{animation:none;opacity:1;transform:none}
+  #trwave.in  i{animation:none;opacity:0}
+}
+/* 醒来：抵达时一层薄雾化开 */
+.trwake{
+  position:fixed;inset:0;z-index:9100;pointer-events:none;
+  background:radial-gradient(70% 60% at 50% 45%, rgba(226,236,255,.20), rgba(180,200,255,.10) 55%, rgba(0,0,0,0) 85%);
+  animation:tr-wake .95s cubic-bezier(.3,0,.2,1) forwards;
+}
+@keyframes tr-wake{
+  0%{opacity:0;backdrop-filter:blur(7px)}
+  22%{opacity:1}
+  100%{opacity:0;backdrop-filter:blur(0px)}
+}
+/* 启动页「开启」：内容随遮罩一起轻轻退场，不是被一刀盖住 */
+.splash-body.leaving .sp2-inner{opacity:0;transform:scale(.986);transition:opacity .46s ease,transform .46s ease}
+.splash-body.leaving .sp2-wordmark{opacity:0;transition:opacity .34s ease}
+
+/* ── v60 · 抽屉的分隔重做：一条细线 + 一个小色点，颜色只做标记不做条纹 ── */
+.drw{
+  --dot:rgba(170,180,200,.5);
+  border-top:1px solid rgba(var(--w),.062)!important;
+  padding:0!important;min-height:0;box-shadow:none!important;
+  background:none!important;
+}
+.drw:first-of-type{border-top:0!important}
+.drw[data-drw=bg]{--dot:#dfa053}
+.drw[data-drw=media]{--dot:#4bbbac}
+.drw[data-drw=sent]{--dot:#7b94ff}
+.drw[data-drw=audio]{--dot:#b7aad0}
+.drw[data-drw=rec]{--dot:#e57777}
+.drw[data-drw=type]{--dot:#6cc48b}
+.drw[data-drw=vary]{--dot:#c58fda}
+
+/* 收起：左侧一颗 5px 小点 */
+.stage2 .drw::before{
+  content:'';display:block;position:absolute;left:15px;top:50%;
+  width:5px;height:5px;margin-top:-2.5px;border-radius:50%;
+  background:var(--dot);opacity:.5;
+  transition:opacity .2s var(--ease),left .26s var(--ease),top .26s var(--ease),
+             width .26s var(--ease),height .26s var(--ease),margin .26s var(--ease),
+             border-radius .26s var(--ease);
+}
+.stage2 .drw:hover::before{opacity:.85}
+.stage2 .drw.lit::before{opacity:1}
+.stage2 .drw.off::before{background:#ef6b6b;opacity:1}
+/* 展开：小点长成左侧一道竖条 */
+.stage2 .drw.open::before{
+  left:15px;top:12px;bottom:14px;margin-top:0;
+  width:2px;height:auto;border-radius:2px;opacity:.92;
+}
+
+/* 标题变回一行正经的列表项 */
+.stage2 .drw .drw-h{
+  position:static!important;left:auto!important;right:auto!important;
+  display:flex!important;align-items:center;gap:10px;width:100%;
+  padding:11px 15px 11px 31px!important;
+  background:none!important;border:0!important;box-shadow:none!important;
+  font-size:12.5px!important;line-height:1.2!important;
+  color:rgba(var(--w),.58)!important;text-align:left;opacity:1!important;
+  transition:color .2s var(--ease);
+}
+.stage2 .drw .drw-h b{
+  font-size:12.5px!important;font-weight:500!important;
+  letter-spacing:.01em!important;color:inherit!important;
+}
+.stage2 .drw .drw-h .mut,.stage2 .drw .drw-h .sp{display:none!important}
+.stage2 .drw .drw-h .car{
+  display:inline-block!important;margin-left:auto;
+  font-size:9px;color:rgba(var(--w),.24);
+  transition:transform .26s var(--ease),color .2s var(--ease);
+}
+.stage2 .drw .drw-h:hover{color:rgba(var(--w),.9)!important}
+.stage2 .drw.open .drw-h{color:rgba(var(--w),.94)!important}
+.stage2 .drw.open .drw-h .car{transform:rotate(180deg);color:rgba(var(--w),.45)}
+/* 内容跟着标题的缩进，不再顶到边上 */
+.stage2 .drw .drw-p{padding:0 15px 0 31px!important}
+.stage2 .drw.open .drw-p{padding:2px 15px 15px 31px!important}
+.stage2 .drw.open{padding-bottom:0!important}
+
+/* v60b：右箭头画成真的箭头，平时不抢眼，指向才出现 */
+.stage2 .drw .drw-h{padding-left:34px!important}
+.stage2 .drw .drw-p,.stage2 .drw.open .drw-p{padding-left:34px!important}
+.stage2 .drw .drw-h .car{
+  display:block!important;margin-left:auto;width:6px;height:6px;
+  font-size:0!important;line-height:0;
+  border-right:1.3px solid rgba(var(--w),.26);border-bottom:1.3px solid rgba(var(--w),.26);
+  transform:rotate(45deg);opacity:0;margin-right:2px;
+  transition:opacity .2s var(--ease),transform .26s var(--ease),border-color .2s var(--ease);
+}
+.stage2 .drw:hover .drw-h .car{opacity:.75}
+.stage2 .drw.open .drw-h .car{opacity:.55;transform:rotate(225deg);border-color:rgba(var(--w),.4)}
+
+/* v60c：窄屏回到单栏（v52 的两栏规则写在媒体查询后面，把窄屏那条盖掉了） */
+@media (max-width:1000px){
+  .st2{grid-template-columns:minmax(0,1fr)}
+  .stage2{min-height:0}
+}
+
+/* v60d：窄屏时，两枚悬浮的翻词箭头跟内容打架，收起来（底部仍有「下一个」） */
+@media (max-width:1000px){
+  .wordnav{display:none}
+}
+
+/* v60e：没点开的那几块，字再淡一档，收起的只剩「这里还有一块」 */
+.stage2 .drw .drw-h{color:rgba(var(--w),.38)!important}
+.stage2 .drw.lit .drw-h{color:rgba(var(--w),.5)!important}
+.stage2 .drw .drw-h:hover{color:rgba(var(--w),.82)!important}
+.stage2 .drw.open .drw-h{color:rgba(var(--w),.95)!important}
+.stage2 .drw::before{opacity:.4}
+.stage2 .drw.lit::before{opacity:.85}

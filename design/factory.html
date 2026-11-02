@@ -1,8 +1,69 @@
 <!doctype html>
 <html lang="zh-CN"><head>
-<meta charset="utf-8"><title>卡片工厂-测试 · factory</title>
-<link rel="stylesheet" href="./app.css?v=vmvxye9x4">
-<script src="./app.js?v=vmvxye9x4"></script><script src="./app2.js?v=vmvxye9x4"></script><script src="./stats.js?v=vmvxye9x4"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:14px;bottom:14px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./decks.js?v=vmvxye9x4"></script><script src="./help.js?v=vmvxye9x4"></script><script src="./pick.js?v=vmvxye9x4"></script><script src="./palette.js?v=vmvxye9x4"></script><script src="./factory.js?v=vmvxye9x4"></script><script src="./fx.js?v=vmvxye9x4"></script><script src="./rows.js?v=vmvxye9x4"></script><script src="./rain.js?v=vmvxye9x4"></script>
+<meta charset="utf-8">
+<script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂-测试 · factory</title>
+<link rel="stylesheet" href="./app.css?v=vmvzanu97">
+<script src="./app.js?v=vmvzanu97"></script><script src="./app2.js?v=vmvzanu97"></script><script src="./stats.js?v=vmvzanu97"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./transit.js?v=vmvzanu97"></script><script src="./smooth.js?v=vmvzanu97"></script><script src="./decks.js?v=vmvzanu97"></script><script src="./help.js?v=vmvzanu97"></script><script src="./pick.js?v=vmvzanu97"></script><script src="./palette.js?v=vmvzanu97"></script><script src="./factory.js?v=vmvzanu97"></script><script src="./fx.js?v=vmvzanu97"></script><script src="./rows.js?v=vmvzanu97"></script><script src="./bgrows.js?v=vmvzanu97"></script><script>
+/* 说明性小字一律收成一个 ?：页面里只留符号，原文塞进 .pop 里给 help.js 用 */
+(function () {
+  var n = 0
+  function run() {
+  var list = document.querySelectorAll('.fold')
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i]
+    var text = (p.textContent || '').trim()
+    if (!text) { p.remove(); continue }
+    // 找这块的标题行：有就挂上去，标题行已经有一个 ? 就把文字并进去，别多长一个
+    var blk = p.closest('.fx-blk, .blk, .mcard, .card, .st-side')
+    var head = null
+    if (blk) {
+      var heads = blk.querySelectorAll('.fx-bh, .tl, .pw-hd, .side-h')
+      for (var h = 0; h < heads.length; h++) {
+        // 取「在它前面、离它最近」的那个标题行
+        if (heads[h].compareDocumentPosition(p) & 4) head = heads[h]
+      }
+    }
+    var footBlock = p.classList.contains('fx-foot')
+    if (footBlock) {
+      var defs = document.querySelectorAll('.fx-def')
+      head = defs.length ? defs[defs.length - 1] : null
+    }
+    var existing = head ? head.querySelector('.q[data-pop]') : null
+    if (existing) {
+      var pv = document.getElementById(existing.getAttribute('data-pop'))
+      if (pv) {
+        var add = document.createElement('p')
+        add.style.margin = '7px 0 0'
+        add.textContent = text
+        pv.appendChild(add)
+        p.remove()
+        continue
+      }
+    }
+    var id = 'fd' + (n++)
+    var pop = document.createElement('div')
+    pop.className = 'pop'
+    pop.id = id
+    pop.textContent = text
+    document.body.appendChild(pop)
+    var q = document.createElement('button')
+    q.type = 'button'
+    q.className = 'q'
+    q.setAttribute('data-pop', id)
+    q.textContent = '?'
+    if (head && (p.parentElement === blk || footBlock)) {
+      q.classList.add('hq')
+      head.appendChild(q)
+      p.remove()
+    } else {
+      p.replaceWith(q)
+    }
+  }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run)
+  else run()
+})()
+</script><script src="./rain.js?v=vmvzanu97"></script>
 </head><body>
 <canvas class="liquid" aria-hidden="true"></canvas>
 <canvas class="rain" aria-hidden="true"></canvas>
@@ -29,7 +90,7 @@
     </details>
     <a class="mi" href="#sync">同步…<span class="sp"></span><span class="ext">未接</span></a>
     <div class="msep"></div>
-    <a class="mi" href="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
+    <a class="mi" href="./index.html" data-fade="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
   </div>
 </details></div>
   <nav class="tabs"><a class="" href="./cards.html">卡片</a><a class="on" href="./factory.html">工厂</a><a class="" href="./stats.html">统计</a></nav>
@@ -197,10 +258,10 @@
                   <button class="mini" type="button" data-sheet="sh-find">换图</button>
                 </div>
                 <div class="src4">
-                  <button class="mini" type="button" data-sheet="sh-find">网上找</button>
-                  <button class="mini" type="button" data-sheet="sh-gen">生图</button>
-                  <button class="mini" type="button" data-sheet="sh-eggs">免费鸡蛋</button>
-                  <button class="mini" type="button" data-sheet="sh-up">自己上传</button>
+                  <button class="mini c-blue" type="button" data-sheet="sh-find">网上找</button>
+                  <button class="mini c-violet" type="button" data-sheet="sh-gen">生图</button>
+                  <button class="mini c-amber" type="button" data-sheet="sh-eggs">免费鸡蛋</button>
+                  <button class="mini c-teal" type="button" data-sheet="sh-up">自己上传</button>
                 </div>
               </div>
               <div class="pop" id="q-img">
@@ -214,7 +275,7 @@
               </div>
 
               <div class="fx-blk">
-                <div class="fx-bh"><span>声</span><button class="q" type="button" data-pop="q-voice">?</button><span class="sp"></span><button class="mini" type="button">试听</button><button class="mini" type="button">重合成</button></div>
+                <div class="fx-bh"><span>声</span><button class="q" type="button" data-pop="q-voice">?</button><span class="sp"></span><button class="mini c-teal" type="button" data-sheet="sh-voiceup">自己上传</button><button class="mini" type="button">试听</button><button class="mini" type="button">重合成</button></div>
                 <div class="vline">
                   <select class="sel sm"><option>Aria · 女声 · 清楚的美国音</option><option>Guy · 男声 · 播报腔</option><option>Jenny · 女声 · 温和</option></select>
                   <span class="mut">3.1s</span>
@@ -233,8 +294,8 @@
               <div class="fx-blk">
                 <div class="fx-bh"><span>变体</span><button class="q" type="button" data-pop="q-vary">?</button><span class="sp"></span><button class="mini" type="button">生成 3 个</button><button class="mini batch" type="button" data-sheet="sh-varybatch">批量变</button></div>
                 <div class="chips"><span class="chip on">gave in to</span><span class="chip">yielded to</span><span class="chip">fell for</span></div>
-                <button class="mini" type="button">自己打一个</button>
-                <p class="mut note">只做一层：换词之后不再派生。默认不加图不加声，因为一句一变体，图和声的成本翻倍。</p>
+                <button class="mini own" type="button">自己打一个</button>
+                <p class="mut note fold">只做一层：换词之后不再派生。默认不加图不加声，因为一句一变体，图和声的成本翻倍。</p>
               </div>
               <div class="pop" id="q-vary">
                 <b>为什么只做一层</b>
@@ -263,7 +324,7 @@
                   <button class="x" type="button" title="删掉">✕</button>
                 </li>
               </ul>
-              <p class="mut note">填链接就行，不用把文件搬进来。动图、视频、帖子都算一条；练「说」「写」时它会跟图一起摆出来。</p>
+              <p class="mut note fold">填链接就行，不用把文件搬进来。动图、视频、帖子都算一条；练「说」「写」时它会跟图一起摆出来。</p>
               <div class="pop" id="q-res">
                 <b>这块是给什么留的</b>
                 <ul class="pl">
@@ -276,13 +337,14 @@
 
             <div class="fx-blk bbg">
                 <div class="fx-bh"><span>背景</span><button class="q" type="button" data-pop="q-bg">?</button><span class="sp"></span><button class="mini" type="button" data-sheet="sh-bg">补全 6 条</button></div>
-                <ul class="bgl">
-                  <li><b>谁</b>船长 · 通过广播对甲板</li>
-                  <li><b>何时</b>傍晚，救生艇已放下海</li>
-                  <li><b>何处</b>倾斜的货轮甲板，风雨很大</li>
-                  <li><b>语气</b>短促、命令式、不解释</li>
+                <ul class="bgl" id="bglList">
+                  <li><b>谁</b><span>船长 · 通过广播对甲板</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
+                  <li><b>何时</b><span>傍晚，救生艇已放下海</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
+                  <li><b>何处</b><span>倾斜的货轮甲板，风雨很大</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
+                  <li><b>语气</b><span>短促、命令式、不解释</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
                 </ul>
-                <p class="mut note">学的时候想不起这句什么时候说，就看这里；生图时这几条会拼进提示词。</p>
+                <button class="bgadd" type="button" data-bgadd>＋ 加一条</button>
+                <p class="mut note fold">学的时候想不起这句什么时候说，就看这里；生图时这几条会拼进提示词。</p>
               </div>
               <div class="pop" id="q-bg">
                 <b>背景是干什么的</b>
@@ -376,7 +438,7 @@
             <button class="mini xs" type="button" data-sheet="sh-senseadd">让模型补</button>
           </span>
         </div>
-        <p class="mut fx-foot">默认一个义项配一句；想多配几句到「设置 → 造料 → 每个义项几句」改。句子自动保存，退出不丢。</p>
+        <p class="mut fx-foot fold">默认一个义项配一句；想多配几句到「设置 → 造料 → 每个义项几句」改。句子自动保存，退出不丢。</p>
       </div>
       <div class="pop" id="q-prob">
         <b>这个百分比是什么</b>
@@ -479,7 +541,29 @@ get along with someone</textarea>
   </div>
 </div>
 
-<!-- ── 免费鸡蛋 ──────────────────────────────────────── -->
+<!-- ── 上传自己的录音 ────────────────────────────────── -->
+      <div class="msheet" id="sh-voiceup" hidden>
+        <div class="mcard">
+          <div class="mhd"><b>上传自己的录音</b><span class="mut">读这一句，或者让别人替你读</span><button class="mx" type="button" data-close>×</button></div>
+          <div class="mbody">
+            <div class="drop" style="margin-bottom:14px">
+              <b>把音频拖进来</b>
+              <p class="mut">wav / mp3 / m4a / ogg 都行，建议 44.1kHz，别做降噪别加混响 —— 学的时候要听得出语气。</p>
+              <button class="mini c-teal" type="button">选文件</button>
+            </div>
+            <div class="mrow"><span class="mtag">整句 / 只读词</span>
+              <span class="chip on">整句</span><span class="chip">只读那个词</span>
+            </div>
+            <div class="mrow"><span class="mtag">用在哪几面</span>
+              <span class="chip on">听</span><span class="chip on">说</span><span class="chip">读</span><span class="chip on">写</span><span class="chip">改</span>
+            </div>
+            <p class="mut">自己的声音有个好处：练「听」的时候不会因为陌生音色分心。上传之后默认只在本机，不同步到别处。</p>
+            <div class="mrow"><span class="sp"></span><button class="btn ghost sm" type="button" data-close>取消</button><button class="btn sm" type="button" data-close>用它</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 免费鸡蛋 ──────────────────────────────────────── -->
 <div class="msheet" id="sh-eggs" hidden>
   <div class="mcard">
     <div class="mhd"><b>免费鸡蛋</b><span class="mut">各家的免费额度，拿去换图</span><button class="mx" type="button" data-close>×</button></div>

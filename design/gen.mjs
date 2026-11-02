@@ -27,7 +27,7 @@ const CHART_ANIM = '<script>(function(){' +
   'function badge(){' +
   'var b=document.createElement("button");b.id="animToggle";b.type="button";' +
   'b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");' +
-  'b.style.cssText="position:fixed;right:14px;bottom:14px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";' +
+  'b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";' +
   'if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");' +
   'b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");' +
   'if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};' +
@@ -67,7 +67,7 @@ const pluginMenu = () => `<details class="menu" id="plugin">
     </details>
     <a class="mi" href="#sync">同步…<span class="sp"></span><span class="ext">未接</span></a>
     <div class="msep"></div>
-    <a class="mi" href="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
+    <a class="mi" href="./index.html" data-fade="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
   </div>
 </details>`;
 
@@ -96,9 +96,70 @@ const shell = (file, active, body, opts = {}) => {
   const name = path.basename(file, '.html');
   return `<!doctype html>
 <html lang="zh-CN"><head>
-<meta charset="utf-8"><title>卡片工厂-测试 · ${name}</title>
+<meta charset="utf-8">
+<script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂-测试 · ${name}</title>
 <link rel="stylesheet" href="./app.css?v=${VER}">
-<script src="./app.js?v=${VER}"></script><script src="./app2.js?v=${VER}"></script><script src="./stats.js?v=${VER}"></script>${CHART_ANIM}<script src="./decks.js?v=${VER}"></script><script src="./help.js?v=${VER}"></script><script src="./pick.js?v=${VER}"></script><script src="./palette.js?v=${VER}"></script><script src="./factory.js?v=${VER}"></script><script src="./fx.js?v=${VER}"></script><script src="./rows.js?v=${VER}"></script><script src="./rain.js?v=${VER}"></script>
+<script src="./app.js?v=${VER}"></script><script src="./app2.js?v=${VER}"></script><script src="./stats.js?v=${VER}"></script>${CHART_ANIM}<script src="./transit.js?v=${VER}"></script><script src="./smooth.js?v=${VER}"></script><script src="./decks.js?v=${VER}"></script><script src="./help.js?v=${VER}"></script><script src="./pick.js?v=${VER}"></script><script src="./palette.js?v=${VER}"></script><script src="./factory.js?v=${VER}"></script><script src="./fx.js?v=${VER}"></script><script src="./rows.js?v=${VER}"></script><script src="./bgrows.js?v=${VER}"></script><script>
+/* 说明性小字一律收成一个 ?：页面里只留符号，原文塞进 .pop 里给 help.js 用 */
+(function () {
+  var n = 0
+  function run() {
+  var list = document.querySelectorAll('.fold')
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i]
+    var text = (p.textContent || '').trim()
+    if (!text) { p.remove(); continue }
+    // 找这块的标题行：有就挂上去，标题行已经有一个 ? 就把文字并进去，别多长一个
+    var blk = p.closest('.fx-blk, .blk, .mcard, .card, .st-side')
+    var head = null
+    if (blk) {
+      var heads = blk.querySelectorAll('.fx-bh, .tl, .pw-hd, .side-h')
+      for (var h = 0; h < heads.length; h++) {
+        // 取「在它前面、离它最近」的那个标题行
+        if (heads[h].compareDocumentPosition(p) & 4) head = heads[h]
+      }
+    }
+    var footBlock = p.classList.contains('fx-foot')
+    if (footBlock) {
+      var defs = document.querySelectorAll('.fx-def')
+      head = defs.length ? defs[defs.length - 1] : null
+    }
+    var existing = head ? head.querySelector('.q[data-pop]') : null
+    if (existing) {
+      var pv = document.getElementById(existing.getAttribute('data-pop'))
+      if (pv) {
+        var add = document.createElement('p')
+        add.style.margin = '7px 0 0'
+        add.textContent = text
+        pv.appendChild(add)
+        p.remove()
+        continue
+      }
+    }
+    var id = 'fd' + (n++)
+    var pop = document.createElement('div')
+    pop.className = 'pop'
+    pop.id = id
+    pop.textContent = text
+    document.body.appendChild(pop)
+    var q = document.createElement('button')
+    q.type = 'button'
+    q.className = 'q'
+    q.setAttribute('data-pop', id)
+    q.textContent = '?'
+    if (head && (p.parentElement === blk || footBlock)) {
+      q.classList.add('hq')
+      head.appendChild(q)
+      p.remove()
+    } else {
+      p.replaceWith(q)
+    }
+  }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run)
+  else run()
+})()
+</script><script src="./rain.js?v=${VER}"></script>
 </head><body>
 <canvas class="liquid" aria-hidden="true"></canvas>
 <canvas class="rain" aria-hidden="true"></canvas>
@@ -788,10 +849,10 @@ screens.factory = shell('factory.html', 'factory', `
                   <button class="mini" type="button" data-sheet="sh-find">换图</button>
                 </div>
                 <div class="src4">
-                  <button class="mini" type="button" data-sheet="sh-find">网上找</button>
-                  <button class="mini" type="button" data-sheet="sh-gen">生图</button>
-                  <button class="mini" type="button" data-sheet="sh-eggs">免费鸡蛋</button>
-                  <button class="mini" type="button" data-sheet="sh-up">自己上传</button>
+                  <button class="mini c-blue" type="button" data-sheet="sh-find">网上找</button>
+                  <button class="mini c-violet" type="button" data-sheet="sh-gen">生图</button>
+                  <button class="mini c-amber" type="button" data-sheet="sh-eggs">免费鸡蛋</button>
+                  <button class="mini c-teal" type="button" data-sheet="sh-up">自己上传</button>
                 </div>
               </div>
               <div class="pop" id="q-img">
@@ -805,7 +866,7 @@ screens.factory = shell('factory.html', 'factory', `
               </div>
 
               <div class="fx-blk">
-                <div class="fx-bh"><span>声</span><button class="q" type="button" data-pop="q-voice">?</button><span class="sp"></span><button class="mini" type="button">试听</button><button class="mini" type="button">重合成</button></div>
+                <div class="fx-bh"><span>声</span><button class="q" type="button" data-pop="q-voice">?</button><span class="sp"></span><button class="mini c-teal" type="button" data-sheet="sh-voiceup">自己上传</button><button class="mini" type="button">试听</button><button class="mini" type="button">重合成</button></div>
                 <div class="vline">
                   <select class="sel sm"><option>Aria · 女声 · 清楚的美国音</option><option>Guy · 男声 · 播报腔</option><option>Jenny · 女声 · 温和</option></select>
                   <span class="mut">3.1s</span>
@@ -824,8 +885,8 @@ screens.factory = shell('factory.html', 'factory', `
               <div class="fx-blk">
                 <div class="fx-bh"><span>变体</span><button class="q" type="button" data-pop="q-vary">?</button><span class="sp"></span><button class="mini" type="button">生成 3 个</button><button class="mini batch" type="button" data-sheet="sh-varybatch">批量变</button></div>
                 <div class="chips"><span class="chip on">gave in to</span><span class="chip">yielded to</span><span class="chip">fell for</span></div>
-                <button class="mini" type="button">自己打一个</button>
-                <p class="mut note">只做一层：换词之后不再派生。默认不加图不加声，因为一句一变体，图和声的成本翻倍。</p>
+                <button class="mini own" type="button">自己打一个</button>
+                <p class="mut note fold">只做一层：换词之后不再派生。默认不加图不加声，因为一句一变体，图和声的成本翻倍。</p>
               </div>
               <div class="pop" id="q-vary">
                 <b>为什么只做一层</b>
@@ -854,7 +915,7 @@ screens.factory = shell('factory.html', 'factory', `
                   <button class="x" type="button" title="删掉">✕</button>
                 </li>
               </ul>
-              <p class="mut note">填链接就行，不用把文件搬进来。动图、视频、帖子都算一条；练「说」「写」时它会跟图一起摆出来。</p>
+              <p class="mut note fold">填链接就行，不用把文件搬进来。动图、视频、帖子都算一条；练「说」「写」时它会跟图一起摆出来。</p>
               <div class="pop" id="q-res">
                 <b>这块是给什么留的</b>
                 <ul class="pl">
@@ -867,13 +928,14 @@ screens.factory = shell('factory.html', 'factory', `
 
             <div class="fx-blk bbg">
                 <div class="fx-bh"><span>背景</span><button class="q" type="button" data-pop="q-bg">?</button><span class="sp"></span><button class="mini" type="button" data-sheet="sh-bg">补全 6 条</button></div>
-                <ul class="bgl">
-                  <li><b>谁</b>船长 · 通过广播对甲板</li>
-                  <li><b>何时</b>傍晚，救生艇已放下海</li>
-                  <li><b>何处</b>倾斜的货轮甲板，风雨很大</li>
-                  <li><b>语气</b>短促、命令式、不解释</li>
+                <ul class="bgl" id="bglList">
+                  <li><b>谁</b><span>船长 · 通过广播对甲板</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
+                  <li><b>何时</b><span>傍晚，救生艇已放下海</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
+                  <li><b>何处</b><span>倾斜的货轮甲板，风雨很大</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
+                  <li><b>语气</b><span>短促、命令式、不解释</span><span class="bops"><button type="button" data-bgedit title="编辑">✎</button><button type="button" data-bgdel title="删掉">−</button></span></li>
                 </ul>
-                <p class="mut note">学的时候想不起这句什么时候说，就看这里；生图时这几条会拼进提示词。</p>
+                <button class="bgadd" type="button" data-bgadd>＋ 加一条</button>
+                <p class="mut note fold">学的时候想不起这句什么时候说，就看这里；生图时这几条会拼进提示词。</p>
               </div>
               <div class="pop" id="q-bg">
                 <b>背景是干什么的</b>
@@ -967,7 +1029,7 @@ screens.factory = shell('factory.html', 'factory', `
             <button class="mini xs" type="button" data-sheet="sh-senseadd">让模型补</button>
           </span>
         </div>
-        <p class="mut fx-foot">默认一个义项配一句；想多配几句到「设置 → 造料 → 每个义项几句」改。句子自动保存，退出不丢。</p>
+        <p class="mut fx-foot fold">默认一个义项配一句；想多配几句到「设置 → 造料 → 每个义项几句」改。句子自动保存，退出不丢。</p>
       </div>
       <div class="pop" id="q-prob">
         <b>这个百分比是什么</b>
@@ -1070,7 +1132,29 @@ get along with someone</textarea>
   </div>
 </div>
 
-<!-- ── 免费鸡蛋 ──────────────────────────────────────── -->
+<!-- ── 上传自己的录音 ────────────────────────────────── -->
+      <div class="msheet" id="sh-voiceup" hidden>
+        <div class="mcard">
+          <div class="mhd"><b>上传自己的录音</b><span class="mut">读这一句，或者让别人替你读</span><button class="mx" type="button" data-close>×</button></div>
+          <div class="mbody">
+            <div class="drop" style="margin-bottom:14px">
+              <b>把音频拖进来</b>
+              <p class="mut">wav / mp3 / m4a / ogg 都行，建议 44.1kHz，别做降噪别加混响 —— 学的时候要听得出语气。</p>
+              <button class="mini c-teal" type="button">选文件</button>
+            </div>
+            <div class="mrow"><span class="mtag">整句 / 只读词</span>
+              <span class="chip on">整句</span><span class="chip">只读那个词</span>
+            </div>
+            <div class="mrow"><span class="mtag">用在哪几面</span>
+              <span class="chip on">听</span><span class="chip on">说</span><span class="chip">读</span><span class="chip on">写</span><span class="chip">改</span>
+            </div>
+            <p class="mut">自己的声音有个好处：练「听」的时候不会因为陌生音色分心。上传之后默认只在本机，不同步到别处。</p>
+            <div class="mrow"><span class="sp"></span><button class="btn ghost sm" type="button" data-close>取消</button><button class="btn sm" type="button" data-close>用它</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 免费鸡蛋 ──────────────────────────────────────── -->
 <div class="msheet" id="sh-eggs" hidden>
   <div class="mcard">
     <div class="mhd"><b>免费鸡蛋</b><span class="mut">各家的免费额度，拿去换图</span><button class="mx" type="button" data-close>×</button></div>
@@ -1428,7 +1512,7 @@ const barChart = (items, { w = 620, h = 170, labels = [], base = 22, grad = ['--
       const y = h - base - bh;
       const label = labels[i] ? chartText(3 + i * slot + slot / 2, h - 6, labels[i]) : '';
       const tip = one.tip || `${one.v} 次`;
-      return `<path class="bar ${one.c || ''}" d="${barPath(x, y, barW, bh, 4)}" style="fill:url(#${gid});--d:${i * 12}ms" data-tip="${tip}"><title>${tip}</title></path>${label}`;
+      return `<path class="bar ${one.c || ''}" d="${barPath(x, y, barW, bh, 4)}" style="fill:url(#${gid});--d:${i * 16}ms" data-tip="${tip}"><title>${tip}</title></path>${label}`;
     })
     .join('');
   const defs = `<defs>${BAR_GRAD(gid, `var(${grad[0]})`, `var(${grad[1]})`)}</defs>`;
@@ -1453,8 +1537,8 @@ const stackChart = (items, { w = 620, h = 170, labels = [], base = 22 } = {}) =>
       const tip = one.tip || '';
       const topPart = full - darkH;
       return `<g class="stk" data-tip="${tip}"><title>${tip}</title>`
-        + (darkH > 0 ? `<path class="bar c1" style="--d:${i * 12}ms" d="${barPath(x, y, barW, darkH, topPart > 0.5 ? 0 : 4)}"/>` : '')
-        + (topPart > 0 ? `<path class="bar c5" style="--d:${i * 12}ms" d="${barPath(x, y + darkH, barW, topPart, 4)}"/>` : '')
+        + (darkH > 0 ? `<path class="bar c1" style="--d:${i * 16}ms" d="${barPath(x, y, barW, darkH, topPart > 0.5 ? 0 : 4)}"/>` : '')
+        + (topPart > 0 ? `<path class="bar c5" style="--d:${i * 16}ms" d="${barPath(x, y + darkH, barW, topPart, 4)}"/>` : '')
         + `</g>${label}`;
     })
     .join('');
@@ -1475,14 +1559,17 @@ const heat = (weekCount = 52) => {
   const h = 7 * (cell + gap);
   let cells = '';
   for (let week = 0; week < weekCount; week += 1) {
+    // 一列一个 <g>：动画按列播，52 个而不是 364 个，掉帧就是这么省下来的
+    let col = '';
     for (let day = 0; day < 7; day += 1) {
       const level = pick(week * 7 + day, 9, 0, 5);
       const count = level * 3; // 模拟实际练习次数
       const fill = level === 0 ? 'rgba(var(--w),.05)' : level < 3 ? 'rgba(var(--accent-rgb),.28)' : level < 6 ? 'rgba(var(--accent-rgb),.55)' : 'rgba(var(--accent-rgb),.85)';
       const dayName = '一二三四五六日'[day];
       const tip = count > 0 ? `第 ${week + 1} 周周${dayName} · ${count} 次` : `第 ${week + 1} 周周${dayName} · 未练习`;
-      cells += `<rect x="${week * (cell + gap)}" y="${day * (cell + gap)}" width="${cell}" height="${cell}" rx="2" style="fill:${fill};cursor:pointer;transition:all .2s ease;--d:${(week + day) * 9}ms" data-tip="${tip}"><title>${tip}</title></rect>`;
+      col += `<rect x="${week * (cell + gap)}" y="${day * (cell + gap)}" width="${cell}" height="${cell}" rx="2" style="fill:${fill}" data-tip="${tip}"><title>${tip}</title></rect>`;
     }
+    cells += `<g class="hcol" style="--d:${week * 14}ms">${col}</g>`;
   }
   return `<svg class="chart heat" viewBox="0 0 ${w} ${h}" width="100%" height="120" role="img">${cells}</svg>`;
 };
@@ -2042,6 +2129,11 @@ screens.settings = shell('settings.html', 'gear', `
         </div>
 
         <div class="field">
+          <div><div class="lab">练完自动跳下一张</div><div class="desc">评完分就换下一句；关掉就留在这一句，自己按右下角「下一个」。</div></div>
+          <div class="ctl"><button class="sw on" type="button" id="sw-autonext"></button></div>
+        </div>
+
+        <div class="field">
           <div><div class="lab">通知</div><div class="desc">到点提醒今天该练了；只在有到期卡片时才提醒。</div></div>
           <div class="ctl"><span class="badge-ok"><i></i>开着</span><button class="btn ghost" data-modal="m-notify" type="button">设置</button></div>
         </div>
@@ -2056,6 +2148,20 @@ screens.settings = shell('settings.html', 'gear', `
           <div class="ctl"><button class="btn ghost" data-modal="m-privacy" type="button">细节</button></div>
         </div>
       </section>
+
+      <script>
+      (function () {
+        var b = document.getElementById('sw-autonext')
+        if (!b) return
+        var on = localStorage.getItem('kf-study:autonext') !== '0'
+        b.classList.toggle('on', on)
+        b.addEventListener('click', function () {
+          var v = !b.classList.contains('on')
+          b.classList.toggle('on', v)
+          try { localStorage.setItem('kf-study:autonext', v ? '1' : '0') } catch (e) {}
+        })
+      })()
+      </script>
 
       <section class="group" id="interface">
         <div class="ghead"><h2>接口</h2><span class="mut">常用的摆外面，细节折起来</span></div>
@@ -2713,12 +2819,13 @@ screens.detail = shell('detail.html', 'cards', `
 /* ── 启动页：不套 shell，一张整屏的宣传页 ── */
 screens.index = `<!doctype html>
 <html lang="zh-CN"><head>
-<meta charset="utf-8"><title>卡片工厂 · 真正学会一门自然语言</title>
-<link rel="stylesheet" href="./app.css">
-<script src="./app.js"></script><script src="./app2.js"></script><script src="./stats.js"></script><script src="./charts.js"></script><script src="./decks.js"></script><script src="./help.js"></script>
-</head><body>
-<canvas class="liquid" aria-hidden="true"></canvas>
-<canvas class="meteors" aria-hidden="true"></canvas>
+<meta charset="utf-8">
+<script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂 · 真正学会一门自然语言</title>
+<link rel="stylesheet" href="./app.css?v=${VER}">
+<script src="./app.js?v=${VER}"></script><script src="./app2.js?v=${VER}"></script><script src="./stats.js?v=${VER}"></script><script src="./decks.js?v=${VER}"></script><script src="./help.js?v=${VER}"></script>
+</head><body class="splash-body">
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="sky-veil" aria-hidden="true"></div>
 <main class="splash2">
   <div class="sp2-inner">
     <div class="sp2-wordmark">
@@ -2727,12 +2834,11 @@ screens.index = `<!doctype html>
     </div>
     <h1 class="sp2-title">真正学会<br>一门自然语言</h1>
     <div class="sp2-act">
-      <button class="btn primary lg" type="button" data-enter>开始练习</button>
+      <button class="btn primary lg" type="button" data-enter>开启</button>
     </div>
   </div>
 </main>
-<canvas class="ringfront" aria-hidden="true"></canvas>
-<script src="./splash.js"></script>
+<script src="./transit.js?v=${VER}"></script><script src="./splash.js?v=${VER}"></script><script src="./smooth.js?v=${VER}"></script>
 </body></html>`;
 screens.study = shell('study.html', 'cards', `
 <main class="screen study">
@@ -2741,12 +2847,11 @@ screens.study = shell('study.html', 'cards', `
       <div class="st-crumb"><a href="./cards.html">卡片</a><span>/</span><span id="deckName">测试牌组</span><span>/</span><span id="deckIdx">第 3 张，共 12 张</span></div>
       <h1 class="st-idx">
         <button class="wd" type="button" data-en="1" title="点开：英文解释" id="sw">abandon</button>
-        <button class="mini" type="button" data-en="1">英释</button>
-        <button class="mini bgb" type="button" data-sheet="sh-bg2">背景</button>
         <span class="mut st-where">06:41 · 这一轮 12 张</span>
       </h1>
     </div>
     <div class="act">
+      <button class="btn ghost" type="button" data-sheet="sh-edit">编辑</button>
       <button class="btn ghost" type="button">暂停</button>
       <a class="btn ghost" href="./cards.html">退出</a>
     </div>
@@ -2759,58 +2864,97 @@ screens.study = shell('study.html', 'cards', `
     <button class="fb" type="button" data-face="write">写<i>画面 → 拼写</i></button>
     <button class="fb" type="button" data-face="vary">改<i>换一个说法</i></button>
     <span class="sp"></span>
-    <button class="mini" type="button" data-all="1">全揭开</button>
   </div>
 
   <div class="st2">
     <section class="stage2" id="stage">
-      <div class="blk b-audio" data-blk="audio">
-        <button class="pp" type="button" aria-label="播放"><span>▶</span></button>
-        <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <span class="dur" id="durTxt">3.3s</span>
-        <button class="mini" type="button">再放一遍</button>
+      <div class="drw" data-drw="bg">
+        <button class="drw-h" type="button" data-drw="bg"><b>背景</b><span class="mut">这句话在什么场合说、谁在说、说完会怎样</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p"><ul class="dlist" id="bgList"></ul></div></div>
       </div>
 
-      <div class="blk b-media" data-blk="media">
-        <figure class="shot">
-          <img id="shotImg" src="./assets/factory/c1.jpg" alt="这一句的场面" />
-          <span class="giftag">静图</span>
-        </figure>
-        <ul class="rlink" id="rlinks">
-          <li><span class="rt gif">动图</span><a href="#">救生艇刚下水 · giphy.com</a></li>
-          <li><span class="rt vid">视频</span><a href="#">RNLI 训练下水 · youtu.be/9K2x…</a></li>
-        </ul>
+      <div class="drw" data-drw="media">
+        <button class="drw-h" type="button" data-drw="media"><b>图 · 资源</b><span class="mut">一张挑过的照片，加几条外部链接</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p">
+          <figure class="shot">
+            <img id="shotImg" src="./assets/factory/c1.jpg" alt="这一句的场面" />
+            <span class="giftag">静图</span>
+          </figure>
+          <ul class="rlink" id="rlinks">
+            <li><span class="rt gif">动图</span><a href="#">救生艇刚下水 · giphy.com</a></li>
+            <li><span class="rt vid">视频</span><a href="#">RNLI 训练下水 · youtu.be/9K2x…</a></li>
+          </ul>
+        </div></div>
       </div>
 
-      <div class="blk b-sent" data-blk="sent">
-        <p class="big" id="sentLine">The crew <b class="tgt">abandoned</b> ship within minutes.</p>
+      <div class="drw" data-drw="sent">
+        <button class="drw-h" type="button" data-drw="sent"><b>句子</b><span class="mut">练的那一句本身</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p"><p class="big" id="sentLine">The crew <b class="tgt">abandoned</b> ship within minutes.</p></div></div>
       </div>
 
-      <div class="blk b-type" data-blk="type">
-        <label class="tl" for="tin">写下来</label>
-        <input class="tin" id="tin" placeholder="听到/看到这个场面，句子是什么？" autocomplete="off" />
-        <span class="tnote">写不写都行 —— 写得出来，说明这句已经是你的了</span>
+      <div class="drw" data-drw="audio">
+        <button class="drw-h" type="button" data-drw="audio"><b>声音</b><span class="mut">母语者念的这一个句子</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p">
+          <div class="arow">
+            <button class="pp" type="button" aria-label="播放"><span>▶</span></button>
+            <div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <span class="dur" id="durTxt">3.3s</span>
+            <button class="mini" type="button">再放一遍</button>
+          </div>
+        </div></div>
       </div>
 
-      <div class="blk b-vary" data-blk="vary">
-        <p class="vl">把标出来的那个词换成别的说法 —— 换完还是同一个场面</p>
-        <div class="chips" id="vchips"><span class="chip on">got off</span><span class="chip">left</span><span class="chip">evacuated</span><span class="chip">自己打一个</span></div>
-        <p class="vw" id="vres">The crew <s>abandoned</s> <b>got off</b> the ship within minutes.</p>
-        <p class="mut">换完读一遍：句子骨架没动，五个面的输入输出关系也没变，只有「换一个说法」这一面变了。</p>
+      <div class="drw" data-drw="rec">
+        <button class="drw-h" type="button" data-drw="rec"><b>录音</b><span class="mut">按住说一遍，松手结束</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p">
+          <div class="arow">
+            <button class="mic" type="button" aria-label="按住说话"><span>●</span></button>
+            <div class="rechint"><b>按住说话</b><span class="mut">松手结束 —— 先别在心里默念一遍</span></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="drw" data-drw="type">
+        <button class="drw-h" type="button" data-drw="type"><b>打字</b><span class="mut">看着场面把句子写出来</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p">
+          <input class="tin" id="tin" placeholder="听到/看到这个场面，句子是什么？" autocomplete="off" />
+          <span class="tnote">写不写都行<span class="fold">写得出来，说明这句已经是你的了。写不出来也不扣分，接着下一张就行。</span></span>
+        </div></div>
+      </div>
+
+      <div class="drw" data-drw="vary">
+        <button class="drw-h" type="button" data-drw="vary"><b>换一个说法</b><span class="mut">同一个场面，换掉中间那个词</span><span class="sp"></span><span class="car">▾</span></button>
+        <div class="drw-b"><div class="drw-p">
+          <div class="chips" id="vchips"><span class="chip on">got off</span><span class="chip">left</span><span class="chip">evacuated</span><span class="chip">自己打一个</span></div>
+          <p class="vw" id="vres">The crew <s>abandoned</s> <b>got off</b> the ship within minutes.</p>
+        </div></div>
       </div>
     </section>
 
-    <aside class="st-side">
-      <div class="side-h">还藏着什么</div>
-      <button class="rv" type="button" data-rv="audio"><span>声音</span><i>3.3s</i></button>
-      <button class="rv" type="button" data-rv="media"><span>图 / 资源</span><i>1 图 2 链</i></button>
-      <button class="rv" type="button" data-rv="sent"><span>句子</span><i>6 词</i></button>
-      <button class="rv" type="button" data-en="1"><span>英文解释</span><i>小窗</i></button>
-      <button class="rv" type="button" data-en="1" data-zh="1"><span>中文翻译</span><i>小窗</i></button>
-      <button class="rv" type="button" data-sheet="sh-bg2"><span>背景</span><i>6 条</i></button>
-      <p class="side-n">灰掉的不代表禁掉，只是这一面不鼓励先看。点开照样能看。</p>
+    <aside class="drail">
+      <div class="side-h">解释</div>
+      <div class="exrow">
+        <button class="ex" type="button" data-en="1"><span>英文</span><i>小窗</i></button>
+        <button class="ex" type="button" data-en="1" data-zh="1"><span>中文</span><i>小窗</i></button>
+      </div>
+
+      <div class="side-h">每一块都在这里</div>
+      <button class="rv" type="button" data-drw="bg"><span>背景</span><i>6 条</i></button>
+      <button class="rv" type="button" data-drw="media"><span>图 · 资源</span><i>1 图 2 链</i></button>
+      <button class="rv" type="button" data-drw="sent"><span>句子</span><i>6 词</i></button>
+      <button class="rv" type="button" data-drw="audio"><span>声音</span><i>3.3s</i></button>
+      <button class="rv" type="button" data-drw="rec"><span>录音</span><i>跟着读</i></button>
+      <button class="rv" type="button" data-drw="type"><span>打字</span><i>写一遍</i></button>
+    <button class="mini allbtn" type="button" data-all="1">全揭开</button>
+      <p class="side-n fold">点一下拉开，再点一下收起来。灰的是这一面不鼓励先看的，照样能拉。</p>
     </aside>
   </div>
+
+  <button class="wordnav prev" type="button" data-word="-1" title="上一个单词">‹</button>
+  <button class="wordnav next" type="button" data-word="1" title="下一个单词">›</button>
+
+  <button class="navstep prev" type="button" data-step="-1">← 上一个</button>
+  <button class="navstep next" type="button" data-step="1">下一个 →</button>
 
   <div class="st-rate">
     <button class="st-r" type="button"><b>重来</b><em>1 分钟</em></button>
@@ -2821,23 +2965,75 @@ screens.study = shell('study.html', 'cards', `
 
   <p class="st-keys"><span class="kbd">1</span>–<span class="kbd">4</span> 评分 · <span class="kbd">←</span><span class="kbd">→</span> 换面 · <span class="kbd">A</span> 声音 <span class="kbd">M</span> 图 <span class="kbd">T</span> 句子 · <span class="kbd">E</span> 英文解释 · <span class="kbd">B</span> 背景</p>
 
-  <div class="msheet" id="sh-en" hidden>
-    <div class="mcard">
-      <div class="mhd"><b id="enWord">abandon</b><span class="mut">英文解释 · 先只看英文</span><button class="mx" type="button" data-close>×</button></div>
+  <div class="popwin" id="sh-en" hidden>
+    <div class="pw-hd" id="enDrag">
+      <b id="enWord">abandon</b>
+      <span class="tag" id="enTag">动词</span>
+      <span class="ph" id="phTxt">/əˈbændən/</span>
+      <span class="sp"></span>
+      <button class="pin" type="button" data-pin title="钉住现在的位置，下次还开在这里">钉</button>
+      <button class="mx" type="button" data-close>×</button>
+    </div>
+    <div class="pw-bd">
+      <div class="pw-list" id="pwList">
+        <div class="pw-blk" data-pw="en">
+          <div class="pw-blk-h"><b>英文解释</b><span class="sp"></span><button type="button" data-pwedit title="编辑">✎</button><button type="button" data-pwdel title="删掉这条">−</button></div>
+          <div class="pw-blk-b" id="enDef">to leave a place or a person for good — or to stop doing something you had already planned to finish.</div>
+        </div>
+        <div class="pw-blk" id="zhbox" hidden>
+          <div class="pw-blk-h"><b>中文</b><span class="sp"></span><button type="button" data-pwedit title="编辑">✎</button><button type="button" data-pwdel title="删掉这条">−</button></div>
+          <div class="pw-blk-b" id="zhDef">丢下不管，走了不再回来；也可以指「放弃一个已经开始的计划」。</div>
+        </div>
+      </div>
+      <div class="pw-add"><button type="button" data-pwadd>＋ 加一条</button></div>
+      <div class="pw-ft">
+        <button class="mini" type="button" data-zh-btn>看中文</button>
+        <span class="sp"></span>
+        <span class="pwtip">按住标题可拖 · 右下角可拉</span>
+        <button class="mini" type="button" data-close>知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="msheet" id="sh-edit" hidden>
+    <div class="mcard mc-wide">
+      <div class="mhd"><b>改这一句</b><span class="mut">只动这一句</span><button class="mx" type="button" data-close>×</button></div>
       <div class="mbody">
-        <div class="enbox">
-          <div class="enrow"><span class="tag" id="enTag">动词</span><span class="ph" id="phTxt">/əˈbændən/</span></div>
-          <p class="en-def" id="enDef">to leave a place or a person for good — or to stop doing something you had already planned to finish.</p>
+        <p class="edwarn">手改这一句：句子、目标词、图、声、五维度、背景、变体。<b>批量造 / 批量变 / 全自动流水线不在这里</b> —— 要用大模型批量，按左下角「返工回工厂」。</p>
+
+        <div class="mrow"><span class="mtag">句子</span><textarea class="inp edtxt" id="edSent" rows="2">The crew abandoned ship within minutes.</textarea></div>
+        <div class="mrow"><span class="mtag">目标词</span><input class="inp sm" id="edWord" value="abandoned" style="max-width:180px" /><span class="mut">练的是这一段</span></div>
+
+        <div class="mrow"><span class="mtag">图</span>
+          <span class="edimg"><img id="edImg" src="./assets/factory/c1.jpg" alt="" /><span class="mut">静图 · commons CC BY-SA 4.0 · 1920×1280</span></span>
+          <button class="mini" type="button">换图</button><button class="mini" type="button">裁成横幅</button>
         </div>
-        <div class="zhbox" id="zhbox" hidden>
-          <div class="enrow"><span class="tag">中文</span></div>
-          <p class="en-def" id="zhDef">丢下不管，走了不再回来；也可以指「放弃一个已经开始的计划」。</p>
-          <p class="mut">中文只在你要的时候给 —— 先看英文，脑子里才会长出画面。</p>
+
+        <div class="mrow"><span class="mtag">声</span>
+          <select class="inp sm" data-pick style="max-width:240px"><option>Aria · 女声 · 清楚的美国音</option><option>Guy · 男声 · 播报腔</option><option>老张 · 男声 · 慢</option></select>
+          <span class="mut" id="edDur">3.3s</span>
+          <button class="mini" type="button">试听</button><button class="mini" type="button">重合成</button>
         </div>
+
+        <div class="mrow"><span class="mtag">五维度</span>
+          <span class="edf5">
+            <button class="chip on" type="button">听</button><button class="chip on" type="button">说</button><button class="chip on" type="button">读</button><button class="chip on" type="button">写</button><button class="chip" type="button">改</button>
+          </span>
+          <span class="mut">点亮哪一面就算这一面有料</span>
+        </div>
+
+        <div class="mrow"><span class="mtag">背景</span><textarea class="inp edbg" id="edBg" rows="4">谁 船长，通过广播对甲板上的船员
+何时 傍晚，救生艇已经放下海
+何处 倾斜的货轮甲板，风雨声很大
+语气 短促、命令式、不解释</textarea></div>
+
+        <div class="mrow"><span class="mtag">变体</span><input class="inp" id="edVar" value="got off · left · evacuated" /></div>
+
         <div class="mrow">
-          <button class="mini" type="button" data-zh-btn>看中文</button>
+          <button class="btn ghost" type="button" data-rework>返工回工厂</button>
           <span class="sp"></span>
-          <button class="btn sm" type="button" data-close>知道了</button>
+          <button class="btn ghost" type="button" data-close>取消</button>
+          <button class="btn primary" type="button" id="edSave">保存这一句</button>
         </div>
       </div>
     </div>
@@ -2855,7 +3051,7 @@ screens.study = shell('study.html', 'cards', `
           <li><b>说完会怎样</b>所有人停下手里的事，往救生艇那边跑</li>
           <li><b>容易误会的地方</b>不是「放弃」，是「撤离」这个动作</li>
         </ul>
-        <p class="mut">学的时候想不起这句话什么时候说，就看这里；练「说」「写」时这几条会拼进提示词。</p>
+        <p class="mut fold">学的时候想不起这句话什么时候说，就看这里；练「说」「写」时这几条会拼进提示词。</p>
       </div>
     </div>
   </div>
@@ -2864,12 +3060,13 @@ screens.study = shell('study.html', 'cards', `
 <script>
 (function () {
   var stage = document.getElementById('stage')
+  // 每一面：show = 直接给；lit = 发光（这一面该用的东西）
   var rules = {
-    listen: { show: ['audio'], dim: ['bg'], hi: [] },
-    speak:  { show: ['media'], dim: ['bg'], hi: [] },
-    read:   { show: ['sent'], dim: ['bg'], hi: ['bg'] },
-    write:  { show: ['media'], dim: [], hi: ['bg', 'type'] },
-    vary:   { show: ['sent', 'media', 'vary'], dim: [], hi: ['bg'] }
+    listen: { open: ['audio', 'rec'], lit: ['audio', 'rec'] },
+    speak:  { open: ['media', 'rec'], lit: ['media', 'rec'] },
+    read:   { open: ['sent'], lit: ['sent', 'bg'] },
+    write:  { open: ['media', 'type'], lit: ['media', 'bg', 'type'] },
+    vary:   { open: ['sent', 'vary'], lit: ['sent', 'media', 'bg'] }
   }
   var CARDS = {
     abandon: {
@@ -2937,10 +3134,16 @@ screens.study = shell('study.html', 'cards', `
       for (var k = 0; k < c.bg.length; k++) bs += '<li><b>' + c.bg[k][0] + '</b>' + c.bg[k][1] + '</li>'
       bl.innerHTML = bs
     }
-    var cnt = document.querySelector('.rv[data-rv="sent"] i')
-    if (cnt) cnt.textContent = c.wc + ' 词'
-    var aud = document.querySelector('.rv[data-rv="audio"] i')
-    if (aud) aud.textContent = c.dur
+    var db = document.querySelectorAll('.rv[data-drw]')
+    for (var q = 0; q < db.length; q++) {
+      var kk = db[q].getAttribute('data-drw')
+      var it = db[q].querySelector('i')
+      if (!it) continue
+      if (kk === 'sent') it.textContent = c.wc + ' 词'
+      else if (kk === 'audio') it.textContent = c.dur
+      else if (kk === 'bg') it.textContent = c.bg.length + ' 条'
+      else if (kk === 'media') it.textContent = '1 图 ' + c.links.length + ' 链'
+    }
   }
 
   var qs = new URLSearchParams(location.search)
@@ -2950,57 +3153,331 @@ screens.study = shell('study.html', 'cards', `
     if (dn) dn.textContent = (qs.get('deck') === 'testing' ? '测试牌组' : qs.get('deck'))
   }
 
+  /* 浮动小窗：按住标题拖，右下角拉，Esc 或 × 关 */
+  var PIN_KEY = 'kf-enpop:rect'
+  function readPin() {
+    try { return JSON.parse(localStorage.getItem(PIN_KEY) || 'null') } catch (e) { return null }
+  }
+  function writePin(r) {
+    try { localStorage.setItem(PIN_KEY, JSON.stringify(r)) } catch (e) {}
+  }
+
+  function openWin(el, anchor) {
+    // .page 上有 transform —— 固定定位会以它为祖先，left/top 与 getBoundingClientRect 差一个页面偏移。
+    // 挪到 body 之后才是真正的视口坐标，拖动才对得上手。
+    if (el.parentNode !== document.body) document.body.appendChild(el)
+    if (!el) return
+    var pin = readPin()
+    if (pin && pin.w) {
+      el.style.left = pin.l + 'px'
+      el.style.top = pin.t + 'px'
+      el.style.width = pin.w + 'px'
+      el.style.height = pin.h + 'px'
+    } else if (anchor) {
+      var rr = anchor.getBoundingClientRect()
+      var ww = el.offsetWidth || 320
+      var left = rr.left - ww - 14
+      if (left < 12) left = Math.min(rr.right + 14, window.innerWidth - ww - 12)
+      el.style.left = Math.round(left) + 'px'
+      el.style.top = Math.max(12, Math.round(rr.top - 8)) + 'px'
+      el.style.width = ''
+      el.style.height = ''
+    } else {
+      el.style.left = Math.max(16, Math.round(window.innerWidth * 0.56)) + 'px'
+      el.style.top = '150px'
+      el.style.width = ''
+      el.style.height = ''
+    }
+    var pinBtn = el.querySelector('[data-pin]')
+    if (pinBtn) pinBtn.classList.toggle('on', !!pin)
+    el.hidden = false
+  }
+
+  function closeWin(el) {
+    if (el) el.hidden = true
+  }
+
+  /* 拖动：只动 transform（合成器干活），rAF 合并；拖的时候把 backdrop-filter 关掉，
+     否则每帧重算模糊，又卡又跟手不齐 */
+  /* 拖动：只写 left/top，按住时关掉模糊（否则每帧重算 backdrop-filter）；
+     不玩 transform 反馈，指针在哪窗口就在哪，松手即落定 */
+  var drag = null
+  document.addEventListener('pointerdown', function (e) {
+    var bar = e.target.closest('.pw-hd')
+    if (!bar || e.target.closest('button')) return
+    var win = bar.closest('.popwin')
+    if (!win) return
+    var r = win.getBoundingClientRect()
+    drag = { win: win, bar: bar, x0: e.clientX, y0: e.clientY, l0: r.left, t0: r.top, w: r.width, h: r.height, id: e.pointerId }
+    win.classList.add('dragging')
+    try { bar.setPointerCapture(e.pointerId) } catch (err) {}
+    e.preventDefault()
+  })
+
+  document.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.id) return
+    var maxL = window.innerWidth - drag.w - 6
+    var maxT = window.innerHeight - 40
+    var l = Math.min(Math.max(6, drag.l0 + (e.clientX - drag.x0)), Math.max(6, maxL))
+    var t = Math.min(Math.max(6, drag.t0 + (e.clientY - drag.y0)), Math.max(6, maxT))
+    drag.win.style.left = l + 'px'
+    drag.win.style.top = t + 'px'
+    drag.l = l
+    drag.t = t
+  })
+
+  function endDrag() {
+    if (!drag) return
+    var win = drag.win
+    win.classList.remove('dragging')
+    if (win.querySelector('[data-pin].on')) {
+      var r = win.getBoundingClientRect()
+      writePin({ l: Math.round(r.left), t: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) })
+    }
+    drag = null
+  }
+  document.addEventListener('pointerup', endDrag)
+  document.addEventListener('pointercancel', endDrag)
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return
+    var w = document.querySelector('.popwin:not([hidden])')
+    if (w) { w.hidden = true }
+  })
+
+  /* 编辑面板：保存回当前这一句 */
+  var edSave = document.getElementById('edSave')
+  if (edSave) {
+    edSave.addEventListener('click', function () {
+      var sent = document.getElementById('edSent')
+      var line = document.getElementById('sentLine')
+      if (sent && line) {
+        var word = (document.getElementById('edWord') || {}).value || ''
+        var html = sent.value.trim().replace(/</g, '&lt;')
+        if (word) html = html.split(word).join('<b class="tgt">' + word + '</b>')
+        line.innerHTML = html
+      }
+      var bg = document.getElementById('edBg')
+      var list = document.getElementById('bgList')
+      if (bg && list) {
+        var out = ''
+        var rows = bg.value.split(String.fromCharCode(10))
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i].trim()
+          if (!r) continue
+          var sp = r.indexOf(' ')
+          if (sp > 0) out += '<li><b>' + r.slice(0, sp) + '</b>' + r.slice(sp + 1).trim() + '</li>'
+          else out += '<li><b>·</b>' + r + '</li>'
+        }
+        list.innerHTML = out
+      }
+      var v = document.getElementById('edVar')
+      var vc = document.getElementById('vchips')
+      if (v && vc) {
+        var arr = v.value.split('·')
+        var cs = ''
+        for (var j = 0; j < arr.length; j++) {
+          var t = arr[j].trim()
+          if (!t) continue
+          cs += '<span class="chip' + (j === 0 ? ' on' : '') + '">' + t + '</span>'
+        }
+        vc.innerHTML = cs + '<span class="chip">自己打一个</span>'
+      }
+      var lv = document.querySelector('.blk.b-vary p.vw')
+      var vres = document.getElementById('vres')
+      if (vres && sent) vres.textContent = sent.value.trim()
+      closeWin(document.getElementById('sh-edit'))
+    })
+  }
+
+  /* 返工：回工厂 */
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-rework]')) {
+      location.href = './factory.html?w=' + (qs.get('w') || 'abandon')
+      return
+    }
+    var pw = e.target.closest('.popwin')
+    if (pw && e.target.closest('[data-close]')) { pw.hidden = true; return }
+  })
+
+  var faces = ['listen', 'speak', 'read', 'write', 'vary']
   var face = 'read'
   var opened = {}
+  var closed = {}
+  var allOpen = false
+  var doneSet = {}
+  var autoNext = true
+
+  try { autoNext = localStorage.getItem('kf-study:autonext') !== '0' } catch (e) {}
+  try {
+    var rawDone = localStorage.getItem('kf-study:done')
+    if (rawDone) doneSet = JSON.parse(rawDone) || {}
+  } catch (e) {}
+
+  function wordNow() { return qs.get('w') || 'abandon' }
+
+  function markDone(f) {
+    doneSet[wordNow() + '|' + f] = 1
+    try { localStorage.setItem('kf-study:done', JSON.stringify(doneSet)) } catch (e) {}
+  }
+
+  function goWord(dir) {
+    var keys = Object.keys(CARDS)
+    var at = keys.indexOf(wordNow())
+    if (at < 0) at = 0
+    var nx = keys[(at + dir + keys.length) % keys.length]
+    var url = './study.html?w=' + nx
+    if (qs.get('deck')) url += '&deck=' + qs.get('deck')
+    location.href = url
+  }
+
+  function goFace(dir) {
+    var at = faces.indexOf(face)
+    var nx = at + dir
+    if (nx < 0) { goWord(-1); return }
+    if (nx >= faces.length) { goWord(1); return }
+    face = faces[nx]
+    opened = {}
+    closed = {}
+    allOpen = false
+    render()
+  }
 
   function render() {
     var r = rules[face]
-    var blks = stage.querySelectorAll('[data-blk]')
-    for (var i = 0; i < blks.length; i++) {
-      var k = blks[i].getAttribute('data-blk')
-      var on = r.show.indexOf(k) >= 0 || opened[k]
-      blks[i].hidden = !on
-      blks[i].classList.toggle('lead', r.show.indexOf(k) >= 0 && k !== 'type')
+    var drws = stage.querySelectorAll('.drw')
+    for (var i = 0; i < drws.length; i++) {
+      var k = drws[i].getAttribute('data-drw')
+      var lit = r.lit.indexOf(k) >= 0
+      var isClosed = !!closed[k]
+      var want
+      if (allOpen) want = !isClosed
+      else if (r.open.indexOf(k) >= 0) want = !isClosed
+      else want = !!opened[k] && !isClosed
+      drws[i].classList.toggle('open', k === 'vary' ? face === 'vary' : want)
+      drws[i].classList.toggle('lit', lit)
+      drws[i].classList.toggle('off', isClosed && lit)
+      if (k === 'vary') drws[i].hidden = face !== 'vary'
     }
-    // 写框：所有面都在，只是轻重不同
-    var t = stage.querySelector('[data-blk="type"]')
-    if (t) {
-      t.hidden = face === 'vary'
-      t.classList.toggle('lead', r.hi.indexOf('type') >= 0)
-      t.classList.toggle('soft', r.hi.indexOf('type') < 0)
+
+    var dbs = document.querySelectorAll('.rv[data-drw]')
+    for (var j = 0; j < dbs.length; j++) {
+      var dk = dbs[j].getAttribute('data-drw')
+      var dLit = r.lit.indexOf(dk) >= 0
+      var cur = stage.querySelector('.drw[data-drw="' + dk + '"]')
+      var isOpen = !!(cur && cur.classList.contains('open'))
+      dbs[j].classList.toggle('open', isOpen)
+      dbs[j].classList.toggle('lit', dLit && !isOpen)
+      dbs[j].classList.toggle('on', isOpen)
     }
-    // 侧栏
-    var rvs = document.querySelectorAll('.rv[data-rv]')
-    for (var j = 0; j < rvs.length; j++) {
-      var kk = rvs[j].getAttribute('data-rv')
-      rvs[j].classList.toggle('on', !!(opened[kk] || r.show.indexOf(kk) >= 0))
-    }
-    var bgs = document.querySelectorAll('.bgb, .rv[data-sheet]')
-    for (var m = 0; m < bgs.length; m++) {
-      bgs[m].classList.toggle('hi', r.hi.indexOf('bg') >= 0)
-      bgs[m].classList.toggle('dim', r.dim.indexOf('bg') >= 0)
-    }
+
     var fbs = document.querySelectorAll('.fb')
     for (var n = 0; n < fbs.length; n++) {
-      fbs[n].classList.toggle('on', fbs[n].getAttribute('data-face') === face)
+      var fname = fbs[n].getAttribute('data-face')
+      fbs[n].classList.toggle('on', fname === face)
+      fbs[n].classList.toggle('done', !!doneSet[wordNow() + '|' + fname])
+    }
+
+    var allBtn = document.querySelector('[data-all]')
+    if (allBtn) {
+      allBtn.classList.toggle('on', allOpen)
+      allBtn.textContent = allOpen ? '收起' : '全揭开'
     }
   }
 
   document.addEventListener('click', function (e) {
-    var f = e.target.closest('[data-face]')
-    if (f) { face = f.getAttribute('data-face'); opened = {}; render(); return }
+    // 解释小窗：逐条编辑 / 增 / 删
+    var pwEdit = e.target.closest('[data-pwedit]')
+    if (pwEdit) {
+      var pblk = pwEdit.closest('.pw-blk')
+      var pbody = pblk.querySelector('.pw-blk-b')
+      var editing = pbody.getAttribute('contenteditable') !== 'true'
+      pbody.setAttribute('contenteditable', editing ? 'true' : 'false')
+      pblk.classList.toggle('editing', editing)
+      pwEdit.textContent = editing ? '✓' : '✎'
+      if (editing) pbody.focus()
+      return
+    }
+    if (e.target.closest('[data-pwdel]')) {
+      var dblk = e.target.closest('.pw-blk')
+      var dlist = dblk.parentElement
+      if (dlist.children.length > 1) dblk.remove()
+      return
+    }
+    if (e.target.closest('[data-pwadd]')) {
+      var nlist = document.getElementById('pwList')
+      nlist.insertAdjacentHTML('beforeend',
+        '<div class="pw-blk"><div class="pw-blk-h"><b>补充</b><span class="sp"></span>' +
+        '<button type="button" data-pwedit title="编辑">✓</button>' +
+        '<button type="button" data-pwdel title="删掉这条">−</button></div>' +
+        '<div class="pw-blk-b" contenteditable="true">写点什么…</div></div>')
+      var nb = nlist.lastElementChild.querySelector('.pw-blk-b')
+      if (nb) { nb.focus(); document.execCommand && document.execCommand('selectAll', false, null) }
+      return
+    }
 
-    var rv = e.target.closest('.rv[data-rv]')
-    if (rv) {
-      var k = rv.getAttribute('data-rv')
-      opened[k] = !opened[k]
+    var f = e.target.closest('[data-face]')
+    if (f) {
+      face = f.getAttribute('data-face')
+      opened = {}
+      closed = {}
+      allOpen = false
       render()
       return
     }
 
     if (e.target.closest('[data-all]')) {
-      opened = { audio: 1, media: 1, sent: 1 }
+      allOpen = !allOpen
+      opened = {}
+      closed = {}
       render()
+      return
+    }
+
+    var drwBtn = e.target.closest('[data-drw]')
+    if (drwBtn) {
+      var dk = drwBtn.getAttribute('data-drw')
+      var box = stage.querySelector('.drw[data-drw="' + dk + '"]')
+      var isOpen = box && box.classList.contains('open')
+      if (isOpen) { closed[dk] = true; opened[dk] = 0 }
+      else { closed[dk] = false; opened[dk] = 1 }
+      render()
+      // 拉开时给一条从下往上扫过去的亮边，像布被拉下来
+      var openedBox = stage.querySelector('.drw[data-drw="' + dk + '"]')
+      if (openedBox && !isOpen) {
+        openedBox.classList.add('opening')
+        setTimeout(function () { openedBox.classList.remove('opening') }, 620)
+      }
+      return
+    }
+
+    var step = e.target.closest('[data-step]')
+    if (step) { goFace(parseInt(step.getAttribute('data-step'), 10)); return }
+
+    var wd = e.target.closest('[data-word]')
+    if (wd) { goWord(parseInt(wd.getAttribute('data-word'), 10)); return }
+
+    var rate = e.target.closest('.st-r')
+    if (rate) {
+      markDone(face)
+      render()
+      if (autoNext) setTimeout(function () { goWord(1) }, 260)
+      return
+    }
+
+    var pinBtn = e.target.closest('[data-pin]')
+    if (pinBtn) {
+      var pw0 = pinBtn.closest('.popwin')
+      var on = !pinBtn.classList.contains('on')
+      pinBtn.classList.toggle('on', on)
+      if (on && pw0) {
+        var r0 = pw0.getBoundingClientRect()
+        writePin({ l: Math.round(r0.left), t: Math.round(r0.top), w: Math.round(r0.width), h: Math.round(r0.height) })
+        pinBtn.title = '位置已钉住，点一下解开'
+      } else {
+        try { localStorage.removeItem(PIN_KEY) } catch (err) {}
+        pinBtn.title = '钉住现在的位置，下次还开在这里'
+      }
       return
     }
 
@@ -3009,8 +3486,15 @@ screens.study = shell('study.html', 'cards', `
       var sheet = document.getElementById('sh-en')
       var zb = document.getElementById('zhbox')
       if (zb) zb.hidden = !en.hasAttribute('data-zh')
-      sheet.hidden = false
-      document.documentElement.classList.add('sheet-open')
+      var exs = document.querySelectorAll('.ex')
+      for (var x = 0; x < exs.length; x++) exs[x].classList.toggle('on', exs[x] === en)
+      var wasOpen = sheet && !sheet.hidden
+      var sameOne = en.classList.contains('on')
+      var exs2 = document.querySelectorAll('.ex')
+      for (var x2 = 0; x2 < exs2.length; x2++) exs2[x2].classList.remove('on')
+      if (wasOpen && sameOne) { sheet.hidden = true; return }   // 再点一下就关
+      en.classList.add('on')
+      openWin(sheet, en)
       return
     }
 
@@ -3025,6 +3509,30 @@ screens.study = shell('study.html', 'cards', `
       var s2 = document.getElementById(sh.getAttribute('data-sheet'))
       if (s2) { s2.hidden = false; document.documentElement.classList.add('sheet-open') }
     }
+  })
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+    if (e.key === 'ArrowLeft') { goFace(-1); e.preventDefault() }
+    if (e.key === 'ArrowRight') { goFace(1); e.preventDefault() }
+    // A 声音 / M 图 / T 句子 / R 录音 / B 背景 / E 英文解释
+    var kmap = { a: 'audio', m: 'media', t: 'sent', r: 'rec', b: 'bg' }
+    var kk = kmap[(e.key || '').toLowerCase()]
+    if (kk) {
+      var box = stage.querySelector('.drw[data-drw="' + kk + '"]')
+      if (box) {
+        var open = box.classList.contains('open')
+        if (open) { closed[kk] = true; opened[kk] = 0 } else { closed[kk] = false; opened[kk] = 1 }
+        render()
+      }
+      e.preventDefault()
+    }
+  })
+
+  // 四个导航是 fixed，但 .page 上有 transform，会被当成定位祖先 —— 挪到 body 才是真的贴视口
+  ;['.wordnav', '.navstep'].forEach(function (sel) {
+    var list = document.querySelectorAll(sel)
+    for (var i = 0; i < list.length; i++) document.body.appendChild(list[i])
   })
 
   render()

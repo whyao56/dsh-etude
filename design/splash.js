@@ -1,681 +1,401 @@
-﻿/* 卡片工厂-测试 · 启动页
-   背景：全世界主流语言的问候语当流星，从左上往右下飞。
-   中间那个「开始」按钮戴一圈土星环：流星撞到环上就留住，在环上转；
-   环满了，下一颗撞上来的流星会把离它最近的那颗顶掉 —— 被顶掉的那颗重新变成流星飞走。
-   环上的流星可以用鼠标拖着走。
-   背景里的鼠标/点击只影响背景，进主页只有「开始」这一个入口。 */
-(() => {
-  const back = document.querySelector('canvas.meteors');
-  const front = document.querySelector('canvas.ringfront');
-  if (!back || !front) return;
+﻿/* ────────────────────────────────────────────────
+   启动页：会慢慢转的星空 + 长按长曝光
+   · 星是「光点」（预渲染径向渐变贴图），不是实心圆
+   · 平时整片星空绕天极极慢地转，像真实天空的周日运动
+   · 按住空白处 → 长曝光：星轨从点长成一条真圆弧，松手收回
+   · 没有黑洞、没有流星、没有卫星环
+   ──────────────────────────────────────────────── */
+(function () {
+  'use strict'
 
-  const ctxB = back.getContext('2d');
-  const ctxF = front.getContext('2d');
-  const root = document.documentElement;
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cvs = document.getElementById('sky')
+  if (!cvs) return
+  var ctx = cvs.getContext('2d')
+  // 视网膜屏上 2 倍换算成 4 倍像素，星轨这种柔和的东西 1.5 倍已经看不出差别，帧率却差一截
+  var DPR = Math.min(1.5, window.devicePixelRatio || 1)
+  var W = 0, H = 0, cx = 0, cy = 0
+  var pole = { x: 0, y: 0 }
+  var TAU = Math.PI * 2
+  var pt = 0, last = 0
 
-  const WORDS = [
-    '你好', 'hello', 'こんにちは', '안녕하세요', 'bonjour', 'hola', 'hallo', 'ciao',
-    'olá', 'привет', 'مرحبا', 'नमस्ते', 'merhaba', 'xin chào', 'สวัสดี', 'selamat',
-    'hoi', 'hej', 'γεια σου', 'שלום', 'jambo', 'kumusta', 'नमस्कार', 'сәлем',
-    'salut', 'aloha', 'sawubona', 'dobrý deň', 'здравей', 'szia', 'terve', 'moi',
-    '早上好', '谢谢', 'grazie', 'obrigado', 'спасибо', 'terima kasih', '감사합니다', 'merci',
-  ];
+  function rnd (a, b) { return a + Math.random() * (b - a) }
 
-  let W = 0;
-  let H = 0;
-  let dpr = 1;
+  /* ── 星点贴图 ── */
+  // 白 → 冰蓝 → 金 → 玫瑰 → 紫罗兰 → 青 → 品红 → 橙
+  var TINTS = [
+    [255, 255, 255],
+    [150, 205, 255],
+    [255, 206, 110],
+    [255, 130, 185],
+    [176, 140, 255],
+    [110, 240, 225],
+    [255, 110, 200],
+    [255, 152, 92]
+  ]
+  // 选色权重：大部分还是白/冷色，剩下的给足饱和度
+  var TINT_W = [0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 5, 6, 7]
+  var sprites = []
 
-  const RING = { cx: 0, cy: 0, rx: 150, ry: 44, tilt: -0.33 };
-  /* 标题净空区：流星进来就淡，别在字上划一道 */
-  const CLEAR = { x: 0, y: 0, rx: 1, ry: 1 };
-  const CAP = 6;
+  function makeSprite (rgb) {
+    var S = 64, c = document.createElement('canvas')
+    c.width = c.height = S
+    var g = c.getContext('2d')
+    var grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2)
+    grad.addColorStop(0.00, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',1)')
+    grad.addColorStop(0.16, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',.66)')
+    grad.addColorStop(0.38, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',.18)')
+    grad.addColorStop(0.68, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',.04)')
+    grad.addColorStop(1.00, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)')
+    g.fillStyle = grad
+    g.fillRect(0, 0, S, S)
+    return c
+  }
 
-  const meteors = [];
-  const orbiters = [];
-  const flashes = [];
-  const ripples = [];
-  const bubbles = [];
-  const mouse = { x: -9999, y: -9999, last: 0 };
-  let drag = null;
-  let raf = 0;
-  let last = 0;
-  let clock = 0;
-  let spawnAt = 0;
+  /* ── 星 ── */
+  var stars = []
+  var trailing = []
+  var q3 = true
+  var smoothDt = 0.016
+  var holdS = 0
+  var trailCap = 1
+  var slowFrames = 0
 
-  const SANS = () => getComputedStyle(root).getPropertyValue('--sans') || 'system-ui, sans-serif';
-  const INK = () => (root.dataset.theme === 'light' ? '22,30,48' : '255,255,255');
-  const ACCENT = () => getComputedStyle(root).getPropertyValue('--accent-rgb').trim() || '151,177,240';
-
-  const sizeCanvases = () => {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    W = window.innerWidth;
-    H = window.innerHeight;
-    [back, front].forEach((cv) => {
-      cv.width = Math.round(W * dpr);
-      cv.height = Math.round(H * dpr);
-      cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
-    });
-  };
-
-  const measureRing = () => {
-    const btn = document.querySelector('[data-enter]');
-    if (!btn) return;
-    const r = btn.getBoundingClientRect();
-    RING.cx = r.left + r.width / 2;
-    RING.cy = r.top + r.height / 2;
-    RING.rx = r.width / 2 + 64;
-    RING.ry = Math.max(40, r.height * 1.05);
-  };
-
-  /* 环上的参数角 → 屏幕坐标；front 表示这一半在按钮前面 */
-  const ringPoint = (a) => {
-    const ex = Math.cos(a) * RING.rx;
-    const ey = Math.sin(a) * RING.ry;
-    const c = Math.cos(RING.tilt);
-    const s = Math.sin(RING.tilt);
+  function makeStar (r, size, tier) {
+    var tint = Math.random() < 0.30 ? 0 : TINT_W[(Math.random() * TINT_W.length) | 0]
+    // 景深：0 = 很远很小很暗，1 = 很近很大很亮。亮暗、粗细、拖影长短全挂在这上面
+    var depth = tier === 2 ? rnd(0.90, 1.0) : tier === 1 ? rnd(0.55, 0.90) : Math.pow(Math.random(), 1.45)
     return {
-      x: RING.cx + ex * c - ey * s,
-      y: RING.cy + ex * s + ey * c,
-      front: ex * s + ey * c > 0,
-    };
-  };
+      depth: depth,
+      r: r,
+      a: Math.random() * TAU,
+      // 内圈快、外圈慢：这样才像绕天极转，而不是整体平移
+      // 真实星空：所有星同一个角速度绕天极转。之前按 r^-0.5 给了内圈更快，
+    // 结果整片像旋涡，不像长曝光。改成常数角速度后，拖影长度 ∝ 半径，才是照片。
+    w: 0.045 * rnd(0.95, 1.05),
+      size: size * (0.72 + 0.55 * depth),
+      tint: tint,
+      // 亮度跟景深走：近的亮、远的暗，不能一片一样
+      lum: (0.16 + 0.84 * depth) * rnd(0.82, 1.0),
+      tw: rnd(0.6, 2.4),
+      tws: rnd(0.35, 1.1),
+      spike: tier === 2,
+      trail: 0
+    }
+  }
 
-  /* 屏幕点 → 环上的参数角（拖动用） */
-  const ringAngleOf = (x, y) => {
-    const dx = x - RING.cx;
-    const dy = y - RING.cy;
-    const c = Math.cos(RING.tilt);
-    const s = Math.sin(RING.tilt);
-    const lx = dx * c + dy * s;
-    const ly = -dx * s + dy * c;
-    return Math.atan2(ly / RING.ry, lx / RING.rx);
-  };
+  function seed () {
+    stars.length = 0
+    trailing = []
+    var maxR = Math.hypot(Math.max(pole.x, W - pole.x), Math.max(pole.y, H - pole.y)) * 1.15
+    // 远：多、小、几乎不动；中：一层过渡；近：少、大、亮、拖影长
+    for (var i = 0; i < 760; i++) stars.push(makeStar(Math.pow(Math.random(), 0.55) * maxR, rnd(0.34, 0.86), 0))
+    for (var j = 0; j < 220; j++) stars.push(makeStar(Math.pow(Math.random(), 0.70) * maxR, rnd(0.85, 1.5), 1))
+    for (var k = 0; k < 10; k++) stars.push(makeStar(rnd(0.30, 1.0) * maxR, rnd(1.8, 2.6), 2))
+    // 只有够亮的星才留影（暗星在长曝光里本来也拍不出来），顺带省一半拖影开销
+    for (var m = 0; m < stars.length; m++) if (stars[m].lum > 0.60) trailing.push(stars[m])
+  // 按亮度降序：渐入时先出现最亮的，暗的垫后，看不到「突然多出一批」的跳变
+  trailing.sort(function (a, b) { return b.lum - a.lum })
+  }
 
-  const ringDist = (x, y) => {
-    const dx = x - RING.cx;
-    const dy = y - RING.cy;
-    const c = Math.cos(RING.tilt);
-    const s = Math.sin(RING.tilt);
-    const lx = dx * c + dy * s;
-    const ly = -dx * s + dy * c;
-    const nx = lx / RING.rx;
-    const ny = ly / RING.ry;
-    return { r: Math.hypot(nx, ny), nx, ny };
-  };
+  /* ── 长按 ── */
+  var hold = 0, holdTarget = 0, entered = false
 
-  let pool = [];
-  const pickWord = () => {
-    if (!pool.length) {
-      pool = WORDS.slice();
-      for (let i = pool.length - 1; i > 0; i -= 1) {
-        const k = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[k]] = [pool[k], pool[i]];
+  function onDown (e) {
+    if (e.target && e.target.closest && e.target.closest('[data-enter]')) return
+    holdTarget = 1
+  }
+  function onUp () { holdTarget = 0 }
+
+  /* ── 尺寸 ── */
+  function resize () {
+    W = window.innerWidth
+    H = window.innerHeight
+    cvs.width = Math.round(W * DPR)
+    cvs.height = Math.round(H * DPR)
+    cvs.style.width = W + 'px'
+    cvs.style.height = H + 'px'
+    cx = W / 2; cy = H / 2
+    // 天极偏左上，整片星空扫过来是斜的，比正中好看
+    pole.x = W * 0.26
+    pole.y = H * 0.18
+    buildCache()
+    seed()
+  }
+
+  /* ── 背景：底色 + 三团极淡的星云 ── */
+  var NEBULA = [
+    { x: 0.24, y: 0.26, r: 0.52, c: '122,66,255', a: 0.26, s: 0.030 },
+    { x: 0.80, y: 0.66, r: 0.46, c: '24,178,190', a: 0.22, s: -0.024 },
+    { x: 0.56, y: 0.94, r: 0.44, c: '214,58,150', a: 0.21, s: 0.019 },
+    { x: 0.72, y: 0.14, r: 0.34, c: '58,116,250', a: 0.17, s: -0.031 },
+    { x: 0.12, y: 0.80, r: 0.30, c: '255,138,64', a: 0.11, s: 0.026 }
+  ]
+
+  // 背景与暗角都预渲染一次：每帧重画三张全屏径向渐变太贵（软件渲染直接卡死）
+  var bgCache = null
+  var vigCache = null
+  var trailCv = null
+  var trailCtx = null
+  var TR = 0.5
+
+  function buildCache () {
+    bgCache = document.createElement('canvas')
+    bgCache.width = Math.max(2, Math.round(W))
+    bgCache.height = Math.max(2, Math.round(H))
+    var b = bgCache.getContext('2d')
+    b.fillStyle = '#04060d'
+    b.fillRect(0, 0, W, H)
+    for (var i = 0; i < NEBULA.length; i++) {
+      var n = NEBULA[i]
+      var g = b.createRadialGradient(n.x * W, n.y * H, 0, n.x * W, n.y * H, n.r * Math.max(W, H))
+      g.addColorStop(0, 'rgba(' + n.c + ',' + n.a + ')')
+      g.addColorStop(1, 'rgba(' + n.c + ',0)')
+      b.fillStyle = g
+      b.fillRect(0, 0, W, H)
+    }
+
+    trailCv = document.createElement('canvas')
+    trailCv.width = Math.max(2, Math.round(W * TR))
+    trailCv.height = Math.max(2, Math.round(H * TR))
+    trailCtx = trailCv.getContext('2d')
+
+    // 地平线：底部一层暖光（远处城市的光污染）+ 贴底压暗，纯星空才有「拍到的照片」感
+    var hz = b.createLinearGradient(0, H * 0.62, 0, H)
+    hz.addColorStop(0, 'rgba(255,150,80,0)')
+    hz.addColorStop(0.55, 'rgba(255,150,80,0.075)')
+    hz.addColorStop(1, 'rgba(255,120,60,0.16)')
+    b.fillStyle = hz
+    b.fillRect(0, H * 0.62, W, H * 0.38)
+    var hg = b.createRadialGradient(W * 0.62, H * 1.05, 0, W * 0.62, H * 1.05, Math.max(W, H) * 0.55)
+    hg.addColorStop(0, 'rgba(255,146,72,0.20)')
+    hg.addColorStop(1, 'rgba(255,146,72,0)')
+    b.fillStyle = hg
+    b.fillRect(0, 0, W, H)
+    var bt = b.createLinearGradient(0, H * 0.80, 0, H)
+    bt.addColorStop(0, 'rgba(2,3,7,0)')
+    bt.addColorStop(1, 'rgba(2,3,7,0.55)')
+    b.fillStyle = bt
+    b.fillRect(0, H * 0.80, W, H * 0.20)
+
+    vigCache = document.createElement('canvas')
+    vigCache.width = bgCache.width
+    vigCache.height = bgCache.height
+    var v2 = vigCache.getContext('2d')
+    var vg = v2.createRadialGradient(cx, cy, Math.min(W, H) * 0.26, cx, cy, Math.max(W, H) * 0.74)
+    vg.addColorStop(0, 'rgba(2,3,8,0)')
+    vg.addColorStop(1, 'rgba(2,3,8,1)')
+    v2.fillStyle = vg
+    v2.fillRect(0, 0, W, H)
+  }
+
+  function drawBackdrop () {
+    ctx.drawImage(bgCache, 0, 0, W, H)
+  }
+
+  /* ── 拖影：批量画。同色同粗细的弧攒成一个 path，一次 stroke ──
+     逐颗开 path 的话，按住那一刻一帧里要 stroke 上千次，开始和结束就会抽帧。 */
+  var GRP = []
+  function grp (gi) {
+    var g = GRP[gi]
+    if (!g) g = GRP[gi] = { n: 0, xs: [], ys: [], rs: [], a0: [], a1: [] }
+    return g
+  }
+  var WDEPTH = [0.55, 0.9, 1.3]
+  for (var gi = 0; gi < 216 + 8; gi++) grp(gi)
+
+  /* 亮的那一批：整条弧用「尾暗头亮」的线性渐变一次画完。
+     分段画会有三条硬边，渐变才是真实曝光的长相。
+     暗的那一批照旧批量描 —— 它们本来就看不见接缝，省下的是每帧几十次 stroke。 */
+  function drawTrails (fade) {
+    var i, j
+    for (i = 0; i < GRP.length; i++) if (GRP[i]) { GRP[i].n = 0; GRP[i].lit = 0; GRP[i].cnt = 0 }
+
+    var jmax = Math.ceil(trailing.length * trailCap * Math.min(1, holdS * 1.8))
+    var smoothN = Math.min(jmax, Math.round(120 * trailCap))
+    var len = holdS * 0.62
+
+    for (j = 0; j < jmax; j++) {
+      var s = trailing[j]
+      if (len < 0.008) continue
+      var head = s.a, tail = head - len
+      var lit = s.lum * (0.72 + 0.28 * Math.sin(s.tw * s.tws + pt * 1.4))
+
+      if (j < smoothN && len > 0.03) {
+        var t = TINTS[s.tint]
+        var tx = pole.x + Math.cos(tail) * s.r, ty = pole.y + Math.sin(tail) * s.r
+        var hx = pole.x + Math.cos(head) * s.r, hy = pole.y + Math.sin(head) * s.r
+        var peak = Math.min(0.95, (0.34 + 0.62 * s.lum) * fade)
+        var gr = ctx.createLinearGradient(tx, ty, hx, hy)
+        gr.addColorStop(0, 'rgba(' + t + ',0)')
+        gr.addColorStop(0.20, 'rgba(' + t + ',' + (peak * 0.11).toFixed(3) + ')')
+        gr.addColorStop(0.50, 'rgba(' + t + ',' + (peak * 0.36).toFixed(3) + ')')
+        gr.addColorStop(0.78, 'rgba(' + t + ',' + (peak * 0.66).toFixed(3) + ')')
+        gr.addColorStop(1, 'rgba(' + t + ',' + peak.toFixed(3) + ')')
+        ctx.strokeStyle = gr
+        ctx.lineWidth = Math.max(0.7, s.size * 0.78)
+        ctx.beginPath()
+        ctx.moveTo(tx, ty)
+        ctx.arc(pole.x, pole.y, s.r, tail, head)
+        ctx.stroke()
+        continue
+      }
+
+      var b = s.depth < 0.5 ? 0 : (s.depth < 0.78 ? 1 : 2)
+      var g = grp((s.tint * 3 + b) * 3)
+      var n = g.n
+      g.xs[n] = pole.x + Math.cos(tail) * s.r
+      g.ys[n] = pole.y + Math.sin(tail) * s.r
+      g.rs[n] = s.r
+      g.a0[n] = tail
+      g.a1[n] = head
+      g.n = n + 1
+      g.lit = (g.lit || 0) + lit * fade
+      g.cnt = (g.cnt || 0) + 1
+    }
+
+    for (i = 0; i < GRP.length; i++) {
+      var G = GRP[i]
+      if (!G || !G.n || !G.cnt) continue
+      var ti = Math.floor(i / 9), bi = Math.floor((i % 9) / 3)
+      var tint = TINTS[ti]
+      var alpha = (G.lit / G.cnt) * 0.42
+      if (alpha < 0.006) continue
+      ctx.strokeStyle = 'rgba(' + tint[0] + ',' + tint[1] + ',' + tint[2] + ',' + alpha.toFixed(3) + ')'
+      ctx.lineWidth = WDEPTH[bi] * 0.85
+      ctx.beginPath()
+      for (var q = 0; q < G.n; q++) {
+        ctx.moveTo(G.xs[q], G.ys[q])
+        ctx.arc(pole.x, pole.y, G.rs[q], G.a0[q], G.a1[q])
+      }
+      ctx.stroke()
+    }
+  }
+
+  /* ── 星点 ── */
+  function drawStar (s) {
+    var x = pole.x + Math.cos(s.a) * s.r
+    var y = pole.y + Math.sin(s.a) * s.r
+    var d = s.size * (s.spike ? 8.4 : 5.6)
+    var pad = d
+    if (x < -pad || x > W + pad || y < -pad || y > H + pad) return
+
+    var born = pt < 0.8 ? pt / 0.8 : 1     // 开场半秒里星星慢慢浮出来，第一批帧不至于一上来就满负荷
+    if (born < 0.05) return
+    var lit = (0.64 + 0.36 * Math.sin(s.tw * s.tws + pt * 1.4)) * s.lum
+    ctx.globalAlpha = Math.min(1, (0.34 + lit * 1.15) * born)
+    ctx.drawImage(sprites[s.tint], x - d / 2, y - d / 2, d, d)
+
+    // 彩色光晕：亮星外面再糊一圈同色的光，画面才「艳」
+    if (s.size > 1.0) {
+      var dh = d * 2.6
+      ctx.globalAlpha = 0.16 * lit
+      ctx.drawImage(sprites[s.tint], x - dh / 2, y - dh / 2, dh, dh)
+    }
+
+    if (s.spike) {
+      ctx.globalAlpha = 0.13 * lit
+      ctx.strokeStyle = 'rgba(' + TINTS[s.tint].join(',') + ',1)'
+      ctx.lineWidth = 0.8
+      ctx.beginPath()
+      ctx.moveTo(x - d * 1.05, y); ctx.lineTo(x + d * 1.05, y)
+      ctx.moveTo(x, y - d * 1.05); ctx.lineTo(x, y + d * 1.05)
+      ctx.stroke()
+    }
+    ctx.globalAlpha = 1
+  }
+
+  function frame (ts) {
+    if (!last) last = ts
+    var dt = Math.min(0.05, (ts - last) / 1000)
+    last = ts
+    pt += dt
+
+    // dt 抖动会让转速跟着抖，这里对 hold 再平滑一次，转速只跟「意图」走
+    hold += (holdTarget - hold) * Math.min(1, dt * 3.2)
+    holdS += (hold - holdS) * Math.min(1, dt * 7)
+    var speed = 1 + holdS * 5.5
+
+    // 卡了就自动降一档：远星少画一半、拖影少一段。宁可少画，也不要一路掉帧
+    smoothDt = smoothDt * 0.92 + dt * 0.08
+    if (!q3) { if (smoothDt < 0.019) q3 = true }
+    else if (smoothDt > 0.028) q3 = false
+    // 一直慢就把拖影总量再砍一半，宁可稀一点，也不要顿
+    if (smoothDt > 0.024) { if (++slowFrames > 18 && trailCap > 0.5) { trailCap = 0.5; slowFrames = 0 } }
+    else slowFrames = 0
+
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
+    drawBackdrop()
+
+    var anyTrail = false
+
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i]
+      s.a += s.w * speed * dt
+      if (s.a > TAU) s.a -= TAU
+    }
+    if (hold > 0.02) anyTrail = true
+
+    ctx.globalCompositeOperation = 'lighter'
+    ctx.lineCap = 'round'
+
+    if (anyTrail) drawTrails(Math.min(1, hold * 1.7))
+
+    for (var k = 0; k < stars.length; k++) {
+      if (!q3 && stars[k].depth < 0.38) continue
+      drawStar(stars[k])
+    }
+
+    ctx.globalCompositeOperation = 'source-over'
+
+
+
+    requestAnimationFrame(frame)
+  }
+
+  /* ── 进门 ── */
+  function enter () {
+    if (entered) return
+    entered = true
+    // 按下去的第一下就加速星空，遮罩盖上时它正在转，两页看起来是一个镜头
+    holdTarget = 1
+    document.body.classList.add('leaving')
+    if (window.kfGo) return window.kfGo('./cards.html', { ms: 470 })
+    var veil = document.createElement('div')
+    veil.style.cssText = 'position:fixed;inset:0;z-index:99;background:#04060d;opacity:0;transition:opacity .52s ease'
+    document.body.appendChild(veil)
+    requestAnimationFrame(function () { veil.style.opacity = '1' })
+    setTimeout(function () { window.location.href = './cards.html?t=fade' }, 540)
+  }
+
+  window.addEventListener('resize', resize)
+  window.addEventListener('pointerdown', onDown, { passive: true })
+  window.addEventListener('pointerup', onUp, { passive: true })
+  window.addEventListener('pointercancel', onUp, { passive: true })
+  window.addEventListener('blur', onUp)
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      if (e.target && e.target.closest && e.target.closest('input,textarea')) return
+      e.preventDefault(); enter()
+    }
+  })
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-enter]')) enter()
+  })
+
+  sprites = TINTS.map(makeSprite)
+  resize()
+  requestAnimationFrame(frame)
+
+  // 调试：__sky.preset(1) 直接看到长曝光那一眼，preset(0) 回到纯星空
+  window.__sky = {
+    hold: function (v) { holdTarget = v ? 1 : 0 },
+    preset: function (len) {
+      holdTarget = len ? 1 : 0
+      hold = len ? 1 : 0
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].trail = len ? 2.3 : 0
+        stars[i].a = Math.random() * TAU
       }
     }
-    return pool.pop();
-  };
-
-  const spawnMeteor = (x, y) => {
-    const ang = Math.PI / 5.2 + (Math.random() - 0.5) * 0.12;
-    const sp = 300 + Math.random() * 220;
-    meteors.push({
-      x,
-      y,
-      vx: Math.cos(ang) * sp,
-      vy: Math.sin(ang) * sp,
-      text: pickWord(),
-      size: 12 + Math.round(Math.random() * 6),
-      al: 0.5 + Math.random() * 0.3,
-      tint: Math.random() < 0.34,
-      t: 0,
-    });
-  };
-
-  const spawnFromEdge = () => {
-    if (Math.random() < 0.62) spawnMeteor(-120 + Math.random() * W * 0.72, -60 - Math.random() * 120);
-    else spawnMeteor(-140 - Math.random() * 140, -40 + Math.random() * H * 0.4);
-  };
-
-  /* 被顶掉的环上流星：变回流星，沿切线往右下飞 */
-  const releaseOrbiter = (i) => {
-    const o = orbiters[i];
-    if (!o) return;
-    orbiters.splice(i, 1);
-    const p = ringPoint(o.a);
-    const c = Math.cos(RING.tilt);
-    const s = Math.sin(RING.tilt);
-    const tx = -Math.sin(o.a) * RING.rx;
-    const ty = Math.cos(o.a) * RING.ry;
-    let dx = tx * c - ty * s;
-    let dy = tx * s + ty * c;
-    const len = Math.hypot(dx, dy) || 1;
-    dx /= len;
-    dy /= len;
-    if (dx < 0.2) dx = Math.abs(dx);
-    if (dy < 0.12) dy = Math.abs(dy) * 0.8 + 0.25;
-    const sp = 360 + Math.random() * 140;
-    meteors.push({ x: p.x, y: p.y, vx: dx * sp, vy: dy * sp, text: o.text, size: o.size, al: 0.5, t: 0 });
-    flashes.push({ x: p.x, y: p.y, t0: clock });
-  };
-
-  const capture = (m, hit) => {
-    if (orbiters.length >= CAP) {
-      const incoming = Math.atan2(hit.ny, hit.nx);
-      let best = 0;
-      let bestD = Infinity;
-      orbiters.forEach((o, i) => {
-        const d = Math.abs(((o.a - incoming + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-        if (d < bestD) {
-          bestD = d;
-          best = i;
-        }
-      });
-      releaseOrbiter(best);
-    }
-    /* 落在环上最空的那一段，别几颗挤在一起 */
-    const TAU = Math.PI * 2;
-    let spot = Math.atan2(hit.ny, hit.nx);
-    if (orbiters.length) {
-      const as = orbiters.map((o) => (((o.a % TAU) + TAU) % TAU)).sort((x, y) => x - y);
-      let bestGap = -1;
-      for (let i = 0; i < as.length; i += 1) {
-        const a0 = as[i];
-        const a1 = i + 1 < as.length ? as[i + 1] : as[0] + TAU;
-        const gap = a1 - a0;
-        if (gap > bestGap) {
-          bestGap = gap;
-          spot = a0 + gap / 2;
-        }
-      }
-    }
-    orbiters.push({
-      a: spot,
-      av: (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.3),
-      text: m.text,
-      size: Math.max(12, m.size - 1),
-    });
-    flashes.push({ x: m.x, y: m.y, t0: clock });
-  };
-
-  /* 环上的浮尘：一丁点一丁点，慢慢绕着走 */
-  let dust = null;
-  const makeDust = () => {
-    dust = [];
-    for (let i = 0; i < 48; i += 1) {
-      dust.push({
-        a: Math.random() * Math.PI * 2,
-        k: 0.9 + Math.random() * 0.12,
-        sp: (Math.random() - 0.5) * 0.05,
-        r: 0.55 + Math.random() * 1.05,
-      });
-    }
-  };
-
-  /* 背景：主色一团很淡的光 + 四角压暗，眼睛舒服，也有纵深 */
-  const drawBackdrop = () => {
-    const accent = ACCENT();
-    const g = ctxB.createRadialGradient(RING.cx, RING.cy, 0, RING.cx, RING.cy, Math.max(W, H) * 0.66);
-    g.addColorStop(0, `rgba(${accent},0.08)`);
-    g.addColorStop(0.42, `rgba(${accent},0.032)`);
-    g.addColorStop(1, `rgba(${accent},0)`);
-    ctxB.fillStyle = g;
-    ctxB.fillRect(0, 0, W, H);
-
-    const v = ctxB.createRadialGradient(W * 0.5, H * 0.44, Math.min(W, H) * 0.2, W * 0.5, H * 0.44, Math.max(W, H) * 0.8);
-    v.addColorStop(0, 'rgba(0,0,0,0)');
-    v.addColorStop(1, 'rgba(0,0,0,0.36)');
-    ctxB.fillStyle = v;
-    ctxB.fillRect(0, 0, W, H);
-  };
-
-  const drawRing = (time) => {
-    const seg = 150;
-    const c = Math.cos(RING.tilt);
-    const s = Math.sin(RING.tilt);
-    const accent = ACCENT();
-    const ink = INK();
-    const hi = (time * 0.5) % (Math.PI * 2);
-    const lk = root.dataset.theme === 'light' ? 1.8 : 1;  /* 浅色底上环要更实一点 */
-
-    const put = (ctx, a0, a1, k, lw, al, col) => {
-      const e0x = Math.cos(a0) * RING.rx;
-      const e0y = Math.sin(a0) * RING.ry;
-      const e1x = Math.cos(a1) * RING.rx;
-      const e1y = Math.sin(a1) * RING.ry;
-      ctx.strokeStyle = `rgba(${col},${Math.max(0.015, al)})`;
-      ctx.lineWidth = lw;
-      ctx.beginPath();
-      ctx.moveTo(RING.cx + e0x * k * c - e0y * k * s, RING.cy + e0x * k * s + e0y * k * c);
-      ctx.lineTo(RING.cx + e1x * k * c - e1y * k * s, RING.cy + e1x * k * s + e1y * k * c);
-      ctx.stroke();
-    };
-
-    for (let i = 0; i < seg; i += 1) {
-      const a0 = (i / seg) * Math.PI * 2;
-      const a1 = ((i + 1) / seg) * Math.PI * 2;
-      const e0x = Math.cos(a0) * RING.rx;
-      const e0y = Math.sin(a0) * RING.ry;
-      const isFront = e0x * s + e0y * c > 0;
-      const ctx = isFront ? ctxF : ctxB;
-
-      /* 一段绕着走的亮边，环才不像一根死线 */
-      const d = Math.abs(((a0 - hi + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-      const bump = Math.max(0, 1 - d / 0.95);
-      const base = isFront ? 0.26 : 0.1;
-      const glow = (base + 0.42 * bump * bump) * lk;
-
-      /* 三圈叠出厚度：外沿亮、中段柔、内沿极淡 */
-      put(ctx, a0, a1, 1, isFront ? 1.5 : 1.1, glow, ink);
-      put(ctx, a0, a1, 0.972, isFront ? 1.0 : 0.8, glow * 0.5, ink);
-      put(ctx, a0, a1, 0.938, 0.8, base * 0.5, ink);
-      if (bump > 0.05) put(ctx, a0, a1, 1.008, 2.6, 0.05 * bump, accent);
-    }
-
-    /* 浮尘 */
-    if (dust) {
-      dust.forEach((p) => {
-        const a = p.a + p.sp * time;
-        const ex = Math.cos(a) * RING.rx * p.k;
-        const ey = Math.sin(a) * RING.ry * p.k;
-        const front = ex * s + ey * c > 0;
-        const ctx = front ? ctxF : ctxB;
-        ctx.fillStyle = `rgba(${ink},${front ? 0.22 : 0.1})`;
-        ctx.beginPath();
-        ctx.arc(RING.cx + ex * c - ey * s, RING.cy + ex * s + ey * c, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-  };
-
-  const drawOrbiters = (time) => {
-    const accent = ACCENT();
-    const ink = INK();
-    const font = SANS();
-    orbiters.forEach((o) => {
-      const p = ringPoint(o.a);
-      const ctx = p.front ? ctxF : ctxB;
-      const pulse = 0.55 + 0.25 * Math.sin(time * 1.8 + o.a);
-      /* 光点 + 光晕 */
-      const hg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 13);
-      hg.addColorStop(0, `rgba(${accent},${pulse})`);
-      hg.addColorStop(0.4, `rgba(${accent},${pulse * 0.34})`);
-      hg.addColorStop(1, `rgba(${accent},0)`);
-      ctx.fillStyle = hg;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 13, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = `rgba(${ink},${p.front ? 0.95 : 0.5})`;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      const nx = p.x - RING.cx;
-      const ny = p.y - RING.cy;
-      const nl = Math.hypot(nx, ny) || 1;
-      ctx.font = `${o.size}px ${font}`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,.35)';
-      ctx.shadowBlur = 6;
-      /* 后半圈的字放进环里，免得顶到标题 */
-      const out = p.front ? 19 : -15;
-      ctx.fillStyle = `rgba(${ink},${p.front ? 0.92 : 0.4})`;
-      ctx.fillText(o.text, p.x + (nx / nl) * out, p.y + (ny / nl) * out);
-      ctx.shadowBlur = 0;
-    });
-  };
-
-  const drawMeteors = () => {
-    const ink = INK();
-    const accent = ACCENT();
-    const font = SANS();
-    ctxB.lineCap = 'round';
-    meteors.forEach((m) => {
-      const fade = m.t < 0.18 ? m.t / 0.18 : 1;
-      const v = Math.hypot(m.vx, m.vy) || 1;
-      const ux = m.vx / v;
-      const uy = m.vy / v;
-      const tail = 96 + v * 0.28;
-      const col = m.tint ? accent : ink;
-      /* 钻到标题那一块就淡下去，字上不留划痕 */
-      const cdx = (m.x - CLEAR.x) / CLEAR.rx;
-      const cdy = (m.y - CLEAR.y) / CLEAR.ry;
-      const cdl = Math.hypot(cdx, cdy);
-      const clearK = cdl >= 1 ? 1 : 0.12 + 0.88 * Math.pow(cdl, 1.6);
-      const al = m.al * fade * clearK;
-
-      /* 三层尾巴：短而亮、中段、长而淡 —— 渐细渐隐才像流星 */
-      [[1, 1.7, 0.95], [0.58, 1.1, 0.42], [0.3, 0.7, 0.16]].forEach(([lenK, lw, aK]) => {
-        const tx = m.x - ux * tail * lenK;
-        const ty = m.y - uy * tail * lenK;
-        const g = ctxB.createLinearGradient(m.x, m.y, tx, ty);
-        g.addColorStop(0, `rgba(${col},${al * aK})`);
-        g.addColorStop(0.65, `rgba(${col},${al * aK * 0.22})`);
-        g.addColorStop(1, `rgba(${col},0)`);
-        ctxB.strokeStyle = g;
-        ctxB.lineWidth = lw;
-        ctxB.beginPath();
-        ctxB.moveTo(m.x, m.y);
-        ctxB.lineTo(tx, ty);
-        ctxB.stroke();
-      });
-
-      /* 头：亮核 + 光晕 */
-      const hg = ctxB.createRadialGradient(m.x, m.y, 0, m.x, m.y, 10);
-      hg.addColorStop(0, `rgba(${col},${Math.min(1, al * 1.15)})`);
-      hg.addColorStop(0.32, `rgba(${col},${al * 0.36})`);
-      hg.addColorStop(1, `rgba(${col},0)`);
-      ctxB.fillStyle = hg;
-      ctxB.beginPath();
-      ctxB.arc(m.x, m.y, 10, 0, Math.PI * 2);
-      ctxB.fill();
-      ctxB.fillStyle = `rgba(${col},${Math.min(1, al * 1.2)})`;
-      ctxB.beginPath();
-      ctxB.arc(m.x, m.y, 1.4, 0, Math.PI * 2);
-      ctxB.fill();
-
-      /* 词 */
-      ctxB.font = `${m.size}px ${font}`;
-      ctxB.textAlign = 'left';
-      ctxB.textBaseline = 'middle';
-      ctxB.fillStyle = `rgba(${col},${al * 0.92})`;
-      ctxB.fillText(m.text, m.x + 11, m.y + 1);
-    });
-  };
-
-  const drawExtras = (time) => {
-    const ink = INK();
-    const accent = ACCENT();
-
-    /* 捕获/点击的闪光：一团柔光 + 一圈扩散 */
-    for (let i = flashes.length - 1; i >= 0; i -= 1) {
-      const f = flashes[i];
-      const age = time - f.t0;
-      if (age > 0.66) {
-        flashes.splice(i, 1);
-        continue;
-      }
-      const p = age / 0.66;
-      const e = 1 - Math.pow(1 - p, 2.2);
-      const rad = Math.max(2, 6 + e * 36);
-      const g = ctxB.createRadialGradient(f.x, f.y, 0, f.x, f.y, rad);
-      g.addColorStop(0, `rgba(${accent},${0.2 * (1 - p)})`);
-      g.addColorStop(0.55, `rgba(${ink},${0.1 * (1 - p)})`);
-      g.addColorStop(1, `rgba(${ink},0)`);
-      ctxB.fillStyle = g;
-      ctxB.beginPath();
-      ctxB.arc(f.x, f.y, rad, 0, Math.PI * 2);
-      ctxB.fill();
-      /* 只留柔光，不画硬圈 —— 硬圈在暗底上看着像 UI 元件，不像光 */
-      const core = ctxB.createRadialGradient(f.x, f.y, 0, f.x, f.y, rad * 0.42);
-      core.addColorStop(0, `rgba(${ink},${0.15 * (1 - p)})`);
-      core.addColorStop(1, `rgba(${ink},0)`);
-      ctxB.fillStyle = core;
-      ctxB.beginPath();
-      ctxB.arc(f.x, f.y, rad * 0.42, 0, Math.PI * 2);
-      ctxB.fill();
-    }
-
-    /* 涟漪：三圈按同一个缓动推开，中心再补一团柔光 */
-    for (let i = ripples.length - 1; i >= 0; i -= 1) {
-      const r = ripples[i];
-      const age = time - r.t0;
-      if (age > 1.6) {
-        ripples.splice(i, 1);
-        continue;
-      }
-      const p = age / 1.6;
-      const ease = 1 - Math.pow(1 - p, 2.6);
-      const fade = Math.pow(1 - p, 1.9);
-      const rr = 16 + ease * 150;
-
-      const disc = ctxB.createRadialGradient(r.x, r.y, 0, r.x, r.y, rr * 0.55);
-      disc.addColorStop(0, `rgba(${accent},${0.06 * fade})`);
-      disc.addColorStop(0.6, `rgba(${ink},${0.035 * fade})`);
-      disc.addColorStop(1, `rgba(${ink},0)`);
-      ctxB.fillStyle = disc;
-      ctxB.beginPath();
-      ctxB.arc(r.x, r.y, rr * 0.55, 0, Math.PI * 2);
-      ctxB.fill();
-
-      [[1, 0.34, 1.5], [0.74, 0.16, 1.05], [0.5, 0.08, 0.85]].forEach(([k, aK, lw]) => {
-        ctxB.strokeStyle = `rgba(${ink},${aK * fade})`;
-        ctxB.lineWidth = lw;
-        ctxB.beginPath();
-        ctxB.arc(r.x, r.y, Math.max(1, rr * k), 0, Math.PI * 2);
-        ctxB.stroke();
-      });
-    }
-
-    /* 水泡：一圈亮边 + 左上角一点高光，往上飘 */
-    for (let i = bubbles.length - 1; i >= 0; i -= 1) {
-      const b = bubbles[i];
-      const bAge = time - b.t0;
-      if (bAge < 0 || bAge > b.life) continue;
-      const bp = bAge / b.life;
-      const rr = b.r * (0.75 + 0.55 * bp);
-      const a = b.al * Math.pow(1 - bp, 1.35) * Math.min(1, bp / 0.12);
-      const gg = ctxB.createRadialGradient(b.x, b.y, 0, b.x, b.y, rr);
-      gg.addColorStop(0, `rgba(${ink},0)`);
-      gg.addColorStop(0.62, `rgba(${ink},${a * 0.05})`);
-      gg.addColorStop(1, `rgba(${ink},${a * 0.13})`);
-      ctxB.fillStyle = gg;
-      ctxB.beginPath();
-      ctxB.arc(b.x, b.y, rr, 0, Math.PI * 2);
-      ctxB.fill();
-      ctxB.strokeStyle = `rgba(${ink},${a * 0.4})`;
-      ctxB.lineWidth = 0.9;
-      ctxB.beginPath();
-      ctxB.arc(b.x, b.y, rr, 0, Math.PI * 2);
-      ctxB.stroke();
-      ctxB.fillStyle = `rgba(${ink},${a * 0.72})`;
-      ctxB.beginPath();
-      ctxB.arc(b.x - rr * 0.3, b.y - rr * 0.32, Math.max(0.7, rr * 0.19), 0, Math.PI * 2);
-      ctxB.fill();
-    }
-
-    /* 鼠标周围的一圈微光 */
-    if (mouse.x > -1000) {
-      const g = ctxB.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 170);
-      g.addColorStop(0, `rgba(${accent},0.05)`);
-      g.addColorStop(1, `rgba(${accent},0)`);
-      ctxB.fillStyle = g;
-      ctxB.beginPath();
-      ctxB.arc(mouse.x, mouse.y, 170, 0, Math.PI * 2);
-      ctxB.fill();
-    }
-  };
-
-  /* 系统开了「减少动态效果」：放慢、少放几颗，但不停 —— 停了这页就成一张静止图了 */
-  const speed = reduce ? 0.5 : 1;
-  let t0 = 0;
-
-  const frame = (ts) => {
-    if (!t0) t0 = ts;
-    const t = ((ts - t0) / 1000) * speed;
-    clock = t;
-    /* 先预约下一帧再画：某一帧就算抛错，动画也不会就此停死 */
-    raf = requestAnimationFrame(frame);
-    const dt = last ? Math.min(0.05, t - last) : 0.016;
-    last = t;
-
-    ctxB.clearRect(0, 0, W, H);
-    ctxF.clearRect(0, 0, W, H);
-
-    if (t > spawnAt && meteors.length < 7) {
-      spawnAt = t + (reduce ? 1.1 : 0.42) + Math.random() * (reduce ? 1.4 : 0.7);
-      spawnFromEdge();
-    }
-
-    for (let i = meteors.length - 1; i >= 0; i -= 1) {
-      const m = meteors[i];
-      m.t += dt;
-      m.x += m.vx * dt;
-      m.y += m.vy * dt;
-      if (Math.abs(m.x - RING.cx) < RING.rx * 1.7 && Math.abs(m.y - RING.cy) < RING.ry * 2.6) {
-        const d = ringDist(m.x, m.y);
-        if (Math.abs(d.r - 1) < 0.055) {
-          capture(m, d);
-          meteors.splice(i, 1);
-          continue;
-        }
-      }
-      if (m.x > W + 260 || m.y > H + 260) meteors.splice(i, 1);
-    }
-
-    orbiters.forEach((o) => {
-      if (drag && drag.i === orbiters.indexOf(o)) return;
-      o.a += o.av * dt;
-    });
-
-    /* 水泡：往上飘、左右微摆，慢慢涨大再破掉 */
-    for (let i = bubbles.length - 1; i >= 0; i -= 1) {
-      const b = bubbles[i];
-      const age = t - b.t0;
-      if (age > b.life) {
-        bubbles.splice(i, 1);
-        continue;
-      }
-      b.y += b.vy * dt;
-      b.x += Math.sin(age * 3.4 + b.ph) * 22 * dt;
-    }
-
-    drawBackdrop(t);
-    drawMeteors();
-    drawExtras(t);
-    drawRing(t);
-    drawOrbiters(t);
-
-  };
-
-  /* 脚本要是没跑起来（被预览面板拦了、或被禁），至少给一行字，别让人对着死图猜 */
-  setTimeout(() => {
-    if (!raf) return;
-    if (last > 0.05) return;
-    const tip = document.createElement('div');
-    tip.textContent = '动画没跑起来 —— 用 Chrome 直接打开这个文件，别在预览面板里看';
-    tip.style.cssText = 'position:fixed;left:0;right:0;bottom:18px;text-align:center;font:12px/1.6 system-ui;color:rgba(255,255,255,.4);pointer-events:none';
-    document.body.appendChild(tip);
-  }, 1400);
-
-  const hitOrbiter = (x, y) => {
-    for (let i = 0; i < orbiters.length; i += 1) {
-      const p = ringPoint(orbiters[i].a);
-      if (Math.hypot(p.x - x, p.y - y) < 30) return i;
-    }
-    return -1;
-  };
-
-  const onDown = (e) => {
-    if (e.target.closest('[data-enter]')) return;
-    const i = hitOrbiter(e.clientX, e.clientY);
-    if (i >= 0) {
-      drag = { i };
-      document.body.style.cursor = 'grabbing';
-      e.preventDefault();
-    }
-  };
-
-  const onMove = (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-    const now = performance.now();
-    /* 鼠标滑过只吐水泡；涟漪留给点击 */
-    if (now - mouse.last > 60) {
-      mouse.last = now;
-      const n = Math.random() < 0.55 ? 1 : 2;
-      for (let i = 0; i < n; i += 1) {
-        bubbles.push({
-          x: mouse.x + (Math.random() - 0.5) * 26,
-          y: mouse.y + (Math.random() - 0.5) * 18,
-          r: 2.6 + Math.random() * 7.2,
-          vy: -(12 + Math.random() * 26),
-          ph: Math.random() * Math.PI * 2,
-          t0: clock,
-          life: 0.9 + Math.random() * 0.9,
-          al: 0.5 + Math.random() * 0.32,
-        });
-      }
-      if (bubbles.length > 70) bubbles.splice(0, bubbles.length - 70);
-    }
-    if (drag) {
-      const o = orbiters[drag.i];
-      if (o) o.a = ringAngleOf(e.clientX, e.clientY);
-      return;
-    }
-    const hit = hitOrbiter(e.clientX, e.clientY) >= 0;
-    document.body.style.cursor = hit ? 'grab' : '';
-  };
-
-  const onUp = () => {
-    drag = null;
-    document.body.style.cursor = '';
-  };
-
-  const measureClear = () => {
-    const h = document.querySelector('.sp2-title');
-    if (!h) return;
-    const r = h.getBoundingClientRect();
-    CLEAR.x = r.left + r.width / 2;
-    CLEAR.y = r.top + r.height / 2;
-    CLEAR.rx = r.width / 2 + 46;
-    CLEAR.ry = r.height / 2 + 26;
-  };
-
-  const start = () => {
-    sizeCanvases();
-    measureRing();
-    measureClear();
-    makeDust();
-    window.addEventListener('resize', () => {
-      sizeCanvases();
-      measureRing();
-      makeDust();
-    });
-    window.addEventListener('pointermove', onMove, { passive: true });
-    window.addEventListener('pointerdown', onDown);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
-    /* 背景点击：涟漪 + 一圈柔光 + 三颗流星；不进主页 */
-    window.addEventListener('click', (e) => {
-      const inBtn = e.target instanceof Element && e.target.closest('[data-enter]');
-      if (inBtn) return;
-      ripples.push({ x: e.clientX, y: e.clientY, t0: clock });
-      if (ripples.length > 12) ripples.shift();
-      for (let i = 0; i < 3; i += 1) {
-        spawnMeteor(e.clientX + (Math.random() - 0.5) * 40, e.clientY + (Math.random() - 0.5) * 40);
-      }
-      flashes.push({ x: e.clientX, y: e.clientY, t0: clock });
-    });
-    /* 环上先留两颗，让人一眼看懂这个环是干什么的 */
-    orbiters.push({ a: 2.62, av: 0.55, text: '你好', size: 13 });
-    orbiters.push({ a: 0.55, av: -0.45, text: 'hello', size: 13 });
-
-    /* 先摆几颗已经在画面里的，别让人第一眼看到空屏 */
-    [
-      [W * 0.05, H * 0.12],
-      [W * 0.24, H * 0.3],
-      [W * 0.44, H * 0.06],
-      [W * 0.62, H * 0.36],
-      [W * 0.34, H * 0.52],
-    ].forEach(([px, py]) => spawnMeteor(px, py));
-    raf = requestAnimationFrame(frame);
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
-  window.addEventListener('pagehide', () => raf && cancelAnimationFrame(raf));
-
-  /* 只有「开始」能进主界面 */
-  document.querySelectorAll('[data-enter]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (document.body.classList.contains('leaving')) return;
-      document.body.classList.add('leaving');
-      setTimeout(() => {
-        window.location.href = './cards.html';
-      }, 420);
-    });
-  });
-})();
+  }
+})()

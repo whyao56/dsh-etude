@@ -239,6 +239,7 @@
     if (!mask) build()
     refresh()
     mask.hidden = false
+    bindDrag()
     document.body.style.overflow = 'hidden'
     input.value = ''
     render()
@@ -255,6 +256,45 @@
     var trigger = e.target.closest ? e.target.closest('[data-pal]') : null
     if (trigger) { e.preventDefault(); toggle() }
   })
+
+  /* 面板可以拖着走：按住空白处拖，位移只动 transform */
+  function bindDrag () {
+    var panel = mask && mask.querySelector('.palette')
+    if (!panel) return
+    // 每次打开都从中间重新开始，不带上一次的位移
+    panel.style.position = ''
+    panel.style.left = ''
+    panel.style.top = ''
+    panel.style.transform = ''
+    var drag = null
+    panel.addEventListener('pointerdown', function (e) {
+      if (e.target.closest('input, button, a')) return
+      var r = panel.getBoundingClientRect()
+      drag = { x: e.clientX, y: e.clientY, ox: 0, oy: 0, p: r.left, q: r.top }
+      panel.classList.add('dragging')
+      try { panel.setPointerCapture(e.pointerId) } catch (err) {}
+    })
+    document.addEventListener('pointermove', function (e) {
+      if (!drag) return
+      var tx = Math.min(Math.max(8 - drag.p, e.clientX - drag.x), window.innerWidth - 120 - drag.p)
+      var ty = Math.min(Math.max(8 - drag.q, e.clientY - drag.y), window.innerHeight - 80 - drag.q)
+      drag.ox = tx
+      drag.oy = ty
+      panel.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0)'
+    }, { passive: true })
+    function up () {
+      if (!drag) return
+      panel.classList.remove('dragging')
+      panel.style.transform = ''
+      // 松手时把位移折进 left/top，否则手一松就弹回原位
+      panel.style.position = 'fixed'
+      panel.style.left = (drag.p + drag.ox) + 'px'
+      panel.style.top = (drag.q + drag.oy) + 'px'
+      drag = null
+    }
+    document.addEventListener('pointerup', up)
+    document.addEventListener('pointercancel', up)
+  }
 
   document.addEventListener('keydown', function (e) {
     var isOpen = mask && !mask.hidden

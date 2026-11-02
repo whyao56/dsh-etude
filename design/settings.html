@@ -1,8 +1,69 @@
 <!doctype html>
 <html lang="zh-CN"><head>
-<meta charset="utf-8"><title>卡片工厂-测试 · settings</title>
-<link rel="stylesheet" href="./app.css?v=vmvxye9x4">
-<script src="./app.js?v=vmvxye9x4"></script><script src="./app2.js?v=vmvxye9x4"></script><script src="./stats.js?v=vmvxye9x4"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:14px;bottom:14px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./decks.js?v=vmvxye9x4"></script><script src="./help.js?v=vmvxye9x4"></script><script src="./pick.js?v=vmvxye9x4"></script><script src="./palette.js?v=vmvxye9x4"></script><script src="./factory.js?v=vmvxye9x4"></script><script src="./fx.js?v=vmvxye9x4"></script><script src="./rows.js?v=vmvxye9x4"></script><script src="./rain.js?v=vmvxye9x4"></script>
+<meta charset="utf-8">
+<script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂-测试 · settings</title>
+<link rel="stylesheet" href="./app.css?v=vmvzanu97">
+<script src="./app.js?v=vmvzanu97"></script><script src="./app2.js?v=vmvzanu97"></script><script src="./stats.js?v=vmvzanu97"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./transit.js?v=vmvzanu97"></script><script src="./smooth.js?v=vmvzanu97"></script><script src="./decks.js?v=vmvzanu97"></script><script src="./help.js?v=vmvzanu97"></script><script src="./pick.js?v=vmvzanu97"></script><script src="./palette.js?v=vmvzanu97"></script><script src="./factory.js?v=vmvzanu97"></script><script src="./fx.js?v=vmvzanu97"></script><script src="./rows.js?v=vmvzanu97"></script><script src="./bgrows.js?v=vmvzanu97"></script><script>
+/* 说明性小字一律收成一个 ?：页面里只留符号，原文塞进 .pop 里给 help.js 用 */
+(function () {
+  var n = 0
+  function run() {
+  var list = document.querySelectorAll('.fold')
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i]
+    var text = (p.textContent || '').trim()
+    if (!text) { p.remove(); continue }
+    // 找这块的标题行：有就挂上去，标题行已经有一个 ? 就把文字并进去，别多长一个
+    var blk = p.closest('.fx-blk, .blk, .mcard, .card, .st-side')
+    var head = null
+    if (blk) {
+      var heads = blk.querySelectorAll('.fx-bh, .tl, .pw-hd, .side-h')
+      for (var h = 0; h < heads.length; h++) {
+        // 取「在它前面、离它最近」的那个标题行
+        if (heads[h].compareDocumentPosition(p) & 4) head = heads[h]
+      }
+    }
+    var footBlock = p.classList.contains('fx-foot')
+    if (footBlock) {
+      var defs = document.querySelectorAll('.fx-def')
+      head = defs.length ? defs[defs.length - 1] : null
+    }
+    var existing = head ? head.querySelector('.q[data-pop]') : null
+    if (existing) {
+      var pv = document.getElementById(existing.getAttribute('data-pop'))
+      if (pv) {
+        var add = document.createElement('p')
+        add.style.margin = '7px 0 0'
+        add.textContent = text
+        pv.appendChild(add)
+        p.remove()
+        continue
+      }
+    }
+    var id = 'fd' + (n++)
+    var pop = document.createElement('div')
+    pop.className = 'pop'
+    pop.id = id
+    pop.textContent = text
+    document.body.appendChild(pop)
+    var q = document.createElement('button')
+    q.type = 'button'
+    q.className = 'q'
+    q.setAttribute('data-pop', id)
+    q.textContent = '?'
+    if (head && (p.parentElement === blk || footBlock)) {
+      q.classList.add('hq')
+      head.appendChild(q)
+      p.remove()
+    } else {
+      p.replaceWith(q)
+    }
+  }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run)
+  else run()
+})()
+</script><script src="./rain.js?v=vmvzanu97"></script>
 </head><body>
 <canvas class="liquid" aria-hidden="true"></canvas>
 <canvas class="rain" aria-hidden="true"></canvas>
@@ -29,7 +90,7 @@
     </details>
     <a class="mi" href="#sync">同步…<span class="sp"></span><span class="ext">未接</span></a>
     <div class="msep"></div>
-    <a class="mi" href="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
+    <a class="mi" href="./index.html" data-fade="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
   </div>
 </details></div>
   <nav class="tabs"><a class="" href="./cards.html">卡片</a><a class="" href="./factory.html">工厂</a><a class="" href="./stats.html">统计</a></nav>
@@ -106,6 +167,11 @@
         </div>
 
         <div class="field">
+          <div><div class="lab">练完自动跳下一张</div><div class="desc">评完分就换下一句；关掉就留在这一句，自己按右下角「下一个」。</div></div>
+          <div class="ctl"><button class="sw on" type="button" id="sw-autonext"></button></div>
+        </div>
+
+        <div class="field">
           <div><div class="lab">通知</div><div class="desc">到点提醒今天该练了；只在有到期卡片时才提醒。</div></div>
           <div class="ctl"><span class="badge-ok"><i></i>开着</span><button class="btn ghost" data-modal="m-notify" type="button">设置</button></div>
         </div>
@@ -120,6 +186,20 @@
           <div class="ctl"><button class="btn ghost" data-modal="m-privacy" type="button">细节</button></div>
         </div>
       </section>
+
+      <script>
+      (function () {
+        var b = document.getElementById('sw-autonext')
+        if (!b) return
+        var on = localStorage.getItem('kf-study:autonext') !== '0'
+        b.classList.toggle('on', on)
+        b.addEventListener('click', function () {
+          var v = !b.classList.contains('on')
+          b.classList.toggle('on', v)
+          try { localStorage.setItem('kf-study:autonext', v ? '1' : '0') } catch (e) {}
+        })
+      })()
+      </script>
 
       <section class="group" id="interface">
         <div class="ghead"><h2>接口</h2><span class="mut">常用的摆外面，细节折起来</span></div>
