@@ -408,14 +408,29 @@ window.__ModuleLoader__.load({
       gridNarrow: { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' },
       gridWide: { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
       cellImage: {
-        position: 'relative',
-        borderRadius: radius.sm,
-        overflow: 'hidden',
-        aspectRatio: '4 / 3',
-        border: `1px solid ${line.a}`,
-        background: surf.c,
-        cursor: 'pointer',
-        padding: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block',
+      },
+      gridHead: {
+        gridColumn: '1 / -1',
+        fontSize: 11.5,
+        color: ink.c,
+        lineHeight: 1.6,
+      },
+      cellPick: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 20,
+        height: 20,
+        borderRadius: 999,
+        background: accent,
+        color: onAccent,
       },
       media: {
         display: 'flex',
@@ -1189,6 +1204,11 @@ window.__ModuleLoader__.load({
       return React.createElement(
         'div',
         { style: wide ? { ...styles.grid, ...styles.gridWide } : narrow ? { ...styles.grid, ...styles.gridNarrow } : styles.grid },
+        React.createElement(
+          'div',
+          { style: styles.gridHead },
+          t('cand.head').replace('{n}', String(example.imageCandidates.length)),
+        ),
         example.imageCandidates.map((candidate) =>
           React.createElement(
             'button',
@@ -1208,6 +1228,9 @@ window.__ModuleLoader__.load({
               alt: candidate.query || '',
               style: styles.cellImage,
             }),
+            picked === candidate.stagedName
+              ? React.createElement('span', { style: styles.cellPick }, React.createElement(Icon, { name: 'check', size: 12 }))
+              : null,
           ),
         ),
         React.createElement(
@@ -2322,8 +2345,8 @@ window.__ModuleLoader__.load({
       const field = (label, key, options) =>
         React.createElement(
           'label',
-          { key, style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 13 } },
-          React.createElement('span', { style: { width: 92, color: 'var(--dsw-alias-label-tertiary)' } }, label),
+          { key, style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, fontSize: 12.5 } },
+          React.createElement('span', { style: { width: 132, color: 'var(--dsw-alias-label-tertiary)' } }, label),
           options
             ? React.createElement(
                 'select',
@@ -2450,6 +2473,7 @@ window.__ModuleLoader__.load({
         'study.none': '学习区只列图、音、打包都齐了的包。还在制卡的那些在左边「制卡」里。',
         'study.reopen': '打回制卡',
         'study.learnable': '能练',
+        'cand.head': '共 {n} 张候选 · 单击选中，双击锁定',
         'study.reopenHint': '退回制卡区重新编辑（导出过的那份不动）',
         'study.keys': '← → 换卡 · 空格看答案',
         'study.reveal': '想好了？看答案',
@@ -2575,6 +2599,7 @@ window.__ModuleLoader__.load({
         'study.none': 'Practice lists only packs with every image, every audio and a built pack. Work in progress stays in Make.',
         'study.reopen': 'Send back to Make',
         'study.learnable': 'ready',
+        'cand.head': '{n} candidates · click to pick, double-click to lock',
         'study.reopenHint': 'Reopen for editing (an exported copy stays where it is)',
         'study.keys': '← → switch · Space to reveal',
         'study.reveal': 'Ready? Show the sentence',
