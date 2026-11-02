@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN" data-page="tutorial">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="../"><title>卡片工厂</title>
+<link rel="stylesheet" href="./system.css?vmvzc4rgf">
+<script src="./ui.js?vmvzc4rgf" defer></script>
+</head>
+<body class="">
+<div class="app">
+<aside class="side">
+  <a class="brand" href="./cards.html" data-fade><span class="brand-mark">卡</span><span class="brand-txt"><span class="brand-name">卡片工厂</span><span class="brand-sub">dsh-etude · 0.2</span></span></a>
+  <nav class="nav"><p class="nav-g">造卡</p><a class="nav-i " href="./factory.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>工厂</span></a><a class="nav-i " href="./mine.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10.5h12M4 16h16M4 21h8"/></svg><span>挖句</span></a><p class="nav-g">卡片</p><a class="nav-i " href="./cards.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.8-9 4.8L3 7.8z"/><path d="M3 12.4l9 4.8 9-4.8"/><path d="M3 16.8l9 4.8 9-4.8"/></svg><span>卡组</span></a><a class="nav-i " href="./library.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg><span>句库</span></a><p class="nav-g">练习</p><a class="nav-i " href="./study.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg><span>学习</span><span class="n-tag">12</span></a><p class="nav-g">观察</p><a class="nav-i " href="./stats.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 20v-6M12 20V7M17 20v-9"/></svg><span>统计</span></a></nav>
+  <div class="side-foot">
+    <a class="nav-i on" href="./tutorial.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v16.5H6.5A1.5 1.5 0 005 21z"/><path d="M5 17.2h14"/></svg><span>教程</span></a>
+    <a class="nav-i " href="./settings.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg><span>设置</span></a>
+    <a class="side-user" href="./settings.html#about" data-fade><span class="ava">HP</span><span class="u-txt"><span style="display:block;font-size:12.5px;color:var(--c-ink)">本机</span><span style="display:block;font-size:11px;color:var(--c-ink-3)">数据在本地</span></span></a>
+  </div>
+</aside>
+<div class="main">
+<header class="topbar">
+  <nav class="crumbs" aria-label="位置"><span class="cur">教程</span></nav>
+  <div class="topbar-r">
+    <button type="button" class="searchbox" data-open="dlg-search"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><span style="flex:1">搜索词、句子、场景…</span><kbd class="kbd">⌘K</kbd></button>
+    <button type="button" class="iconbtn " aria-label="快捷键" title="快捷键"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
+    <a class="iconbtn " href="./settings.html" data-fade aria-label="设置" title="设置"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg></a>
+  </div>
+</header>
+<main class="page  ">
+<div class="tut-hero" style="padding:40px;border-radius:14px;background:var(--c-surf);border:1px solid var(--c-line)">
+        <span class="ph-eyebrow">三分钟</span>
+        <h1 style="font-size:28px;margin:6px 0 8px">一条产线，五个人工动作</h1>
+        <p class="dim" style="margin:0;max-width:560px">看完这一页，你会知道为什么「没有图」不是占位框，而是根本导出不了。</p>
+      </div>
+      <div class="g g3 mt20">
+        <div class="card"><div class="card-bd">
+            <div class="row" style="gap:8px;align-items:center"><span class="t-xs dim2 num">1</span><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><b style="font-size:14px">造例句</b></div>
+            <p class="dim" style="font-size:12.5px;margin:8px 0 0">一个词八个场景，场景不许撞。</p>
+          </div></div><div class="card"><div class="card-bd">
+            <div class="row" style="gap:8px;align-items:center"><span class="t-xs dim2 num">2</span><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M3.5 17l5-4.5 4 3.5 3-2.5 5 4"/></svg><b style="font-size:14px">挑图</b></div>
+            <p class="dim" style="font-size:12.5px;margin:8px 0 0">先过体检，再进九宫格，点了才算。</p>
+          </div></div><div class="card"><div class="card-bd">
+            <div class="row" style="gap:8px;align-items:center"><span class="t-xs dim2 num">3</span><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9v6h3l5 4V5L8 9z"/><path d="M17 9.5a4 4 0 010 5M19.5 7a7 7 0 010 10"/></svg><b style="font-size:14px">试听</b></div>
+            <p class="dim" style="font-size:12.5px;margin:8px 0 0">听到 60% 才让点确认。</p>
+          </div></div><div class="card"><div class="card-bd">
+            <div class="row" style="gap:8px;align-items:center"><span class="t-xs dim2 num">4</span><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.8-9 4.8L3 7.8z"/><path d="M3 12.4l9 4.8 9-4.8"/><path d="M3 16.8l9 4.8 9-4.8"/></svg><b style="font-size:14px">打包</b></div>
+            <p class="dim" style="font-size:12.5px;margin:8px 0 0">硬校验不过就拒绝，说清第几条。</p>
+          </div></div><div class="card"><div class="card-bd">
+            <div class="row" style="gap:8px;align-items:center"><span class="t-xs dim2 num">5</span><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><b style="font-size:14px">导出</b></div>
+            <p class="dim" style="font-size:12.5px;margin:8px 0 0">拷完拿副本再验一遍。</p>
+          </div></div><div class="card"><div class="card-bd">
+            <div class="row" style="gap:8px;align-items:center"><span class="t-xs dim2 num">6</span><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg><b style="font-size:14px">练习</b></div>
+            <p class="dim" style="font-size:12.5px;margin:8px 0 0">听、说、读、写、改。</p>
+          </div></div>
+      </div>
+      <div class="row mt20"><a href="./factory.html" class="btn primary "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>看我造一个</span></a></div>
+</main>
+</div>
+</div>
+<div class="dlg" id="dlg-search" hidden role="dialog" aria-label="搜索">
+  <div class="dlg-bd" style="padding:14px">
+    <div class="input-ico"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><input class="input lg" placeholder="一个词、一条句子、一个场景，都能搜" autofocus></div>
+    <div class="mt12" style="display:flex;flex-direction:column;gap:2px">
+      <a class="picked on" href="./detail.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span><b style="color:var(--c-ink);font-weight:600">abandon</b> · The crew abandoned ship within minutes.</span></a>
+      <a class="picked" href="./library.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>abandon · 丢掉、放弃 · 3 条例句</span></a>
+      <a class="picked" href="./cards.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>牌组 · 影视对白</span></a>
+    </div>
+  </div>
+  <div class="dlg-ft"><span class="keys"><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> 选 <kbd class="kbd">↵</kbd> 打开 <kbd class="kbd">esc</kbd> 关</span></div>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+</body>
+</html>

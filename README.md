@@ -1,4 +1,4 @@
-﻿# dsh-etude · 卡片工厂
+# dsh-etude · 卡片工厂
 
 **DeepSeek Harness 插件：把「一个词」做成一整套能练的语言卡片。**
 
@@ -21,23 +21,28 @@
   → 导出：Downloads/dsh-etude/coffee-<id>/ 里就是成品
 ```
 
-> 现状：**0.1.0，能用**。真模型造过 8 目标 × 8 条例句，零 flag；配图走 Wikimedia
+> 现状：**0.2，能用**。真模型造过 8 目标 × 8 条例句，零 flag；配图走 Wikimedia
 > Commons 实拍图，每张都人工点过；语音走 Edge TTS（零配置、不要 key），也能接
-> OpenAI 兼容的 TTS。
+> OpenAI 兼容的 TTS。这一轮把界面整套重做了：一套令牌、十五个页面、每页三版对比。
 
-![卡片工厂面板](docs/assets/panel-wide.jpg)
+![卡组页](docs/assets/guide/new-cards.png)
 
-挑图的那一条会切上下布局，九宫格铺满整卡宽 —— 缩略图太小就等于让人瞎点：
+工厂页：左边是词，右边是这个词的句子和素材。五维度是五个练法，图与声是两组材料。
 
-![九宫格挑图](docs/assets/panel-grid.jpg)
+![工厂页](docs/assets/guide/new-factory.png)
 
-窄屏（390px）下卡包列表变成横向一溜，卡片转上下布局：
+学习页：一屏一张，不分栏。顶部五面，底部四档评分，评完自己跳下一张。
 
-<img src="docs/assets/panel-narrow.jpg" width="390" alt="窄屏">
+![学习页](docs/assets/guide/new-study.png)
 
-底部那排动作：批量取候选图（只取货、不替你点头）、打包、导出、补齐语音、删包。
+统计页：四个数字够用；下面是今天按时段、未来 30 天、保留度、卡片分布、热力图。
 
-![底部动作](docs/assets/panel-actions.jpg)
+![统计页](docs/assets/guide/new-stats.png)
+
+界面本身是一套纯静态样式稿（`design/`，15 页 + 41 个变体），双击
+`design/index.html` 就能看，不用装依赖、不用起服务。设计流水和每一版的取舍在
+`design/DESIGN.md`：`node gen.mjs` 可重建全部页面。
+
 
 ---
 
@@ -238,7 +243,7 @@ credit_url`，缺授权信息只警告、不拦交付 —— 但那种包别对�
 index.js           Host 半入口：Config、RPC、媒体路由、三个工具、systemPrompt 段
 client.js          Web UI 半：侧栏图标 + 主面板 + 配置卡（零依赖，手写 SVG）
 lib/
-  prompts.js       Etude 那套七条 HARD RULES 原文 + 本插件加的三处约束
+  prompts.js       七条 HARD RULES + 场景/中文说法/句长的三处约束
   examples.js      造例句、确定性校验、不过关带意见重试一次
   images.js        检索（Openverse/Commons）、像素预检、内容寻址落盘
   tts.js           引擎选择与降级；tts-edge.js 是 Edge WebSocket 的纯 JS 实现

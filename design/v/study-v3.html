@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN" data-page="study">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="../"><title>卡片工厂</title>
+<link rel="stylesheet" href="./system.css?vmvzc4rgf">
+<script src="./ui.js?vmvzc4rgf" defer></script>
+</head>
+<body class="">
+<div class="app">
+<aside class="side">
+  <a class="brand" href="./cards.html" data-fade><span class="brand-mark">卡</span><span class="brand-txt"><span class="brand-name">卡片工厂</span><span class="brand-sub">dsh-etude · 0.2</span></span></a>
+  <nav class="nav"><p class="nav-g">造卡</p><a class="nav-i " href="./factory.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>工厂</span></a><a class="nav-i " href="./mine.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10.5h12M4 16h16M4 21h8"/></svg><span>挖句</span></a><p class="nav-g">卡片</p><a class="nav-i " href="./cards.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.8-9 4.8L3 7.8z"/><path d="M3 12.4l9 4.8 9-4.8"/><path d="M3 16.8l9 4.8 9-4.8"/></svg><span>卡组</span></a><a class="nav-i " href="./library.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg><span>句库</span></a><p class="nav-g">练习</p><a class="nav-i on" href="./study.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg><span>学习</span><span class="n-tag">12</span></a><p class="nav-g">观察</p><a class="nav-i " href="./stats.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 20v-6M12 20V7M17 20v-9"/></svg><span>统计</span></a></nav>
+  <div class="side-foot">
+    <a class="nav-i " href="./tutorial.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v16.5H6.5A1.5 1.5 0 005 21z"/><path d="M5 17.2h14"/></svg><span>教程</span></a>
+    <a class="nav-i " href="./settings.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg><span>设置</span></a>
+    <a class="side-user" href="./settings.html#about" data-fade><span class="ava">HP</span><span class="u-txt"><span style="display:block;font-size:12.5px;color:var(--c-ink)">本机</span><span style="display:block;font-size:11px;color:var(--c-ink-3)">数据在本地</span></span></a>
+  </div>
+</aside>
+<div class="main">
+<header class="topbar">
+  <nav class="crumbs" aria-label="位置"><a href="./cards.html" data-fade>卡组</a><span class="sep">/</span><span class="cur">学习</span></nav>
+  <div class="topbar-r">
+    <button type="button" class="searchbox" data-open="dlg-search"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><span style="flex:1">搜索词、句子、场景…</span><kbd class="kbd">⌘K</kbd></button>
+    <button type="button" class="iconbtn " aria-label="快捷键" title="快捷键"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
+    <a class="iconbtn " href="./settings.html" data-fade aria-label="设置" title="设置"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg></a>
+  </div>
+</header>
+<main class="page  ">
+<div class="g g-1-3" style="gap:24px">
+      <div class="rail" style="top:72px">
+        <section class="card "><header class="card-hd"><h2>牌组</h2></header><div class="card-bd tight"><div class="wordlist">
+          <a class="wrow " href="#" data-fade><span>abandon</span><span class="cnt">1/12</span></a><a class="wrow " href="#" data-fade><span>abandon</span><span class="cnt">2/12</span></a><a class="wrow on" href="#" data-fade><span>succumb</span><span class="cnt">3/12</span></a><a class="wrow " href="#" data-fade><span>succumb</span><span class="cnt">4/12</span></a><a class="wrow " href="#" data-fade><span>indispensable</span><span class="cnt">5/12</span></a><a class="wrow " href="#" data-fade><span>indispensable</span><span class="cnt">6/12</span></a>
+        </div></div></section>
+        <section class="card "><header class="card-hd"><h2>这张卡</h2></header><div class="card-bd "><div class="col" style="gap:8px"><span class="t-sm dim">第 3 张 · 12 张里</span><div class="bar"><i style="width:25%"></i></div><span class="t-xs dim2">今天已练 42 次 · 11 分钟</span></div></div></section>
+      </div>
+      <div>
+        <div class="facebar">
+  <button type="button" class="on">听<span>正在练</span></button><button type="button" class="">说<span>练过</span></button><button type="button" class="">读<span>练过</span></button><button type="button" class="">写<span>没开始</span></button><button type="button" class="">改<span>没开始</span></button>
+</div>
+        <div class="stage-card mt12">
+          <div class="stage-main" style="align-items:center;text-align:center;min-height:340px">
+            <span class="t-xs dim2">听 · 声音 → 画面</span>
+            <div class="mt12" style="width:100%;max-width:420px"><span class="wave tall"><i style="height:27.8px"></i><i style="height:21.4px"></i><i style="height:6.6px"></i><i style="height:30.0px"></i><i style="height:30.0px"></i><i style="height:25.2px"></i><i style="height:19.5px"></i><i style="height:30.0px"></i><i style="height:9.4px"></i><i style="height:8.5px"></i><i style="height:18.9px"></i><i style="height:17.6px"></i><i style="height:30.0px"></i><i style="height:5.7px"></i><i style="height:23.4px"></i><i style="height:14.2px"></i><i style="height:15.0px"></i><i style="height:29.6px"></i><i style="height:14.6px"></i><i style="height:4.6px"></i><i style="height:17.7px"></i><i style="height:12.7px"></i><i style="height:28.9px"></i><i style="height:25.0px"></i><i style="height:19.0px"></i><i style="height:30.0px"></i><i style="height:9.1px"></i><i style="height:22.4px"></i><i style="height:16.8px"></i><i style="height:15.0px"></i><i style="height:28.9px"></i><i style="height:30.0px"></i><i style="height:8.4px"></i><i style="height:16.0px"></i><i style="height:30.0px"></i><i style="height:30.0px"></i><i style="height:6.0px"></i><i style="height:21.9px"></i><i style="height:17.1px"></i><i style="height:25.8px"></i><i style="height:18.9px"></i><i style="height:20.9px"></i><i style="height:14.0px"></i><i style="height:10.5px"></i><i style="height:30.0px"></i><i style="height:27.0px"></i><i style="height:18.8px"></i><i style="height:9.7px"></i><i style="height:20.5px"></i><i style="height:20.8px"></i><i style="height:20.9px"></i><i style="height:19.0px"></i><i style="height:15.8px"></i><i style="height:12.3px"></i><i style="height:25.1px"></i><i style="height:17.2px"></i></span></div>
+            <div class="row"><button class="play-btn" style="width:44px;height:44px" aria-label="再放一遍"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg></button>
+              <span class="t-sm dim2">3.4 秒 · Ava</span></div>
+            <p class="t-sm dim2">只放声音。听完先想画面，再翻开对。</p>
+            <div class="row"><button type="button" class="btn primary "><span>翻开</span></button><button type="button" class="btn ghost "><span>再放一遍</span></button></div>
+          </div>
+          <div class="ratebar">
+  <button class="rate" type="button">重来<small>1 分钟</small></button>
+  <button class="rate" type="button">困难<small>3 天</small></button>
+  <button class="rate recommend" type="button">良好<small>8 天</small></button>
+  <button class="rate" type="button">简单<small>15 天</small></button>
+</div>
+        </div>
+        <div class="hintbar">
+    <span><kbd class="kbd">space</kbd> 翻开</span>
+    <span><kbd class="kbd">1</kbd>–<kbd class="kbd">4</kbd> 评分</span>
+    <span><kbd class="kbd">←</kbd><kbd class="kbd">→</kbd> 换面</span>
+    <span><kbd class="kbd">J</kbd><kbd class="kbd">K</kbd> 换词</span>
+    <span class="sp">  </span>
+    <span>自动跳下一张 · 开</span>
+  </div>
+      </div>
+    </div>
+</main>
+</div>
+</div>
+<div class="dlg" id="dlg-search" hidden role="dialog" aria-label="搜索">
+  <div class="dlg-bd" style="padding:14px">
+    <div class="input-ico"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><input class="input lg" placeholder="一个词、一条句子、一个场景，都能搜" autofocus></div>
+    <div class="mt12" style="display:flex;flex-direction:column;gap:2px">
+      <a class="picked on" href="./detail.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span><b style="color:var(--c-ink);font-weight:600">abandon</b> · The crew abandoned ship within minutes.</span></a>
+      <a class="picked" href="./library.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>abandon · 丢掉、放弃 · 3 条例句</span></a>
+      <a class="picked" href="./cards.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>牌组 · 影视对白</span></a>
+    </div>
+  </div>
+  <div class="dlg-ft"><span class="keys"><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> 选 <kbd class="kbd">↵</kbd> 打开 <kbd class="kbd">esc</kbd> 关</span></div>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+</body>
+</html>

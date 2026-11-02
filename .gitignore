@@ -38,3 +38,6 @@ docs/video/.check/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# screenshot output (dev only)
+design/_shots/
