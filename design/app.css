@@ -5762,7 +5762,9 @@ body:has(.navstep.next) #animToggle{right:108px!important}
    怎么用：放在 app.css 之后加载（或整段追加到 app.css 末尾）。
            只写「覆盖」，不改 app.css 本体，不改 gen.mjs，不动分组顺序。
    写法：每条 = 现在 → 改成 → 为什么，数字都是 1440×900 实拍量出来的。
-   真源：app.css（2026-11-03 实读 4974 行，别的代理还在追加，这里只认选择器）
+   真源：app.css（实读时 4974 → 8062 行，别的代理还在追加，这份只认选择器）
+   提醒：app.css 第 5836 行之后已经出现本文件的一份快照（别人合并的，不是我
+         写的）；那份不会跟着这里更新，所以定稿仍以本文件为准，行号引用按选择器对。
    实拍：F:\dsharness\etude-test\mock\settings.html（8 段逐个截过）
    字阶：全页收到 11 / 12 / 14 / 16（+ 页面标题 24 不动），共 5 级
    间距：全部 4 的倍数；圆角：6 / 14 / 999；颜色：只用现有 token
@@ -5839,14 +5841,14 @@ body:has(.navstep.next) #animToggle{right:108px!important}
 .setnav .glab{padding:12px 12px 8px;font-size:11px}
 
 
-/* ── 06 · 开关旋钮画了两层：15×15@(2,2) 加 16×16@(3,3) ────────────────
+/* ── 06 · 开关：轨道被 div.sw 压成 36×20，旋钮还画了两层 ────────────────
    现在：app.css:555 .sw i 是白块 15×15 top2/left2；app.css:4043 又叠了
          .sw::after 16×16 top3/left3 —— 两个旋钮同时渲染
    改成：只留 ::after，top/left 归到 4px，尺寸 16×16
    为什么：实拍关着的开关旋钮 bbox 量到 17×17（不是 16），边缘一圈发虚，
            就是两层白块错 1px 叠出来的。24 高的轨道放 16 的旋钮，上下
            各 4px 才对称；原来 top 是按 --sw-h:20/--sw-k:14 算的 3px，
-           尺寸被改成 24/16 之后没人回头改 top。 */
+           尺寸被改成 24/16 之后没人回头改 top。
    注：轨道尺寸必须显式写 —— app.css:2609 的 `div.sw{--sw-w:36px;--sw-h:20px;
         width:var(--sw-w);height:var(--sw-h)}` 特异度 (0,1,1)，一直压着
         app.css:4042 的 `.sw{width:40px;height:24px}` (0,1,0)。实测 ON 态
