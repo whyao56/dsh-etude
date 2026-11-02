@@ -4321,3 +4321,3742 @@ table.rt td.b{color:var(--fg3)}
 .st-r:nth-child(1) em,
 .st-r:nth-child(2) em,
 .st-r:nth-child(4) em{color:var(--fg3)}
+
+/* v-fix-contrast.css — 深色 UI 可读性补丁（追加在 app.css 末尾，v65 之后）
+   审计对象：F:\dsharness\dsh-etude\design\app.css（4323 行 / 206907 字节 / 末段 v65 = 4272-4323）
+   审计时间：2026-11-02 23:5x
+   底色实测（从 study-v65-1440.png / stats-v64-1440.png 取像素）：
+     页面 #1D2028 · 面板/舞台 #1B1F26 · 面标签条 #1E2228 · 统计卡片 #20232A
+   阈值：正文 4.5:1，≥18px 或 ≥600 字重的大字 3:1（本文件命中的全是 9–12.5px 小字，一律按 4.5 算）
+   只动 color / fill / opacity，不动尺寸、字体、间距。颜色只用 --fg3 / --w / --accent-rgb 及其 alpha 变体。
+   核心结论：--ghost(#656971) 在实际底色上只有 2.86~3.00:1，是唯一系统性不合格的令牌；
+             换成 --fg3(#9A9EA9) 即 5.87~6.17:1，层级仍低于 --fg2，视觉不塌。
+   —— 学习页评分四档（.st-r）已被 v65 修好，这里不再重复开药方。 */
+
+/* ───────────────────────── 学习页 study.html ───────────────────────── */
+
+/* 面包屑「卡片 / 测试牌组 / 第 3 张，共 12 张」 */
+.st-crumb{color:var(--fg3)}
+/* ghost #656971 → fg3 #9A9EA9，底 #1D2028，2.96:1 → 6.08:1 */
+
+/* 单词右边那行「06:41 · 这一轮 12 张」（HTML 上同时挂了 .mut，故要压过 .mut） */
+.st-where{color:var(--fg3)}
+/* ghost → fg3，底 #1D2028，2.96:1 → 6.08:1 */
+
+/* 页面底部快捷键提示「1–4 评分 · ← → 换面 …」 */
+.st-keys{color:var(--fg3)}
+/* ghost → fg3，底 #1D2028，2.96:1 → 6.08:1；里面 .kbd 没有自己的色，会跟着变亮 */
+
+/* 右栏抽屉列表底部那行说明 */
+.drail .side-n{color:var(--fg3)}
+/* ghost → fg3，底 #1D2028，2.96:1 → 6.08:1 */
+
+/* 七个抽屉标题右边那行解释（「这句话在什么场合说…」），收起状态下几乎看不见 */
+.stage2 .drw .drw-h .mut{color:var(--fg3)}
+/* ghost → fg3，底 #1B1F26，3.00:1 → 6.17:1 */
+
+/* 抽屉右侧的展开箭头 ▾（9px） */
+.stage2 .drw .drw-h .car{color:rgba(var(--w),.5)}
+/* rgba(w,.24) → rgba(w,.5)，底 #1B1F26，2.20:1 → 5.10:1；箭头是「这里能点开」的唯一点头，不能糊 */
+
+/* 打字面的提示「写不写都行」 */
+.tnote{color:var(--fg3)}
+/* ghost → fg3，底 #1B1F26，3.00:1 → 6.17:1 */
+
+/* soft 面把整块 opacity 压到 .62，叠在 ghost 上只剩 1.94:1 —— 这是全页最糊的一处正文 */
+.b-type.soft .tnote{color:var(--fg3);opacity:1}
+/* ghost@.62 → fg3@1，底 #1B1F26，1.94:1 → 6.17:1 */
+
+/* 打字输入框占位符（框底是 rgba(0,0,0,.22) 叠面板 = #15181E） */
+.tin::placeholder{color:var(--fg3)}
+/* ghost → fg3，底 #15181E，3.22:1 → 6.63:1 */
+
+/* 变体结果里被划掉的词 */
+.vw s{color:var(--fg3)}
+/* ghost → fg3，底 #1B1F26，3.00:1 → 6.17:1；保留下划线删除线，弱化感还在 */
+
+/* 面标签条上每档的小字「声音 → 画面」（.fb.on 那档已有自己的 #a9bcff，不受影响） */
+.fb i{color:var(--fg3)}
+/* ghost → fg3，底 #1E2228，2.90:1 → 5.96:1 */
+
+/* 悬浮小窗标题里的注音 /əˈbændən/ */
+.pw-hd .ph{color:var(--fg3)}
+/* ghost → fg3，底 #1B1F26 级别，3.00:1 → 6.17:1 */
+
+/* 小窗底部「按住标题可拖 · 右下角可拉」 */
+.pwtip{color:var(--fg3)}
+/* ghost → fg3，3.00:1 → 6.17:1 */
+
+/* ───────────────────────── 统计页 stats.html ───────────────────────── */
+
+/* 数据表表头（10.5px / 600 也算小字，4.5 才够） */
+table.rt thead th{color:var(--fg3)}
+/* ghost → fg3，底 #20232A，2.86:1 → 5.87:1；th.g / th.b 的 v64 配色不动 */
+
+/* 图例右边的占比数字 */
+.legend .mut{color:var(--fg3)}
+/* ghost → fg3，底 #20232A，2.86:1 → 5.87:1；旁边的 .legend li 是 fg2，仍比它亮 */
+
+/* 环图中心的标签字 */
+.donut-label{fill:var(--fg3)}
+/* ghost → fg3，底 #20232A，2.86:1 → 5.87:1 */
+
+/* 图表里的 y 轴刻度（本来是 ghost 再乘 .85 透明） */
+.tx.ty{fill:var(--fg3);opacity:1}
+/* ghost@.85 → fg3@1，2.42:1 → 5.87:1；.tx 本体已是 fg3，这一条只是把刻度拉回同一级 */
+
+/* ───────────────────────── 设置页 settings.html ───────────────────────── */
+
+/* 快捷键面板每一组标题右边的条数（硬编码 #4C515A，全文件最糊的一处） */
+.kgh .mut{color:var(--fg3)}
+/* #4C515A → fg3，底 #20232A，1.97:1 → 5.87:1 */
+
+/* ───────────────────────── 工厂页 factory.html ───────────────────────── */
+
+/* 五维标签右上角的 ↗ 角标（9px，主色 55% 透明叠在深底上） */
+.f5name .cor{color:rgba(var(--accent-rgb),.82)}
+/* accent@.55 → accent@.82，底 #1B1F26，3.31:1 → 5.67:1；仍是同色相，只是不再半透明糊掉 */
+
+/* ============================================================================
+   v-fix-align.css
+   像素对齐修正补丁 —— 追加在 F:\dsharness\dsh-etude\design\app.css 之后即可生效
+   （所有覆盖规则的来源特异性 >= 被覆盖规则，且更靠后，见每条注释里的行号）
+
+   实测环境：headless Chrome，deviceScaleFactor=1，宽度 1440 / 1024 / 900
+   量法：getBoundingClientRect（CDP Runtime.evaluate），像素复核用截图 + 亮度扫描
+   取值纪律：间距只用 4 的倍数，圆角只用 6 / 14 / 999，字号只用 11/12/14/16/20/24/28，
+             字重只用 400 / 500 / 600
+
+   注释统一格式：修哪个错位、错位量（px）、被覆盖的规则行号
+   ============================================================================ */
+
+
+/* ============================================================================
+   【1】卡片页（cards）—— 表头「待复习」被当成数据胶囊
+   app.css:4229-4230 的 .dnum.due 同时命中了表头单元格（表头也是 <span class="dnum due">），
+   于是三个表头里只有一个被染成实心胶囊：
+     表头「待复习」  W 51.6  H 25    （右端 780.8）
+     同级表头「未学习」/「学习中」 W 64  H 17（右端 635 / 707）
+     数据胶囊「12」  W 32   H 26.6  （右端 771）
+   错位量：宽 +19.6、高 -1.6、与另两列表头的右端差 +45.8
+   另：4229 的 justify-self:center 让该列表头居中、另两列表头右对齐，同一行两套对齐规则。
+   修法：表头不带胶囊（背景/内边距/最小宽/字重全归零），保留强调色；居中保持不动，
+        修完后表头文字中心 = 754.5 = 下方数据胶囊中心（739..771 的中点），列内自洽。
+   ============================================================================ */
+.deckhead>.dnum.due{
+  background:none;
+  padding:0;
+  min-width:0;
+  font-weight:400;
+}
+
+
+/* ============================================================================
+   【2】学习页（study）—— 评分四键左右各缩进 56px，和整页错开
+   app.css:4278 给 .st-rate 加了 padding:0 56px。
+     评分四键 222..1218（宽 996）
+     同页 .fbar / .st2 / .st-keys 166..1274（宽 1108）
+   错位量：左右各 56px（总宽差 112px）
+   ≤1200 更糟：app.css:4007-4009 的 .screen.study{padding-left:56px;padding-right:56px}
+   再叠一道，1024 下四键 138..886 而 .screen 是 82..942，仍是 56。
+   修法：去掉这层内边距，四键回到 166..1274，单键 240 → 268 宽。
+   ============================================================================ */
+.st-rate{padding:0}
+
+
+/* ============================================================================
+   【3】学习页（study）—— 右栏行距 9px，不在 4 的倍数网格上
+   app.css:3966 / 3682 的 .drail{gap:4px} 与 app.css:3972 的
+   .drail .rv{...margin-bottom:5px} 叠加成 9px：
+     七行 .rv 的 top = 414.7 / 455.7 / 496.7 / 537.7 / 578.7 / 619.7 / 660.7
+     → 行距 pitch 41 = 32（行高）+ 9
+     → 「全揭开」.allbtn 的上间距 17 = 8（margin-top）+ 9
+   错位量：行间多出 5px、按钮上方多出 5px（9 vs 4）
+   修法：margin-bottom 归零；pitch 41 → 36，.allbtn 上间距 17 → 12。
+   ============================================================================ */
+.drail .rv{margin-bottom:0}
+
+
+/* ============================================================================
+   【4】学习页（study）—— 五面条宽度不等 + 右侧 571.6px 空白
+   app.css:3938 .fbar 是 flex 容器，app.css:3939 .fb 按内容定宽：
+     五个 .fb 宽 97.1 / 97.1 / 97.1 / 97.1 / 90.1（第 5 个少 7px）
+     末尾 <span class="sp"> 吃满剩余（app.css:230 .sp{flex:1}），占 693.4..1265
+   错位量：最后一格窄 7px；条右侧空 571.6px（五个胶囊只用到条宽的 47%）
+   修法：五格均分。(1108 - 16 - 32) / 5 = 212 每格（实测 211.6，差在 border 与取整）；.sp 不再参与分配。
+   ============================================================================ */
+.fbar .fb{flex:1 1 0;min-width:0}
+.fbar>.sp{display:none}
+
+
+/* ============================================================================
+   【5】学习页（study）≤1000 —— 横向溢出 157px
+   900 宽下 document.scrollWidth = 1057 而 innerWidth = 900：
+     aside.drail  W 975.5（82..1057.5），自己被撑成 975 宽，overflow-x:auto 完全失效
+     button.mini 右端 1033、button.q 右端 1057 —— 直接被视口切掉
+   成因：app.css:4015 的 .st2{display:flex;flex-direction:column;gap:16px} 没写 align-items，
+        继承了基础 .st2 的 align-items:start → 子项按 max-content 定宽，不再受容器约束
+        （app.css:4016 给 .drail 的 overflow-x:auto 因此永远不触发）
+   错位量：157px 溢出（视口 900 / 内容 1057）
+   修法：拉伸列宽，让 .drail 变成 736 宽、自家横向滚动。
+   ============================================================================ */
+@media (max-width:1000px){
+  .st2{display:flex;flex-direction:column;align-items:stretch;min-width:0}
+  .st2>.drail{width:auto;min-width:0;max-width:100%}
+}
+
+
+/* ============================================================================
+   【6】工厂页（factory）—— 五维块左右内缩不对称 14 / 2
+   app.css:2546 .fx-sense .fx-body{padding-left:14px;padding-right:2px}（特异性 0,3,0，
+   压过 app.css:3157 的 padding:8px 6px 16px 26px）：
+     .fx-body   401..1259
+     .fx-blk.b5 415..1257   → 左 14、右 2
+     内容框     432..1240   → 比上方 .fx-def 段落右端 1259 少 19、左端多 31
+   错位量：左右内缩差 12px（14 vs 2），整块在面板里左重右轻
+   修法：对称 16 / 16；b5 变 417..1243，内容框 434..1226（实测），与面板左右各留 16。
+   ============================================================================ */
+.fx-sense .fx-body{padding-left:16px;padding-right:16px}
+
+
+/* ============================================================================
+   【7】工厂页（factory）—— 五维行行高不等 58 / 59 / 59 / 59 / 59
+   app.css:2305 .f5row{border-top:1px solid ...} + app.css:2306 .f5row:first-child{border-top:0}
+   → 首行少 1px，五行里第一行比其余矮 1px，行内容垂直中心彼此差 0.5px。
+   错位量：行高差 1px（58 vs 59）
+   修法：首行保留 1px 但透明，五行统一 59。
+   ============================================================================ */
+.fx-blk.b5 .f5row:first-child{border-top:1px solid transparent}
+
+
+/* ============================================================================
+   【8】工厂页（factory）—— 同一行三段间距三个节奏（14 / 12 / 20）
+   行 gap 是 12（app.css:3409），但：
+     app.css:3413 .fx-blk.b5 .f5row em{margin-left:2px}  → 方块→状态 chip = 14
+     app.css:3415 .fx-blk.b5 .f5row .sw{margin-left:8px}  → 标签→开关   = 20
+   实测：f5name 432..468、em 482..527.2（+14）、.d 右端 1182、.sw 1202..1240（+20）
+   错位量：chip 多 2px、开关多 8px
+   修法：两处归零 → 统一 12。chip 左移 2px；开关左移 8px，右侧标签组右移 8px。
+   ============================================================================ */
+.fx-blk.b5 .f5row em{margin-left:0}
+.fx-blk.b5 .f5row .sw{margin-left:0}
+
+
+/* ============================================================================
+   【9】工厂页（factory）—— 五维方块圆角 11px 不在白名单
+   app.css:3410 .fx-blk.b5 .f5row .f5name{width:36px;height:36px;border-radius:11px}
+   36x36 的方块用了 11px 圆角；设计规范只允许 6 / 14 / 999。
+   错位量：圆角 11 → 14（3px）
+   ============================================================================ */
+.fx-blk.b5 .f5row .f5name{border-radius:14px}
+
+
+/* ============================================================================
+   【10】统计页（stats）—— 面板头右侧控件三种高度，上下边差 5.2px
+   8 个 .shead2 的 .sctls 高度序列：32.8 / 32.8 / 30.6 / 32.8 / 32.8 / 35.8 / 32.8 / 32.8 / 32.8
+     .ck（复选框标签）  30.6  = 18（行高）+ 5+5（padding）+ 1+1（border）
+     .sel（下拉）       32.8  = 16.8 + 7+7 + 1+1
+     .seg.small（分段） 35.8  = 27.8 + 3+3 + 1+1
+   三者垂直居中所以中心线齐，但上边缘差 5.2px、下边缘差 5.2px（最高 35.8 / 最矮 30.6）。
+   错位量：±2.6px（总差 5.2px）
+   修法：三种统一 32px（.sel 内边距 7→6 补回差值，.seg 内边距 3→2、格内 5→4，行高才塞得下）。
+   ============================================================================ */
+.shead2 .sctls .ck,
+.shead2 .sctls .sel,
+.shead2 .sctls .seg{height:32px;box-sizing:border-box}
+.shead2 .sctls .ck{padding-top:0;padding-bottom:0}
+.shead2 .sctls .sel{padding-top:6px;padding-bottom:6px}
+.shead2 .sctls .seg.small{padding:2px}
+.shead2 .sctls .seg.small span{padding:4px 11px}
+
+
+/* ============================================================================
+   【11】统计页（stats）—— 记忆保留率表格四个数字列宽不等
+   table.rt 是 auto 布局（app.css:748），四个数字列宽由表头文字撑开：
+     228.9（首列）/ 222（欠熟练）/ 209.2（已熟练）/ 222（总计）/ 170.8（总数）
+   「已熟练」比左右邻居各窄 12.8px，最宽最窄差 51.2px。
+   错位量：12.8px（相邻列）/ 51.2px（极差）
+   修法：固定布局，四个数字列各 19%，首列吃剩下的 24%：
+         1054 宽下 253 / 200.3 / 200.3 / 200.3 / 200.3（实测 252.8 / 200.1 × 4）。
+   ============================================================================ */
+table.rt{table-layout:fixed}
+table.rt thead th:nth-child(n+2){width:19%}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v-fix-anim.css · 动效 / 图表演示修复覆盖层
+   --------------------------------------------------------------------------
+   覆盖对象：F:\dsharness\dsh-etude\design\app.css（抓现场时 4323 行）
+             + gen.mjs 内联注入的 #animToggle
+
+   必须先读这条前提：本文件必须排在 app.css 之后加载
+   （<link rel="stylesheet" href="app.css"><link rel="stylesheet" href="v-fix-anim.css">
+     或整段贴到 app.css 末尾）。原因是这里大量用「同重要性、同特异性、靠后胜」
+   来压 app.css 里那批带 !important 的时长规则；跑到前面去就全败。
+
+   每条都按：现在 → 改成 → 为什么
+   --------------------------------------------------------------------------
+   时长令牌（本文件新定义，不复用旧名，免得跟 app.css:2670-2673 打架）：
+     悬停 / 按下    120–180ms   --fx-t-hover:160ms
+     展开 / 收起    380–520ms   --fx-t-open:460ms
+     页面切换       460–580ms   --fx-t-page:520ms
+     图表重绘       600–900ms   --fx-t-chart:760ms
+   缓动令牌：
+     进场 cubic-bezier(.22,.9,.18,1)     --fx-in
+     退场 cubic-bezier(.4,0,.85,.55)     --fx-out
+   全文件无弹跳（没有 --ease-spring 那种回弹曲线）。
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  --fx-in:cubic-bezier(.22,.9,.18,1);
+  --fx-out:cubic-bezier(.4,0,.85,.55);
+  --fx-t-hover:160ms;
+  --fx-t-open:460ms;
+  --fx-t-page:520ms;
+  --fx-t-chart:760ms;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   A 组 · 演示开关 #animToggle：从「窄屏消失 + 压住齿轮」改成「一直在、在右下角」
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* A1 ── 让它无论多窄都还在
+   现在：app.css:4260
+         @media (max-width:1100px){#animToggle{display:none}}
+         这是全库唯一命中 #animToggle 的样式表规则；1024–1100 的窗口里整个开关被
+         display:none 干掉，用户看到的就是「动画演示都不行了」。
+   改成：任何宽度都 display:inline-flex，!important 压掉那条媒体查询。
+   为什么：它是唯一能证明「图表的动画是活的」的开关，藏起来等于把唯一的自救入口拿掉。
+           注意 gen.mjs:30 的内联 cssText 里没有 display，所以这里不会跟内联打架。 */
+#animToggle{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:32px;
+  min-width:32px;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* A2 ── 从右上角挪到右下角
+   现在：gen.mjs:30 内联 `position:fixed;right:16px;top:12px;z-index:9000`
+         实测 1200×800 的截图里，胶囊左缘直接压住顶栏齿轮的右半边
+         （.page max-width:1160 + padding 26 → 视口 <≈1390px 就开始压 .tb-right）。
+         而 1101–1390px 这一整段「既压住齿轮、又没被隐藏」，1024 以下又整个没有。
+   改成：bottom:16px / right:16px，z-index 从 9000 降到 60，字号 12px、内边距 7px 12px。
+   为什么：右上角是 .tb-right（搜索 / 齿轮）的地盘，任何 fixed 元素钉在那里迟早撞；
+           右下角常驻可点，不挡顶栏三颗按钮。
+           z-index 60 让它落在 .tip(99) / .popwin(70) / .msheet(9000) 之下，
+           弹窗和浮窗打开时不会被一个演示开关盖住。
+   实现要点：内联 style 是「普通声明」，作者样式表里的 !important 能压过它，
+           所以 position/right/top/bottom/z-index 必须带 !important 才生效。 */
+#animToggle{
+  position:fixed!important;
+  top:auto!important;
+  right:16px!important;
+  bottom:16px!important;
+  left:auto!important;
+  z-index:60!important;
+  padding:7px 12px!important;
+  font-size:12px!important;
+  line-height:1!important;
+  transition:
+    background-color var(--fx-t-hover) var(--fx-in),
+    border-color     var(--fx-t-hover) var(--fx-in),
+    color            var(--fx-t-hover) var(--fx-in);
+}
+
+/* A3 ── 悬停 / 按下反馈（160ms，在 120–180ms 里）
+   现在：没有 hover 态，只有一段 backdrop-filter 毛玻璃。
+   改成：hover 提亮底色与边框；active 下压 0.5px。
+   为什么：一个常驻的浮动控件必须有「我点得到」的反馈，否则用户不敢点。
+           这里不用 transform 放大，避免弹跳感。 */
+#animToggle:hover{
+  background:rgba(28,31,40,.94)!important;
+  border-color:rgba(255,255,255,.26)!important;
+}
+#animToggle:active{transform:translateY(.5px)}
+
+/* A4 ── 键盘焦点环
+   现在：:focus 被 app.css:1022 那类规则统一 outline:none 掉了，键盘用户看不到自己停在哪。
+   改成：:focus-visible 给一圈 2px 主色描边 + 2px 偏移。
+   为什么：它是页面里唯一能关掉全部动画的开关，必须能被键盘找到。 */
+#animToggle:focus-visible{
+  outline:2px solid rgba(138,169,255,.55);
+  outline-offset:2px;
+}
+
+/* A5 ── 窄屏收一号，而不是消失
+   现在：≤1100px 直接 display:none（就是 A1 要压掉的那条）。
+   改成：≤1100px 时内边距 6px 10px、字号 11px、位置贴边 14px。
+   为什么：窄屏更需要这个开关；缩一号就足够不压住内容，没有必要整个砍掉。
+           带 !important 是为了连同 app.css:4260 的 display:none 一起压住。 */
+@media (max-width:1100px){
+  #animToggle{
+    display:inline-flex!important;
+    padding:6px 10px!important;
+    font-size:11px!important;
+    right:14px!important;
+    bottom:14px!important;
+  }
+}
+
+/* A6 ── 学习页给翻页胶囊让位
+   现在：app.css:3375 `.navstep{position:fixed;bottom:16px;z-index:30}` 配
+         3383 `.navstep.next{right:16px}` —— 跟新位置完全重叠。
+   改成：body 里存在 .navstep.next 时，开关右移 92px（≤900px 时右移 82px）。
+   为什么：两个 fixed 元素钉在同一个角落会叠成一坨；让位比把开关藏起来划算。
+           :has() 在现代 Chrome / Edge 都能用（本项目只跑 Chrome 系）。 */
+body:has(.navstep.next) #animToggle{right:108px!important}
+@media (max-width:900px){
+  body:has(.navstep.next) #animToggle{right:96px!important}
+}
+
+/* A7 ── 打印 / 导出 PDF 时不要出现
+   现在：app.css:1030
+         @media print{.topbar,.chips.jump,.sctls,.hdr-act,.tip,.card.stat .takeaway{display:none!important}}
+         名单里没有 #animToggle，而 stats.js 的「导出 PDF」走 window.print()，
+         结果这枚屏幕控件的胶囊会被打进 PDF 的第一页右上角。
+   改成：打印媒体下 display:none!important。
+   为什么：它是屏幕上的调试/演示开关，不属于报告内容。 */
+@media print{
+  #animToggle{display:none!important}
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   B 组 · 统计图表：把「到底谁说了算」收成一处（时长 / 错峰 / 缓动 / 图层）
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* B1 ── 柱子时长：从 1.05s 改成 760ms（落在 600–900ms 令牌里）
+   现在：三套时长互相打架
+         2136 `.cv-js .bar,.cv-play .bar{animation:bar-grow .95s cubic-bezier(.22,.72,.3,1) both;animation-delay:var(--d,0ms)}`（简写）
+         3221 `.cv-js .bar,.cv-play .bar{animation-duration:1.05s!important}`   ← 带 !important，它赢
+         3716 `.cv-js .bar,.cv-play .bar{animation-duration:1.55s}`             ← 没 !important，它是死的
+         也就是说 3715 行「v53：统计演示再慢一档（用户说太快、掉帧）」那次调慢，
+         从来没有生效过。
+   改成：760ms，!important。
+   为什么：!important 不看谁在后面，只看重要性；要改就得带 !important 才压得住 3221。
+           760ms 配 420ms 的错峰上限（见 B2），最后一批柱子 1.18s 收尾，比原来 2.1s 干净一半。 */
+.cv-js .bar, .cv-play .bar{animation-duration:var(--fx-t-chart)!important}
+
+/* B2 ── 折线 / 面积 / 旋转 / 热格 / 环图 的时长一起收进令牌
+   现在：2156 dspin 1.05s；2141 line2 1.15s；2146 area2 .9s；2158 donut .dc .5s；
+         2142/2144/… 各自再加一条 3222-3224 的 !important。
+   改成：line2 860ms、area2 780ms、dspin 820ms、hcol 680ms、donut .dc 640ms、adot 460ms。
+   为什么：一张图里有 5 种时长、5 条曲线各走各的，眼睛就会觉得「卡」；
+           统一到同一档之后，视觉上是一次整齐的生长。
+           hcol / donut .dc 上一版靠「靠后胜」赢（3214 vs 3720），这里用 !important 钉死，
+           以后谁再往文件末尾加时长也不会被翻掉。 */
+.cv-js .line2,       .cv-play .line2      {animation-duration:860ms!important}
+.cv-js .area2,       .cv-play .area2      {animation-duration:780ms!important}
+.cv-js .dspin,       .cv-play .dspin      {animation-duration:820ms!important}
+.cv-js .hcol,        .cv-play .hcol       {animation-duration:680ms!important}
+.cv-js .donut .dc,   .cv-play .donut .dc  {animation-duration:640ms!important}
+.cv-js .adot,        .cv-play .adot       {animation-duration:460ms!important}
+
+/* B3 ── 错峰尾巴封顶，别让人等两秒
+   现在：2136 `animation-delay:var(--d,0ms)` 直接吃 stats.html 内联的 --d，
+         实测 215 处 --d，最大 1020ms；1.05s 动画 + 1.02s 延迟 = 最后一根柱子 2.1s 才站好。
+   改成：min(var(--d,0ms),420ms)（热格 360ms、环图 260ms、点 420ms）。
+   为什么：错峰是为了「一根接一根」的节奏，不是为了让人等；min() 只削最长的尾巴，
+           前 420ms 以内的间距比例完全不变。min() 对时间值是合法的（Chrome 79+）。
+           带 !important 是因为 .cvv.on .bar（app.css:772，特异性 0,3,0）会把 delay 重置成 0。 */
+.cv-js .bar,       .cv-play .bar       {animation-delay:min(var(--d,0ms),420ms)!important}
+.cv-js .hcol,      .cv-play .hcol      {animation-delay:min(var(--d,0ms),360ms)!important}
+.cv-js .donut .dc, .cv-play .donut .dc {animation-delay:min(var(--d,0ms),260ms)!important}
+.cv-js .adot,      .cv-play .adot      {animation-delay:min(var(--d,0ms),420ms)!important}
+
+/* B4 ── 进场缓动统一成 --fx-in
+   现在：2135 bar-grow 用 cubic-bezier(.22,.72,.3,1)，773 grow 用 (.34,.61,.35,1)，
+         2141 line-draw 用 (.4,.1,.35,1)，2167 legend 用 rise，各写一套。
+   改成：图里所有进场动画统一 cubic-bezier(.22,.9,.18,1)。
+   为什么：同一屏里三种起步速度，肉眼读到的就是「不流畅」；统一手感比抠单个数值有效。
+           只覆盖 timing-function，不动 keyframes 本身（柱子的 scaleY、线的 dashoffset 都保留）。
+           图例 / 环心数字顺手加上 .card.stat 限定，别去碰别的页面（见 D 组同样的坑）。 */
+.cv-js :is(.bar,.line2,.area2,.dspin,.hcol,.donut .dc),
+.cv-play :is(.bar,.line2,.area2,.dspin,.hcol,.donut .dc){animation-timing-function:var(--fx-in)!important}
+.card.stat .legend li,
+.card.stat .donut-big{animation-timing-function:var(--fx-in)!important}
+
+/* B5 ── 把常驻的 will-change 收回去
+   现在：app.css:3227-3228 写了 `.chart,.chart *{will-change:auto}`（想收图层），
+         但 3714 / 3723 两行又说
+           .cv-play .bar,.cv-play .darc,.cv-play .hcol,.cv-play .dot,.cv-play .line2,…{will-change:transform,opacity}
+           .cv-play .bar,.cv-play .dc,.cv-play .dot{will-change:transform,opacity}
+         它们特异性更高、位置更靠后，把 auto 翻掉了 → 一屏 98 根柱子 + 30 多段环图弧
+         全部常驻 will-change，而且 .cv-play 动画跑完不会被摘掉，图层永远不回收。
+   改成：`.chart` 及其全部后代 will-change:auto，!important。
+   为什么：SVG 子元素的 transform/opacity 动画在 Chrome 里本来就不走合成器（走 repaint），
+           will-change 在这里唯一的作用是把元素提成独立图层。100+ 个小图层常驻，
+           滚动和后续重绘都跟着变贵 —— 这正是「昨天还顺、今天不对劲」的典型来源。 */
+.chart,
+.chart *{will-change:auto!important}
+
+/* B6 ── 折线绘制期间先卸掉 drop-shadow
+   现在：2112 `.chart .line2{…filter:drop-shadow(0 2px 8px rgba(78,127,229,.28))}`
+         同时 2141 在跑 stroke-dashoffset 1→0 的绘制动画，每一帧都要重新栅格化 8px 模糊。
+   改成：给折线再挂第二条动画 line-fx —— 0% 和 99% 都是 filter:none，
+         只有 100% 才是原来那圈 drop-shadow。于是整段绘制期间没有 blur，
+         画完最后一帧影子自己回来。
+   为什么：影子只在「线已经画完」时有意义；把这一秒的 blur 关掉，绘制帧就能省下来。
+         实现上不要写 `filter:none` 做兜底 —— 那会让 .cv-off（animation:none）时
+         折线永久失去辉光。交给动画值接管就够：动画值压过 2112 的常驻 filter，
+         动画被关掉时 2112 的 filter 自然回位。
+         注意：这里任何 filter 都不能带 !important —— 作者 !important 会压过动画值，
+         那样 100% 的影子永远挂不回来。
+         副作用：`.chart:hover .line2{filter:…}`（app.css:810）的 hover 加亮会被动画
+         fill 住的 100% 值盖住，只剩 stroke-width 变化。要保留 hover 加亮就整段删掉这条。 */
+@keyframes line-fx{
+  0%,99%{filter:none}
+  100%  {filter:drop-shadow(0 2px 8px rgba(78,127,229,.28))}
+}
+.cv-js .line2, .cv-play .line2{
+  animation:
+    line-draw 860ms var(--fx-in) .1s both,
+    line-fx   860ms var(--fx-in) .1s both;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   C 组 · 填色：v64 / v64b 只改了一半
+   （跟「卡不卡」无关 —— 柱子动画只动 transform 和 opacity，从没动过 fill。
+     这一组只把「图例一个色、柱子另一个色」这个半截状态补完，不改新配色，
+     颜色全部取自 v64(4160-4165) 与 v64b(4186-4189) 已有的值。不想要就整组删掉。）
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* C1 ── 让柱子真正吃到 v64b 的实色阶
+   现在：app.css:4160 `.bar.c1{fill:url(#grad-blue)}`（特异性 0,2,0）
+         压着 v64b 4186 `.c1{fill:#6E82BA}`（特异性 0,1,0）→ 柱子还是渐变；
+         而图例 4191 `.legend .c1{background:#6E82BA}`、环图 4196 `.donut .dc.c1{stroke:#6E82BA}`
+         特异性够，吃到了新色 → 同一张图里两套蓝。
+         更麻烦的是 stats.html 里有 38 根柱子直接写了内联 `style="fill:url(#bg1)"`（内联永远赢），
+         连 `.bar.cN` 都压不住它们。
+   改成：`.chart .bar.cN` + !important，一次性钉死 7 个色。
+   为什么：这正是「统计你都改的不流畅了」里那个「看着不对劲」的来源 —— 98 根柱子里
+           38 根是渐变、60 根是实色，还和图例不是一个色。统一之后颜色才跟 v64b 的意图一致。
+           实色比渐变省填充率，对帧率只有好处，没有坏处。 */
+.chart .bar.c1{fill:#97B1F0!important}   /* 单序列柱图的主用色：主色，别再压暗 */
+.chart .bar.c2{fill:#656971!important}
+.chart .bar.c3{fill:#B9C9F6!important}
+.chart .bar.c4{fill:#E69089!important}
+.chart .bar.c5{fill:#55689A!important}
+.chart .bar.c6{fill:#7E93C8!important}
+.chart .bar.c7{fill:#D5DFFA!important}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   D 组 · 门控收窄：`.cv-off` / `.cv-js` 别再用 `.chart *` 一网打尽
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* D1 ── 暂停只冻「真的会动」的那几个类
+   现在：app.css:2185
+           .cv-js .chart *, .cv-js .heat rect, .cv-js .legend li, .cv-js .donut-big{animation-play-state:paused!important}
+         2186 同款 running。
+         `.chart *` 把图里所有后代一起冻住 —— 包括以后加进图里的任何新动效、图内浮层、子图。
+   改成：只冻 .bar / .line2 / .area2 / .adot / .dspin / .hcol / .donut .dc，
+         图例与环心数字加上 .card.stat 限定。
+   为什么：`animation-play-state` 只对「自己身上有 animation 的元素」有意义；
+           用通配符的唯一效果是把后来加进图里的东西一起冻死，而且写的人根本不会记得回来改。
+           这一条不改变现在的行为（今天会动的就是这 7 个类），只是把雷拆掉。 */
+.cv-js :is(.bar,.line2,.area2,.adot,.dspin,.hcol,.donut .dc),
+.cv-js .card.stat .legend li,
+.cv-js .card.stat .donut-big{animation-play-state:paused!important}
+
+.cv-play :is(.bar,.line2,.area2,.adot,.dspin,.hcol,.donut .dc),
+.cv-play .card.stat .legend li,
+.cv-play .card.stat .donut-big{animation-play-state:running!important}
+
+/* D2 ── 「关动画」也不要越过 .chart 的边界
+   现在：app.css:2177
+           .cv-off .chart *, .cv-off .heat rect, .cv-off .legend li, .cv-off .donut-big{animation:none!important}
+         后两个选择器没有 .chart 前缀，是作用于整个文档的。
+         `.legend li` 的进场是 2167 `animation:rise .4s … both`、2166 `@keyframes rise{from{opacity:0;…}}`，
+         `.donut-big` 是 2172 `fadein .5s ease .3s both`（from opacity:0）。
+         一旦这类元素落在没有 .cv-play 祖先的地方，就会被永久冻在 opacity:0 —— 字直接不见。
+   改成：收窄到会动的 7 个类，图例 / 环心数字限定在 .card.stat 里。
+   为什么：今天 stats.html 的图例和环心都在 `<section class="card stat" id="s-counts">` 内，
+           所以还没炸；但 .cv-off 是挂在 <html> 上的，全 15 页通吃，
+           只要哪天把图例搬到卡片外面，那段文字就永久消失。这是预防，不是修复现场。 */
+.cv-off :is(.bar,.line2,.area2,.adot,.dspin,.hcol,.donut .dc,.heat rect){animation:none!important}
+.cv-off .card.stat .legend li,
+.cv-off .card.stat .donut-big{animation:none!important}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   E 组 · 可选：reduced-motion 与「动画演示」互相打架（默认不启用）
+   ══════════════════════════════════════════════════════════════════════════
+
+   现在：app.css:2732-2735
+           @media (prefers-reduced-motion:reduce){
+             *,*::before,*::after{
+               animation-duration:.01ms!important;
+               animation-iteration-count:1!important;
+               transition-duration:.01ms!important;
+               scroll-behavior:auto!important;
+             }
+           }
+         而 app.css:2174-2175 的注释写的是「不再按系统的 reduced-motion 关掉这些动画」。
+         两句话直接打脸，而且是前者说了算。
+         后果：Windows 设置里关掉「动画效果」之后，全站一切动效立刻变成 0.01ms ——
+         柱子不长、环图不转、页面不淡入，看起来就是「动画/图表演示全坏了」，
+         而且那个「动画 · 开」开关救不了它（它只切 .cv-off）。
+
+   先验证再决定要不要开：控制台跑
+       matchMedia('(prefers-reduced-motion: reduce)').matches
+   如果是 true，并且你希望「演示」照样能动（按 2174 行注释的本意），
+   就把下面这段的注释去掉。如果这台机器本来就是 false，那这条跟你的现象无关，保持注释。
+
+@media (prefers-reduced-motion:reduce){
+  .cv-js :is(.bar,.line2,.area2,.adot,.dspin,.hcol,.donut .dc),
+  .card.stat .legend li,
+  .card.stat .donut-big{animation-duration:var(--fx-t-chart)!important}
+}
+*/
+
+/* ══════════════════════════════════════════════════════════════════════════
+   收尾备注
+   1) 本文件只动：动画时长/缓动/延迟、动画门控选择器、will-change、可见性与定位、
+      以及 C 组「补齐 v64b 半迁移」的柱子填色。没动字体、没动布局结构。
+   2) 如果只想解决「开关不见了」，只留 A 组即可；只想让统计顺一点，留 B 组 + D 组。
+   3) 想在浏览器里直接验证 B1 生效：选中一根柱子看 computed animation-duration，
+      应为 0.76s；改之前是 1.05s（app.css:3221 那个 !important 的缘故）。
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* =============================================================================
+   v66 · 三页打磨：句库(library) / 详情(detail) / 挖句(mine)
+   —— 覆盖层，接在 design/app.css 之后加载；不改 app.css，不改 HTML 结构。
+   —— 每条注释写清「现在 → 改成 → 为什么」，编号 #01…#77 与 detail-report.md 对齐。
+
+   作用域为什么长这样
+     这三页没有 <body> 级页面类，硬靠类名选会把别的 12 页一起改到。所以全部选择器都
+     挂在三页自己的标记上（:has() 需要 Chrome ≥ 105）：
+       .page:has(.sent)                  句库 + 详情（左说法列表 + 右句子表，两页共用）
+       .page:has(main.screen > .drawer)  详情（.drawer 在 main.screen 里，不是 .page 子节点）
+       .page:has(.minewrap)              挖句
+
+   三处被撞名的全局类（本文件靠作用域把它们压回去，源文件一个字不动）
+     .t     在 app.css 是「统计/工厂的时间胶囊」（padding:5px 11px;border-radius:99px;border + 底）
+            → 挖句页字幕时间 12:38 被套成胶囊，见 #54
+     .mini  在 app.css 是「面板上的 28px 小按钮」（height:28px;padding:0 12px;font-size:11px）
+            → 挖句页「正面/背面」两张卡被压成一条按钮，文字互压，见 #66
+     .drow  在 app.css 是「卡组表的 5 列网格行」（display:grid;height:44px;grid-template-columns:…）
+            → 详情抽屉每行被拆成 5 列，标签挤进最右 64px 竖排，见 #27
+
+   为什么有几处 !important
+     页面里有行内 style（padding:10px / padding:6px 8px 10px / margin-top:6px / line-height:1.7），
+     其中 10、6、1.7 违反硬规格，行内样式只能靠 !important 压。每一处都单条注释说明。
+   ========================================================================== */
+
+
+/* ==========================================================================
+   §1 三页共用页头（#01–#04）
+   ========================================================================== */
+
+/* #01 现在 h1 = 22px（非 4 的倍数，且比学习页标题弱）→ 改成 24px
+       为什么：POLISH 3.2「字阶 ≤6 级」现有 11/12/14/16/20/24/28 正好 6 级，24 才是标题档；
+               22 是第 7 级，把 22 收进 24，页头才跟学习页一个手感（POLISH 10）。 */
+.page:is(:has(.sent),:has(.minewrap)) .hdr h1{font-size:24px}
+
+/* #02 现在 .hdr{padding-top:6px} → 改成 4px，并且 act 行允许换行、底部对齐基线
+       为什么：6 不是 4 的倍数（硬规格）；4 个 chip + 2 个按钮在 1024 宽还得挤一行，
+               换行后靠 flex-end 对齐，标题不会被顶歪。 */
+.page:is(:has(.sent),:has(.minewrap)) .hdr{padding-top:4px;align-items:flex-end;row-gap:8px}
+
+/* #03 现在 .hdr .sub{margin-top:6px;color:var(--ghost)} → 改成 margin-top:4px + --fg3
+       为什么：6→4（硬规格）；副标题是「次文字」不是「提示」，
+               POLISH 3.2 要求次文字 .6 / 提示 .38，--ghost 只有 .38，副标题会糊进背景。 */
+.page:is(:has(.sent),:has(.minewrap)) .hdr .sub{margin-top:4px;color:var(--fg3)}
+
+/* #04 现在 .hdr .act{gap:10px} → 改成 gap:8px、flex-wrap:wrap、行间距 8px
+       为什么：10 不是 4 的倍数；1024 宽时四个 chip + 两个按钮仍在一行，加 wrap 兜住窄屏。 */
+.page:is(:has(.sent),:has(.minewrap)) .hdr .act{gap:8px;row-gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+
+/* ==========================================================================
+   §2 句库 · 左「说法」列表（#05–#12）
+   ========================================================================== */
+
+/* #05 现在左卡行内 style="padding:10px"（10 不是 4 的倍数，卡片内边距跟别的 .card 也不一致）
+       → 改成 8px（行内样式只能 !important）
+       为什么：硬规格；.card 默认 18px 20px 在这里太肥，8px 让 litem 自己撑出 32px 行高。 */
+.page:has(.sent) .split > .card:first-child{padding:8px !important}
+
+/* #06 现在列表头行行内 style="padding:6px 8px 10px"（6、10 不是 4 的倍数，且跟数据行没有分隔）
+       → 改成 padding:4px 8px 8px + 1px 下边线
+       为什么：硬规格；表头和数据行之间没有线，「说法 / 句子·卡住」看起来像第一条数据。 */
+.page:has(.sent) .split > .card:first-child > .row:first-child{
+  padding:4px 8px 8px !important;
+  border-bottom:1px solid rgba(52,56,65,.5);
+}
+
+/* #07 现在 .litem 没有任何样式：三个 span 挤成一行「succumb屈服、扛不住4 · 2」，行高由文字撑
+       → 改成 flex 行：min-height:32px、padding 0 8px、gap 8px、圆角 6px、可点、加过渡
+       为什么：读不出来是一个条目；32px 满足桌面触控 ≥28（POLISH 8），6px 是硬规格三档圆角之一。 */
+.page:has(.sent) .litem{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:32px;
+  padding:0 8px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:background 160ms cubic-bezier(.22,.9,.18,1);
+}
+
+/* #08 现在 hover 完全没有反馈 → 改成 4% 白底
+       为什么：POLISH 9「点了应该有反应的地方几乎没反馈」，悬停 120–180ms，这里 160ms。 */
+.page:has(.sent) .litem:hover{background:rgba(var(--w),.045)}
+
+/* #09 现在选中态 .litem.on 只是背景略亮一点，看不出来选的是哪个说法
+       → 改成 10% 主色底 + 左端 2px 主色竖条
+       为什么：主色是唯一强调色（硬规格）；2px 属于「装饰色只在 ≤2px 元素上」的许可范围；
+               左边条不占布局宽度，行高不变，选中不会跳。 */
+.page:has(.sent) .litem.on{background:rgba(var(--accent-rgb),.10);position:relative}
+.page:has(.sent) .litem.on::before{
+  content:"";
+  position:absolute;
+  left:0; top:4px; bottom:4px;
+  width:2px;
+  border-radius:999px;
+  background:var(--accent);
+}
+
+/* #10 现在 .litem .en 继承全局 .en{font-weight:400;color:var(--fg)}，字重和正文一样
+       → 改成 14px / 600 / --fg，不参与收缩
+       为什么：说法是这一行的主信息，要压过释义；POLISH 2 字重只三档，600 是主信息档。 */
+.page:has(.sent) .litem .en{font-size:14px;font-weight:600;color:var(--fg);flex:0 0 auto}
+
+/* #11 现在中文释义是 --ghost（提示档 .38），且长了不截断，把计数挤到换行
+       → 改成 12px / --fg3（次文字档）+ 单行省略；计数用 mono 11px 固定在最右
+       为什么：POLISH 3.2 对比度分档（次文字 .6、提示 .38），释义不是提示；
+               省略号保证「4 · 2」永远对齐在最右，六行数字才排得出一条竖线。 */
+.page:has(.sent) .litem .mut{
+  font-size:12px;
+  color:var(--fg3);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.page:has(.sent) .litem .mut:last-child{
+  flex:0 0 auto;
+  margin-left:auto;
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--ghost);
+  font-variant-numeric:tabular-nums;
+}
+
+/* #12 现在底部「还有 6 个 / 31 句」行行内 margin-top:6px + border-top 用 rgba(52,56,65,.7)
+       → 改成 margin-top:8px、分割线走 --line 同色
+       为什么：6→8（硬规格）；同一张卡里前后两条分割线不能一个 .7 一个 1.0。 */
+.page:has(.sent) .split > .card:first-child > .row:last-child{
+  margin-top:8px !important;
+  padding-top:12px !important;
+  border-top:1px solid rgba(52,56,65,.6) !important;
+}
+
+
+/* ==========================================================================
+   §3 句库 · 右「句子」表（#13–#22）
+   ========================================================================== */
+
+/* #13 现在右卡行内 style="padding:6px 8px 8px"（6 不是 4 的倍数）→ 改成 8px
+       为什么：硬规格；四边等距，表头和卡片上沿的关系才跟左边那张卡一致。 */
+.page:has(.sent) .split > .card:last-child{padding:8px !important}
+
+/* #14 现在 .split table 全裸：没有 width:100%、没有 border-collapse，列宽按内容撑，表头和数据对不齐
+       → 改成 width:100% + table-layout:fixed + border-collapse
+       为什么：fixed 让「句子」列真的吃 54%（th 上的行内 width），五个面容得下列宽才会等宽，
+               否则首行两行文字会把「读」列顶到别处（这就是现在读/打/听列错位的原因）。 */
+.page:has(.sent) .split > .card:last-child > table{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
+
+/* #15 现在表头没有样式：11.5px 灰字、字号跟来源列一样、没有下边线
+       → 改成 11px / 500 / --fg3 / min-height 32px / 居中 / 1px 下边线
+       为什么：硬规格字阶里没有 11.5；表头是标签不是数据，用 500 免得跟正文 600 抢。 */
+.page:has(.sent) .split thead th{
+  font-size:11px;
+  font-weight:500;
+  color:var(--fg3);
+  height:32px;
+  padding:0 8px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+
+/* #16 现在表头「句子」是居中的，而 td 里的句子是左对齐的 → 表头文字浮在句子行中间
+       → 改成 th:first-child 左对齐；最后一列「来源」也左对齐（数据贴左，视觉上成一条）
+       为什么：15 页里所有表头都跟着数据左对齐；居中的表头 + 左对齐的数据是这两页最明显的错位。 */
+.page:has(.sent) .split thead th:first-child,
+.page:has(.sent) .split thead th:last-child,
+.page:has(.sent) .split tbody td:last-child{text-align:left}
+
+/* #17 现在 td 没有 padding、没有行高，6 行句子贴在一起，行间也没有分割线
+       → 改成 padding:4px 8px、垂直居中、tr + tr 一条 1px 分割线
+       为什么：4 是硬规格；行内句子 24px 行高 + 8px 上下留白 = 40px 行，6 行才读得开（POLISH 3）。 */
+.page:has(.sent) .split tbody td{
+  padding:4px 8px;
+  text-align:center;
+  vertical-align:middle;
+}
+.page:has(.sent) .split tbody tr + tr > td{border-top:1px solid rgba(52,56,65,.6)}
+
+/* #18 现在整行可点（tr.clickable 有 onclick）但没有 hover、没有手型，用户不知道能点
+       → 改成 hover 4% 白底 + cursor:pointer，160ms
+       为什么：POLISH 9；这张表是进详情页的唯一入口（点看这句详情只是另一个入口）。 */
+.page:has(.sent) .split tbody tr:hover > td{background:rgba(var(--w),.045)}
+.page:has(.sent) .split tbody tr.clickable{cursor:pointer}
+
+/* #19 现在 .sent 没有样式，14px 继承正文，靠 --fg 满亮度 → 六行句子亮成一片，扫不出「哪句在说哪个说法」
+       → 改成 14px / --fg2（次文字）+ 行高 24px；行 hover 时提亮到 --fg
+       为什么：POLISH 3.2 对比度分档；句子是数据不是标题，满亮度会让下划线高亮失效。 */
+.page:has(.sent) .sent{font-size:14px;line-height:24px;color:var(--fg2)}
+.page:has(.sent) .split tbody tr:hover .sent{color:var(--fg)}
+
+/* #20 现在下划线是全局 u{box-shadow:inset 0 -1.5px 0 rgba(accent,.55)}，1.5px 在 14px 字下几乎看不见
+       → 改成 2px、底色提到 .62
+       为什么：u 标的是「这句在练哪个说法」，是这张表的核心信息；2px 是装饰色许可上限（硬规格）。 */
+.page:has(.sent) .sent u{box-shadow:inset 0 -2px 0 rgba(var(--accent-rgb),.62)}
+
+/* #21 现在 pip 是 inline span，width/height 在行内元素上不生效，td 居中也不稳
+       → 改成 display:block + margin:0 auto
+       为什么：8px 的圆点在 40px 行里要落在正中，五个面才排成一条水平线（现在有些偏上有些偏下）。 */
+.page:has(.sent) .split tbody td > .pip{display:block;margin:0 auto}
+
+/* #22 现在「来源」列是 .mut（12px / --ghost），跟表头 11px 不同字号，右边缘也不齐
+       → 改成 11px、--ghost、不换行、tabular
+       为什么：硬规格字阶 11 才是提示档；来源是辅助信息，不该跟句子同字号。 */
+.page:has(.sent) .split tbody td.mut{font-size:11px;white-space:nowrap;color:var(--ghost)}
+
+
+/* ==========================================================================
+   §4 详情 · 抽屉骨架（#23–#26）
+   ========================================================================== */
+
+/* #23 现在 .drawer 没有任何定位样式，直接排在 .split 下面、占满全宽，像「页面掉了一块」
+       → 改成页级两栏：内容 1fr + 抽屉 400px，抽屉 sticky 在右上
+       为什么：详情页的信息密度比句库高一级（POLISH 10 要照学习页对齐）；
+               400px 是「一列标签 + 一列值」放得下、又不会把句子表挤爆的宽度。
+               注意 .drawer 在 main.screen 里（不是 .page 的直接子节点），所以选 main.screen。 */
+.page > main.screen:has(> .drawer){
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 400px;
+  column-gap:16px;
+  row-gap:0;
+  align-content:start;
+}
+.page > main.screen:has(> .drawer) > main.screen{
+  grid-column:1;
+  grid-row:1;
+  min-width:0;
+  padding:0;              /* 现在里外两层 main.screen 各有一份 padding:8px 0 44px，底部白 88px */
+  gap:20px;
+}
+.page > main.screen:has(> .drawer) > .drawer{
+  grid-column:2;
+  grid-row:1;
+  align-self:start;
+  position:sticky;
+  top:16px;
+}
+
+/* #24 现在 .dmask 是空的 div，没样式但也没隐藏（占一行高度）→ 关掉
+       为什么：抽屉是常驻栏不是模态层，不需要遮罩；留着会在 grid 里多占一行。 */
+.page > main.screen:has(> .drawer) > .dmask{display:none}
+
+/* #25 现在抽屉开着时左栏只有 1104-400-16=688px，而句子表是 7 列 fixed 表：
+       「句子」54% 只剩 206px（句子折 3 行）、五个面的列各 20px 撑不住 8px 点
+       → 改成抽屉打开时详情页走单栏（说法列表在上、句子表在下，各占 688px）
+       为什么：7 列表格在 382px 里放不下；堆叠后表格 688px、句子列 371px，一行读完（POLISH 3）。
+       抽屉关掉（.drawer[hidden]）时回到 290px + 1fr。 */
+.page:has(main.screen > .drawer) .split{grid-template-columns:minmax(0,1fr)}
+.page:has(main.screen > .drawer[hidden]) .split{grid-template-columns:290px minmax(0,1fr)}
+.page:has(main.screen > .drawer[hidden]) > main.screen:has(> .drawer){grid-template-columns:minmax(0,1fr)}
+
+/* #26 现在抽屉是裸 div：无底、无边、无圆角、无内距，五段内容一口气排到底
+       → 改成 surface-sheet 面板：16px 内距、14px 圆角、最大高度 calc(100vh - 32px)、内部滚动
+       为什么：--surface-sheet(#20242D) 就是给「抽屉」准备的令牌；14px 与 .card 同档（硬规格）；
+               内部滚动让抽屉不会把页面拉成 1500px 长。 */
+.page:has(main.screen > .drawer) .drawer{
+  background:var(--surface-sheet);
+  border:1px solid var(--glass-line);
+  border-radius:14px;
+  padding:16px;
+  max-height:calc(100vh - 32px);
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+
+
+/* ==========================================================================
+   §5 详情 · 抽屉内部（#27–#38）
+   ========================================================================== */
+
+/* #27 现在 .drawer .drow 命中全局「卡组表 5 列网格」：display:grid + height:44px + grid-template-columns
+       → 改成 flex 行：min-height:28px、gap 8px、圆角 6px、hover 4%
+       为什么：这里每行是「点 + 面名 + 结果 + 右端备注」，不是五列表格；复位成 flex 之后
+               「最近七次」的日期也回到行首，而不是被挤到最右 64px 列里竖排。 */
+.page:has(main.screen > .drawer) .drow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:28px;
+  padding:0 4px;
+  border-radius:6px;
+  transition:background 160ms cubic-bezier(.22,.9,.18,1);
+}
+.page:has(main.screen > .drawer) .drow:hover{background:rgba(var(--w),.04)}
+
+/* #28 现在抽屉里的 pip 跟着网格被甩到最左，跟文字隔一整个 1fr
+       → 改成 flex 子项固定 8px
+       为什么：「五个面」是「点 → 面名 → 结果」的读法，点必须紧贴面名。 */
+.page:has(main.screen > .drawer) .drow > .pip{flex:0 0 auto;display:block}
+
+/* #29 现在 .df（面名 读/打/听/说/改）没有样式，14px 继承 --fg，最右那列还被行内 width:auto 影响
+       → 改成 12px / --fg2、flex:0 0 auto + min-width 32px
+       为什么：面名是标签，用 --fg2（次文字）不抢结果；min-width 32px 让五个面名等宽对齐；
+               行内 style="width:auto" 的「原声 3.2s」靠 min-width 兜住，不会再被压成 32px。 */
+.page:has(main.screen > .drawer) .drow > .df{
+  font-size:12px;
+  color:var(--fg2);
+  flex:0 0 auto;
+  min-width:32px;
+}
+
+/* #30 现在 .dst（已过 / 卡住 / 没开始）没有样式，跟面名同字号同色，一行里读不出主次
+       → 改成 14px / --fg / 600 / 吃掉剩余空间
+       为什么：结果才是这一行的答案，字重 600 + 满亮度；吃掉剩余空间后右端备注自然贴右。 */
+.page:has(main.screen > .drawer) .drow > .dst{
+  font-size:14px;
+  font-weight:600;
+  color:var(--fg);
+  flex:1 1 auto;
+  min-width:0;
+}
+
+/* #31 现在右端备注（档 4 · 4 天后）是 .mut 但没右对齐规则，两行数字不成列
+       → 改成 11px / --ghost / 右对齐 / tabular-nums，且行高 20px
+       为什么：一列数字必须等宽才对得齐（tabular-nums）；11px 是提示档（硬规格字阶）。 */
+.page:has(main.screen > .drawer) .drow > .mut:last-child{
+  font-size:11px;
+  color:var(--ghost);
+  text-align:right;
+  flex:0 1 auto;
+  min-width:0;
+  font-variant-numeric:tabular-nums;
+  line-height:20px;
+}
+
+/* #32 现在「这一句」的 ▶ 落在 1fr 列里被拉成 800px 长的横条
+       → 改成 28px 见方的键帽按钮
+       为什么：它是个播放按钮，不是进度条；28px 满足桌面触控下限（POLISH 8）。 */
+.page:has(main.screen > .drawer) .drow > .kbd{
+  flex:0 0 auto;
+  display:inline-grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  padding:0;
+  border-radius:6px;
+  font-size:11px;
+  cursor:pointer;
+  transition:background 160ms cubic-bezier(.22,.9,.18,1);
+}
+.page:has(main.screen > .drawer) .drow > .kbd:hover{background:rgba(var(--accent-rgb),.16)}
+
+/* #33 现在抽屉头部 .dhead/.dtitle/.dsub 全无样式：长英文标题 14px 铺满、副标题贴着标题
+       → 标题 16px/600/行高 24px，副标题 12px/--fg3/margin-top 4px
+       为什么：POLISH 3.2 字阶；标题 2 行时要整齐断开，副标题得让人一眼看出「说法·出处」。 */
+.page:has(main.screen > .drawer) .dhead{display:flex;align-items:flex-start;gap:12px;padding-bottom:16px}
+.page:has(main.screen > .drawer) .dhead > div{min-width:0;flex:1}
+.page:has(main.screen > .drawer) .dtitle{font-size:16px;font-weight:600;color:var(--fg);line-height:24px}
+.page:has(main.screen > .drawer) .dsub{font-size:12px;color:var(--fg3);margin-top:4px}
+
+/* #34 现在关闭钮是全局 .iconbtn 38px 圆钮，压在标题行右侧但没有基线关系
+       → 改成 32px，不收缩
+       为什么：POLISH 8「图标按钮再小也要有 32px 命中区」；32 也正好跟标题行高对齐。 */
+.page:has(main.screen > .drawer) .dhead > .iconbtn{width:32px;height:32px;flex:0 0 auto;cursor:pointer}
+
+/* #35 现在四个 .dsec 之间没有任何分隔，只有间距；段落标题 13px 跟内容 12px 差一点
+       → 每段 padding 16px 0 + 1px 分割线，首段不留上边距、末段不留线
+       为什么：四段信息（五个面 / 卡片信息 / 最近七次 / 这一句）要能一眼切成四块（POLISH 10）。 */
+.page:has(main.screen > .drawer) .dsec{padding:16px 0;border-top:1px solid rgba(52,56,65,.6)}
+.page:has(main.screen > .drawer) .dhead + .dsec{padding-top:0;border-top:0}
+.page:has(main.screen > .drawer) .dsec > .dsech{margin-bottom:4px}
+
+/* #36 现在 .dsech 没样式，13px 继承，跟下面 14px 的结果几乎同号
+       → 改成 11px / 500 / --ghost / 大写字距感（不引入新字重）
+       为什么：段落小标题是「提示」层级，靠字号+颜色分层，不靠加粗（POLISH 2 只许三档字重）。 */
+.page:has(main.screen > .drawer) .dsech{font-size:11px;font-weight:500;color:var(--ghost)}
+
+/* #37 现在 .dgrid 没有网格：四组「当前间隔/4 天」竖着排成一列、label 和值间没有 4px
+       → 改成 2×2 网格，gap 12px 16px，label 11px/--ghost，值 14px/600/margin-top 4px
+       为什么：四个字段是并列的，竖排会让抽屉多长 120px；12px 与 16px 都是 4 的倍数。 */
+.page:has(main.screen > .drawer) .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.page:has(main.screen > .drawer) .dgrid > div > .mut{font-size:11px;color:var(--ghost);line-height:16px}
+.page:has(main.screen > .drawer) .dv{
+  font-size:14px;
+  font-weight:600;
+  color:var(--fg);
+  margin-top:4px;
+  line-height:20px;
+  font-variant-numeric:tabular-nums;
+}
+
+/* #38 现在 .dfoot 沉在抽屉最底，没有分割线，主按钮和两个 ghost 一样大，焦点不明确
+       → 加上边线、gap 8px、按钮 12px/8px 16px，主按钮靠右
+       为什么：POLISH 9 状态反馈 + 视觉焦点；底部动作条必须跟内容切开，主按钮才立得住。 */
+.page:has(main.screen > .drawer) .dfoot{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding-top:16px;
+  border-top:1px solid rgba(52,56,65,.6);
+}
+.page:has(main.screen > .drawer) .dfoot .sp{flex:1}
+.page:has(main.screen > .drawer) .dfoot .btn{font-size:12px;padding:8px 16px;cursor:pointer}
+
+
+/* ==========================================================================
+   §6 挖句 · 播放器（#39–#48）
+   ========================================================================== */
+
+/* #39 现在 .minewrap 没有布局：播放器卡和字幕卡上下各占满全宽，播放器一开就是 1104×770
+       → 改成两栏 1fr + 400px
+       为什么：1440 下播放器 688×387（16:9 正好），字幕卡 400px 在右边同屏可见，
+               挖句时不用上下滚（POLISH 3 一屏之内可用）。 */
+.page:has(.minewrap) .minewrap{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 400px;
+  gap:16px;
+  align-items:start;
+}
+
+/* #40 现在播放器卡用 .card 默认 18px 20px 内距，内部元素之间没有统一间距
+       → 改成 padding:16px、纵向 gap:12px
+       为什么：16/12 都是 4 的倍数；播放器里的块（视频 / 进度 / 快捷键 / 音轨 / 说法）节奏要一致。 */
+.page:has(.minewrap) .player{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* #41 ★ 现在 .vid 是个普通 div，里面的 .vplay > svg 没有 width/height，
+       浏览器按「宽度撑满父级」解析 → SVG 变成一整个屏幕大的黑色三角形，把整页盖住
+       → 给 .vid 定 16:9 + 圆角 + 溢出裁切
+       为什么：这是挖句页第一丑（整页只剩一个黑三角）；16:9 是视频唯一正确答案，
+               overflow:hidden 让里面任何绝对定位也跑不出去。 */
+.page:has(.minewrap) .vid{
+  position:relative;
+  aspect-ratio:16/9;
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--lowest);
+  border:1px solid rgba(52,56,65,.8);
+}
+
+/* #42 现在 .vframe 无样式，播放三角居中不了 → absolute 铺满 + grid 居中 + 可点
+       为什么：视频封面区域要自己撑满 .vid，播放钮才是真的在正中间。 */
+.page:has(.minewrap) .vframe{position:absolute;inset:0;display:grid;place-items:center;cursor:pointer}
+
+/* #43 现在 .vplay 就是那个失控的 SVG → 改成 48px 圆钮 + 16px 图标 + hover 反馈
+       为什么：POLISH 8（≥28px 触控、图标按钮 32px 命中区）与 POLISH 9（悬停/按下 120–180ms）。 */
+.page:has(.minewrap) .vplay{
+  width:48px;
+  height:48px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:rgba(var(--w),.10);
+  border:1px solid rgba(var(--w),.16);
+  color:var(--fg);
+  transition:background 160ms cubic-bezier(.22,.9,.18,1),transform 160ms cubic-bezier(.22,.9,.18,1);
+}
+.page:has(.minewrap) .vplay svg{width:16px;height:16px;fill:currentColor;stroke:none}
+.page:has(.minewrap) .vplay:hover{background:rgba(var(--w),.16);transform:scale(1.06)}
+
+/* #44 现在 .vtime「12:41 / 22:04」是普通文本，压在视频左上角，跟黑色画面糊在一起
+       → 贴右下角、11px mono、半透明深底胶囊
+       为什么：播放器时间码是「提示」信息，不该跟画面对撞；右下角是播放器的通用位置。 */
+.page:has(.minewrap) .vtime{
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  padding:4px 8px;
+  border-radius:6px;
+  background:rgba(20,22,28,.72);
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--fg2);
+  font-variant-numeric:tabular-nums;
+}
+
+/* #45 现在 .vbar 没样式，里面 i 的 31% 宽度不生效（父级没有高度）→ 轨道 4px、已播主色
+       为什么：进度是状态反馈的基础（POLISH 9）；4px 是硬规格间距里最小的一档厚度。 */
+.page:has(.minewrap) .vbar{height:4px;border-radius:999px;background:rgba(var(--w),.10);overflow:hidden}
+.page:has(.minewrap) .vbar > i{display:block;height:100%;border-radius:999px;background:var(--accent)}
+
+/* #46 现在 .vctl 里四个 .kbd 和说明文字挤成一行，没有换行余量
+       → gap 8px + 允许换行 + 11px 提示色
+       为什么：900 宽时这一行必然换行，不设 wrap 会横向溢出（硬规格 900 断点要求）。 */
+.page:has(.minewrap) .vctl{display:flex;align-items:center;gap:8px;row-gap:8px;flex-wrap:wrap;font-size:11px;color:var(--ghost)}
+
+/* #47 现在 .vtrack 里「音轨」标签和 .wave 抢宽度，wave 被标签压成一个窄条
+       → 标签不收缩 11px、wave 吃剩余宽度
+       为什么：波形是音轨这一块的主体，标签只是标注（POLISH 3 节奏）。 */
+.page:has(.minewrap) .vtrack{display:flex;align-items:center;gap:12px}
+.page:has(.minewrap) .vtrack > .mut{flex:0 0 auto;font-size:11px}
+.page:has(.minewrap) .vtrack .wave{flex:1 1 auto;min-width:0}
+
+/* #48 现在 .wave i.on 带着 animation:wave-pulse .6s infinite alternate，48 根柱子一直在闪
+       → 关掉无限动画，改成静态主色；只保留 .on 与 .off 的明暗差
+       为什么：常驻闪烁是噪声不是反馈（POLISH 9 只要「点了有反应」，不要持续动）；
+               prefers-reduced-motion 时也必须静止（硬规格）。 */
+.page:has(.minewrap) .wave i.on{animation:none}
+.page:has(.minewrap) .wave i{background:rgba(var(--accent-rgb),.32)}
+.page:has(.minewrap) .wave i.on{background:var(--accent)}
+
+/* #49 现在播放器里说明小字行内 style="font-size:11px;line-height:1.7"（1.7 不是 4 的倍数体系）
+       → 改成行高 16px（行内样式只能 !important）
+       为什么：硬规格间距；11px 字配 16px 行高在深色底上正好不散。 */
+.page:has(.minewrap) .player > p.mut{line-height:16px !important;margin:0 !important}
+
+/* #50 现在 .player 里的 .divider 还带全局 margin:6px 0，跟 gap:12px 叠成 12+12=24 的空档
+       → margin:0，间距全交给 gap
+       为什么：同一条缝不能两份间距（POLISH 3 一屏只用 3 种间距档，这里统一 12）。 */
+.page:has(.minewrap) .player > .divider{margin:0}
+
+
+/* ==========================================================================
+   §7 挖句 · 字幕（#51–#60）
+   ========================================================================== */
+
+/* #51 现在 .subs 是默认 .card 内距，.sublines 没有间距 → 9 行字幕贴成一片
+       → .subs padding 16px + gap 12px；.sublines flex 列 + gap 4px
+       为什么：字幕行密，行与行之间靠 4px + hover 底色区分，而不是靠大空白。 */
+.page:has(.minewrap) .subs{padding:16px;display:flex;flex-direction:column;gap:12px}
+.page:has(.minewrap) .sublines{display:flex;flex-direction:column;gap:4px}
+
+/* #52 ★ 现在 .subline 没有样式 → 「12:38We're completely out of coffee.已收」三块粘成一句
+       → 三列网格：48px 时间 + 1fr 句子 + auto 状态，gap 8px，min-height 36px，可点
+       为什么：这是挖句页操作最频繁的一行；48px 刚好放下 12:38 这种 5 字符时间码，36px 命中区
+               满足 POLISH 8。 */
+.page:has(.minewrap) .subline{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr) auto;
+  align-items:baseline;
+  gap:8px;
+  min-height:36px;
+  padding:8px;
+  border-radius:6px;
+  cursor:pointer;
+  position:relative;
+  transition:background 160ms cubic-bezier(.22,.9,.18,1);
+}
+.page:has(.minewrap) .subline:hover{background:rgba(var(--w),.045)}
+
+/* #53 现在选中的字幕 .subline.on 完全没有可见差别
+       → 主色 10% 底 + 左端 2px 主色条
+       为什么：正在播的是哪一句必须一眼看出来（POLISH 9 状态反馈）；跟说法列表用同一套选中语言。 */
+.page:has(.minewrap) .subline.on{background:rgba(var(--accent-rgb),.10)}
+.page:has(.minewrap) .subline.on::before{
+  content:"";
+  position:absolute;
+  left:0; top:4px; bottom:4px;
+  width:2px;
+  border-radius:999px;
+  background:var(--accent);
+}
+
+/* #54 ★ 现在时间 12:38 命中全局 .t（时间胶囊：padding 5px 11px + 边框 + 圆底），被套成一个小胶囊
+       → 复位成裸 mono 时间码：11px、--ghost、无底无边、不收缩、左对齐
+       为什么：撞名。时间码是行首的标尺，不是可点的胶囊；胶囊还把 48px 列撑破了。
+       注：圆角写 6px 而不是 0，是因为硬规格只认 6/14/999 三档；没有底色时看不出来。 */
+.page:has(.minewrap) .subline > .t{
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:400;
+  color:var(--ghost);
+  padding:0;
+  border:0;
+  background:none;
+  border-radius:6px;
+  cursor:inherit;
+  text-align:left;
+  font-variant-numeric:tabular-nums;
+}
+
+/* #55 现在 .subline .en 继承全局 .en{color:var(--fg);font-weight:400}，9 行全是满亮度白字
+       → 14px / 行高 24px / --fg2；已收的行降到 --fg3，选中行提亮到 --fg
+       为什么：三档亮度正好表达「没碰 → 已收 → 正在听」（POLISH 3.2 分档 + POLISH 9）。 */
+.page:has(.minewrap) .subline > .en{font-size:14px;line-height:24px;color:var(--fg2);font-weight:400}
+.page:has(.minewrap) .subline.done > .en{color:var(--fg3)}
+.page:has(.minewrap) .subline.on > .en{color:var(--fg)}
+
+/* #56 现在 .smark（已收 / 收这句 / 空）跟在句子后面，把句子挤短、右端参差
+       → 第三列右端对齐，11px，nowrap
+       为什么：状态列右对齐才成一列（跟表里的 pip 一个道理）。 */
+.page:has(.minewrap) .smark{font-size:11px;color:var(--ghost);white-space:nowrap;justify-self:end;align-self:center}
+.page:has(.minewrap) .smark:empty{display:none}
+
+/* #57 现在「收这句」和「已收」颜色一样，看不出哪行还能收
+       → 未收的 .smark 用主色，已收的保持 --ghost
+       为什么：主色是唯一强调色，只用来标「可操作」（POLISH 1 色相收敛）。 */
+.page:has(.minewrap) .subline:not(.done) > .smark{color:var(--accent);font-weight:500}
+
+/* #58 现在句子里的 .w（逐词可点）没有 hover，点上去没反应
+       → hover 主色 14% 底、圆角 6px、120ms
+       为什么：POLISH 9；逐词可点是挖句页的核心交互，必须有悬停反馈。 */
+.page:has(.minewrap) .w{border-radius:6px;transition:background 120ms cubic-bezier(.22,.9,.18,1);cursor:pointer}
+.page:has(.minewrap) .w:hover{background:rgba(var(--accent-rgb),.14)}
+
+/* #59 现在 .mined（已经收进卡片的词）没有任何标记
+       → 2px 主色下划线；.mined.hot（当前正要收的）再加 16% 底
+       为什么：已收词要在句子里看得见，否则用户不知道自己收过哪些（POLISH 9）。 */
+.page:has(.minewrap) .w.mined{box-shadow:inset 0 -2px 0 var(--accent)}
+.page:has(.minewrap) .w.mined.hot{background:rgba(var(--accent-rgb),.16)}
+
+/* #60 现在字幕卡的标题行「字幕 / 点词查 · 点整行收」跟列表没有分隔，标题像第一条数据
+       → 标题行下加 1px 分割线、padding 0 0 8px
+       为什么：一卡一个大标题，跟抽屉的 .dhead 用同一种处理（POLISH 10 密度对齐）。 */
+.page:has(.minewrap) .subs > .row:first-child{padding-bottom:8px;border-bottom:1px solid rgba(52,56,65,.6)}
+
+
+/* ==========================================================================
+   §8 挖句 · 查词面板（#61–#64）
+   ========================================================================== */
+
+/* #61 ★ 现在 .pop 命中全局 .pop{display:none}（那是「说明文字浮层」的关闭态），
+      而挖句页的 .pop 是钉在字幕卡里的查词面板 → 一直不显示
+       → 在 .subs 里恢复成一张常驻小卡（12px 内距、14px 圆角、3% 白底）
+       为什么：撞名。这个面板是挖句页的第二根柱子（点词→释义→收），必须看得见。 */
+.page:has(.minewrap) .subs > .pop{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:12px;
+  border-radius:14px;
+  background:rgba(var(--w),.03);
+  border:1px solid rgba(52,56,65,.7);
+}
+
+/* #62 现在 .pw/.ipa/.chip 挤在一行没有基线关系，词频 chip 贴在词右边
+       → 词 20px/600、音标 12px mono --ghost、词频 chip 推到最右
+       为什么：20px 是硬规格字阶里的次级标题档；音标用 mono 才不会跟正文混淆。 */
+.page:has(.minewrap) .pophead{display:flex;align-items:baseline;gap:8px}
+.page:has(.minewrap) .pw{font-size:20px;font-weight:600;color:var(--fg)}
+.page:has(.minewrap) .ipa{font-size:12px;color:var(--ghost);font-family:var(--mono)}
+.page:has(.minewrap) .pophead > .chip{margin-left:auto}
+
+/* #63 现在 .poplemma / .popdef 没样式：原形和释义同字号，读不出层级
+       → 原形 11px --ghost，释义 14px/24px --fg2
+       为什么：释义是这一段真正要读的东西，14px 正文档（POLISH 2 补的那一档）。 */
+.page:has(.minewrap) .poplemma{font-size:11px;color:var(--ghost)}
+.page:has(.minewrap) .popdef{font-size:14px;line-height:24px;color:var(--fg2)}
+
+/* #64 现在 .popfoot 里两个按钮没有间距，也没有上边线
+       → gap 8px + 上边线 + 12px 按钮
+       为什么：面板内部的动作条跟抽屉 .dfoot 用同一套（POLISH 10 一致性）。 */
+.page:has(.minewrap) .popfoot{display:flex;gap:8px;padding-top:8px;border-top:1px solid rgba(52,56,65,.6)}
+.page:has(.minewrap) .popfoot .btn{font-size:12px;padding:8px 16px;cursor:pointer}
+
+
+/* ==========================================================================
+   §9 挖句 · 「收进来是这样」预览卡（#65–#70）
+   ========================================================================== */
+
+/* #65 现在 .cardprev 没有布局：正面卡和背面卡并排且各自被 .mini 压成 28px 高
+       → 两列 1fr + 12px 间隙
+       为什么：正面/背面是同一张卡的两个面，并排最省地方，12px 是 4 的倍数。 */
+.page:has(.minewrap) .cardprev{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* #66 ★ 现在 .mini 命中全局「面板小按钮」（height:28px / padding 0 12px / font-size 11px / 内联 flex），
+      两张卡被压成一条按钮，英文和中文互相叠在一起
+       → 复位成卡：height:auto、padding 12px、圆角 14px、纵向 flex gap 8px、14px 字
+       为什么：撞名。这是「卡片长什么样」的预览，必须是卡片的比例，不然预览毫无意义。 */
+.page:has(.minewrap) .cardprev .mini{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  height:auto;
+  padding:12px;
+  border-radius:14px;
+  background:var(--low);
+  border:1px solid rgba(52,56,65,.7);
+  font-size:14px;
+  line-height:normal;
+  cursor:default;
+}
+
+/* #67 现在 .miniimg 只有「12:41 的画面」几个字，没有画面区
+       → 16:9 渐变占位 + 11px mono 提示字居中
+       为什么：正面要有图片区的形状，用户才知道卡片出厂长什么样（POLISH 7 空位也要画）。 */
+.page:has(.minewrap) .miniimg{
+  aspect-ratio:16/9;
+  border-radius:6px;
+  background:linear-gradient(180deg,var(--cont),var(--lowest));
+  display:grid;
+  place-items:center;
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--fg3);
+}
+
+/* #68 现在 .minien（英文句子）跟 11px 按钮字一样大，压在图片底下没有间距
+       → 16px / 500 / 行高 24px / --fg
+       为什么：卡片正面的主文字是那句英文，16px 是硬规格字阶；500 比正文 400 重一档，不抢 600。 */
+.page:has(.minewrap) .minien{font-size:16px;font-weight:500;color:var(--fg);line-height:24px}
+
+/* #69 现在 .miniaudio 里 kbd ▶ 和「3.2s · 原声」粘在一起
+       → flex + gap 8px，kbd 固定 28px 命中区，说明 11px
+       为什么：试听是卡片正面唯一的动作，命中区 28px（POLISH 8）。 */
+.page:has(.minewrap) .miniaudio{display:flex;align-items:center;gap:8px}
+.page:has(.minewrap) .miniaudio .kbd{
+  display:inline-grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  padding:0;
+  border-radius:6px;
+  font-size:11px;
+  cursor:pointer;
+}
+.page:has(.minewrap) .miniaudio .mut{font-size:11px}
+
+/* #70 现在 .minizh / .minitags / .minisrc 三块没有间距，中文和三个 chip 贴在一起
+       → 中文 14px/24px --fg2，chip 横排 gap 8px，出处 11px --ghost + 上 4px
+       为什么：背面是「中文场景 + 标签 + 出处」三层信息，靠 8px/4px 分档（POLISH 3 三档间距）。 */
+.page:has(.minewrap) .minizh{font-size:14px;line-height:24px;color:var(--fg2)}
+.page:has(.minewrap) .minitags{display:flex;flex-wrap:wrap;gap:8px}
+.page:has(.minewrap) .minisrc{font-size:11px;color:var(--ghost);margin-top:4px}
+
+
+/* ==========================================================================
+   §10 三页的态（空 / 加载 / 错误）与键盘（#71–#74）
+   ========================================================================== */
+
+/* #71 现在三条列表（说法 / 句子表 / 字幕 / 收进来）在没数据时是一片空白卡片，什么也不说
+       → 用 :has() 判空补空态文案（不改 HTML、不要 JS）
+       为什么：POLISH 7「空态不要写暂无数据，要说清下一步该点哪」；这里是纯 CSS 就能补的一层保险。 */
+.page:has(.sent) .split > .card:first-child:not(:has(.litem))::after{
+  content:"还没有说法：先去「工厂」粘几段素材，或在挖句台收一句进来";
+  display:block;
+  padding:24px 12px;
+  text-align:center;
+  font-size:12px;
+  line-height:20px;
+  color:var(--fg3);
+}
+.page:has(.sent) .split > .card:last-child:not(:has(tbody tr))::after{
+  content:"这张表还没有句子：换个说法筛选，或按「全部」看全部 37 句";
+  display:block;
+  padding:24px 12px;
+  text-align:center;
+  font-size:12px;
+  line-height:20px;
+  color:var(--fg3);
+}
+.page:has(.minewrap) .sublines:not(:has(.subline))::after{
+  content:"这一段还没抓到字幕：点右上「导入素材」贴 .srt，或换一段再挖";
+  display:block;
+  padding:24px 8px;
+  text-align:center;
+  font-size:12px;
+  line-height:20px;
+  color:var(--fg3);
+}
+.page:has(.minewrap) .cardprev:not(:has(.mini))::after{
+  content:"收进来之后这里会显示卡片正反面";
+  grid-column:1/-1;
+  display:block;
+  padding:24px 8px;
+  text-align:center;
+  font-size:12px;
+  line-height:20px;
+  color:var(--fg3);
+}
+
+/* #72 现在数据没回来时页面就是空白，没有任何「在加载」的迹象
+       → 给三页的列表容器补 .is-loading / .is-error 态（JS 加类即可，无需改结构）
+       为什么：POLISH 7 三态都要画；故意做成「有底色 + 一行话」，不引进度条色相。 */
+.page:is(:has(.sent),:has(.minewrap)) .card.is-loading::after{
+  content:"正在读库…";
+  display:block;
+  padding:24px 12px;
+  text-align:center;
+  font-size:12px;
+  color:var(--fg3);
+}
+.page:is(:has(.sent),:has(.minewrap)) .card.is-error::after{
+  content:"这一块没读出来：先刷新一次，还不行就看「诊断」";
+  display:block;
+  padding:24px 12px;
+  text-align:center;
+  font-size:12px;
+  line-height:20px;
+  color:var(--danger);      /* 唯一警示色，不引入第二种 */
+}
+.page:is(:has(.sent),:has(.minewrap)) .card.is-error{border-color:var(--danger-cont)}
+
+/* #73 现在全页没有焦点环（app.css 只给部分控件写了 :focus-visible），键盘 Tab 到说法行/字幕行看不出来
+       → 三页的可点块统一 2px 主色焦点环、offset 2px
+       为什么：POLISH 3.2「Tab 可达、焦点环可见」；offset 2 让环不压住文字。 */
+.page:is(:has(.sent),:has(.minewrap)) :is(a,button,.chip,.litem,.subline,.drow,.w):focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+/* #74 现在波形常驻动画、悬停过渡不受系统偏好影响
+       → prefers-reduced-motion 时全部静止
+       为什么：POLISH 3.2「reduce 时全部动画立即完成」是硬规格。 */
+@media (prefers-reduced-motion:reduce){
+  .page:is(:has(.sent),:has(.minewrap)) *{
+    animation:none !important;
+    transition-duration:1ms !important;
+  }
+}
+
+
+/* ==========================================================================
+   §11 断点（#75–#77）—— 1440 / 1024 / 900 三个宽度都要能看（POLISH 3.2）
+   ========================================================================== */
+
+/* #75 现在 <1120 时抽屉 400px 会把内容栏压到 600px 以下，句子表 7 列挤成一列一个词
+       → 抽屉落到内容下面，变整宽、不再 sticky
+       为什么：POLISH 3.2「900 宽不许出现一列一个词」；抽屉本身是详情不是主线，窄屏让位。 */
+@media (max-width:1120px){
+  .page > main.screen:has(> .drawer){grid-template-columns:minmax(0,1fr);row-gap:16px}
+  .page > main.screen:has(> .drawer) > .drawer{
+    grid-column:1;
+    grid-row:2;
+    position:static;
+    max-height:none;
+  }
+}
+
+/* #76 现在 <1100 时挖句两栏（688 + 400）会小于 1100，字幕列被压到 300px 以下开始折三行
+       → 单栏：播放器在上、字幕在下
+       为什么：挖句是看视频为主的动作，窄屏先给画面。 */
+@media (max-width:1100px){
+  .page:has(.minewrap) .minewrap{grid-template-columns:minmax(0,1fr)}
+}
+
+/* #77 现在 <900 时 .split 的 290px 左栏 + 7 列表格必然溢出，正面/背面两卡也会挤成两列窄条
+       → 三处一起塌成单栏
+       为什么：POLISH 3.2 三个断点都要截图验证；900 是一列一个词的分水岭。 */
+@media (max-width:900px){
+  .page:has(.sent) .split{grid-template-columns:minmax(0,1fr)}
+  .page:has(.minewrap) .cardprev{grid-template-columns:minmax(0,1fr)}
+  .page:is(:has(.sent),:has(.minewrap)) .hdr{flex-direction:column;align-items:flex-start}
+  .page:is(:has(.sent),:has(.minewrap)) .hdr .act{margin-left:0;justify-content:flex-start}
+}
+
+/* —— 规则到此为止：#01…#77。数字口径：编号是按「一条独立的可覆盖决定」编的，
+   一个编号下面可能有两三条声明（比如 .litem 的 flex 行算 #07，它的 hover 算 #08）。 */
+
+/* ════════════════════════════════════════════════════════════════════
+   v-settings.css · 设置页（settings.html）打磨覆盖层
+   ────────────────────────────────────────────────────────────────────
+   怎么用：放在 app.css 之后加载（或整段追加到 app.css 末尾）。
+           只写「覆盖」，不改 app.css 本体，不改 gen.mjs，不动分组顺序。
+   写法：每条 = 现在 → 改成 → 为什么，数字都是 1440×900 实拍量出来的。
+   真源：app.css（2026-11-03 实读 4974 行，别的代理还在追加，这里只认选择器）
+   实拍：F:\dsharness\etude-test\mock\settings.html（8 段逐个截过）
+   字阶：全页收到 11 / 12 / 14 / 16（+ 页面标题 24 不动），共 5 级
+   间距：全部 4 的倍数；圆角：6 / 14 / 999；颜色：只用现有 token
+   ════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 01 · 骨架栅格：26/18/190 不在 4 网格上 ──────────────────────────
+   现在：.setwrap gap 26px、栏宽 190px；.setbody gap 18px
+   改成：24px / 192px / 16px
+   为什么：26 与 18 都落在 4 网格外，栅格和内容间距各自为政，
+           卡片左缘在 x=382，侧栏右缘在 x=356，中间 26px 是唯一的
+           奇数级差，缩放时先在这里看出歪。 */
+.setwrap{grid-template-columns:192px minmax(0,1fr);gap:24px}
+.setbody{gap:16px}
+
+
+/* ── 02 · 卡片圆角：20 是规格外的第七种圆角 ──────────────────────────
+   现在：.group 用 var(--r-lg) = 20px，全站圆角原本只有 6 / 14 / 999
+   改成：14px
+   为什么：20px 是台阶上的第十三级，跟内部的 .ncard(12)、.fprev(12)、
+           .inp(10) 凑出四种圆角；统一到 14 之后卡片 = 14、内块 = 14、
+           小件 = 6，只剩三级。 */
+.setbody .group{border-radius:14px;padding:16px 20px}
+
+
+/* ── 03 · 分组标题太弱：15/600 和白字行标签 13/600 只差 2px ──────────
+   现在：.ghead h2 15px；.ghead .mut 被密度层 display:none 撤掉
+   改成：h2 16px，副标题恢复 12px / --fg3
+   为什么：整页 8 个分组里，标题和下面第一行标签几乎同权，眼睛找不到
+           「这一段从哪开始」。副标题（"账本 · 素材 · 音频"）本来就是
+           撑层级的，被 .setbody .group .ghead .mut{display:none} 一起
+           撤了，等于把唯一的层级线索删了。尺寸差 16:12 + 权重 600:400
+           拉开两档，再靠 h2 与首行的 8px 间隙分组。 */
+.setbody .group .ghead{margin-bottom:8px;gap:12px}
+.setbody .group .ghead h2{font-size:16px;font-weight:600;line-height:1.4}
+.setbody .group .ghead .mut{display:block;font-size:12px;color:var(--fg3);line-height:1.4}
+
+
+/* ── 04 · 同一页两套行高：48 与 66，且 66 不是 4 的倍数 ───────────────
+   现在：控件是开关的行 = 48px，控件是按钮的行 = 66px
+         （13 上 + 40 按钮 + 13 下 + 上下各 1px border）
+   改成：.field 统一 64px（11 + 40 + 11 + 2 border），开关行被 min-height
+         撑到同一高度
+   为什么：实拍 divider y 坐标（通用 276/324/390/456、数据 275/341/407/
+           473/539）证明开关行 48、按钮行 66，同一列上下跳 18px；66 还
+           落在 4 网格外。
+   注：padding 取 11 不是 12 —— .field 同时带 border-top（app.css:490 的
+       基础规则）和 border-bottom（密度层 1157 加的），两条都没被抵消，
+       实测占 2px。11+40+11+2 = 64 才真的落在 64。
+   注：这条只管高度。真正把行钉在 64 的是下面几条 —— 只要有一个控件的
+       内容超过 40px，这一行就会破 64，所以 .seg / .stepper / .btn 都
+       给了显式 height:40px。 */
+.setbody .group .field{
+  min-height:64px;padding:11px 0;gap:8px 24px;
+  align-items:center;
+}
+.setbody .group .field .lab{font-size:14px;font-weight:500;line-height:1.4}
+.setbody .group .field .ctl{gap:8px;align-items:center}
+
+
+/* ── 05 · 侧栏：每项 34.5px（分数像素），圆角 9、字号 13 都在规格外 ──
+   现在：.setnav a padding 8px 12px + 13px 字 → 实测 12 项 y 间距
+         33/34 交替 = 34.5px；border-radius 9px；font-size 13px
+   改成：定高 36px、圆角 6、字号 14、左竖条 top/bottom 8px；gap 2→4
+   为什么：34.5 是分数像素，每三项就会有一行落在半像素上，字发虚；
+           36 是 4 的倍数且比原来高 1.5px，命中区更大。9px 圆角是规格
+           外第七种值。gap 2px 同样贴不住网格。 */
+.setnav{gap:4px;padding:4px 0}
+.setnav a{
+  display:flex;align-items:center;height:36px;padding:0 12px;
+  border-radius:6px;font-size:14px;line-height:1;
+}
+.setnav a.on::before{top:8px;bottom:8px}
+.setnav .glab{padding:12px 12px 8px;font-size:11px}
+
+
+/* ── 06 · 开关旋钮画了两层：15×15@(2,2) 加 16×16@(3,3) ────────────────
+   现在：app.css:555 .sw i 是白块 15×15 top2/left2；app.css:4043 又叠了
+         .sw::after 16×16 top3/left3 —— 两个旋钮同时渲染
+   改成：只留 ::after，top/left 归到 4px，尺寸 16×16
+   为什么：实拍关着的开关旋钮 bbox 量到 17×17（不是 16），边缘一圈发虚，
+           就是两层白块错 1px 叠出来的。24 高的轨道放 16 的旋钮，上下
+           各 4px 才对称；原来 top 是按 --sw-h:20/--sw-k:14 算的 3px，
+           尺寸被改成 24/16 之后没人回头改 top。 */
+.setbody .sw i{display:none}
+.setbody .sw::after{top:4px;left:4px;width:16px;height:16px;background:rgba(255,255,255,.72)}
+.setbody .sw.on::after{transform:translateX(16px);background:#fff}
+
+
+/* ── 07 · 开着的开关比同列控件多出 5px：外发光溢出了 ──────────────────
+   现在：.sw.on box-shadow 0 0 12px rgba(111,139,255,.30)（app.css:2700）
+   改成：外发光换成内描边，右缘回到 1252
+   为什么：实测所有行控件右缘都是 1252，只有「通用 · 练完自动跳下一张」
+         那个开着的开关量到 1257 —— 12px 的外发光把 5px 光晕画到了
+         控件列之外。同一列控件在开/关两种状态下右缘差 5px，扫一眼就
+         觉得没对齐。内描边不越界，也不会在暗底上糊成一团。 */
+.setbody .sw.on{
+  background-color:var(--accent);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.55);
+}
+.setbody .sw.on:hover{background-color:var(--accent);filter:brightness(1.07)}
+
+
+/* ── 08 · 开关颜色是写死的 #7d97ff / #8aa3ff，不是主色 ────────────────
+   现在：.sw.on background-color:#7d97ff（hover #8aa3ff），比 --accent
+         (#97B1F0) 更蓝更亮，换配色主题时这一处不跟
+   改成：var(--accent)
+   为什么：主色是唯一允许的强调色，写死的蓝一旦换主题就露馅；上面一条
+           已经把 background-image 关掉了，正好一起换成 token。 */
+
+
+/* ── 09 · 开关命中区 40×24，差 4px ────────────────────────────────────
+   现在：桌面命中区 24px 高
+   改成：加一层 inset:-4px 的透明 ::before，命中区 48×32
+   为什么：硬规格要求开关桌面命中区 ≥28。视觉尺寸不动（24px 好看），
+           只把可点区域撑到 32，鼠标擦边也能点上。 */
+.setbody .sw{position:relative}
+.setbody .sw::before{content:"";position:absolute;inset:-4px;border-radius:999px}
+
+
+/* ── 10 · 分段控件：内边距 3px、字 12.5 都在规格外 ────────────────────
+   现在：.seg padding 3px；.seg span padding 6px 14px、font-size 12.5px
+         → 实测整体 43px 高（4 + 35 + 4），把整行顶到 67px
+   改成：整体定高 40px（4 + 32 + 4），块内 6px 12px、12px 字
+   为什么：3px 贴不住 4 网格；12.5 是台阶外的第四种字号（全页还有
+           13 / 13.5 / 11.5 / 10.5 四种，一起收）。12px 下「跟随系统」
+           仍一行放得下（实测该段最宽 84px，栏宽 128px）。
+   注：显式 height 是必须的 —— 段落高度靠 padding + 行高乘出来是 43，
+       而 .field 只给了 min-height:64，43 > 40 就会把那一行撑到 67。
+       32 = 40 - 上下各 4，是能落在 64 行里的最大档。 */
+.setbody .seg{height:40px;padding:4px;align-items:center}
+.setbody .seg span{
+  height:32px;display:inline-flex;align-items:center;
+  padding:0 12px;font-size:12px;font-weight:500;line-height:1;
+}
+
+
+/* ── 11 · 缩放步进器：CSS 写的是 button/span，HTML 里是 i/b ───────────
+   现在：.stepper button{24×24 圆} 和 .stepper span{12.5px} 全打不中，
+         −/+ 是裸的 <i>（默认斜体）、100% 是 <b>（默认 700 粗体）
+   改成：整体定高 40px，i 做 30×30 圆底 + hover，b 用 500 字重
+   为什么：斜体减号 + 700 粗的百分比，是全页唯一一处斜体和唯一一处
+           700 字重（规格只允许 400/500/600）。24px 命中区也不够。
+   注：圆底取 30 不是 32 —— 这颗胶囊自带 1px 描边，4 + 32 + 4 + 2 = 42
+       会把那一行顶到 66；30 是能同时满足「40 高」「4 网格」「命中区
+       ≥28」三个条件的最大值。 */
+.setbody .stepper{height:40px;padding:4px;gap:12px;align-items:center}
+.setbody .stepper i{
+  width:30px;height:30px;border-radius:999px;display:inline-flex;
+  align-items:center;justify-content:center;font-style:normal;line-height:1;
+  background:rgba(var(--w),.06);color:var(--fg2);cursor:pointer;font-size:14px;
+  transition:background .16s cubic-bezier(.22,.9,.18,1),color .16s cubic-bezier(.22,.9,.18,1);
+}
+.setbody .stepper i:hover{background:rgba(var(--w),.12);color:var(--fg)}
+.setbody .stepper b{font-size:14px;font-weight:500;min-width:44px;text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+
+
+/* ── 12 · 主题色板：命中区 22px、标签 10.5px、间距 10px ───────────────
+   现在：.sw2 i 22×22，.sw2 字 10.5px、gap 5px；.swatches gap 10px；
+         color input 只有 22×22
+   改成：色圆 24×24、字 11px、gap 4px、色板列间距 8px，color input 撑满
+   为什么：22px 的命中区加上下面 10.5px 的标签，整块才 40px 高，但真正
+           能点的只有那个 22px 的圆；「自定义」那个 label 里的 input 也
+           只盖住圆本身。撑满之后点标签文字也能选色，命中区 44×44。
+           10.5px 是字阶外的最小号，和 .kgh 一起并到 11。
+   注：.sw2 的 line-height 收到 1 —— 色圆 + 标签这一块的高度是
+       24 + 4 + 11，行高按 1.55 算会多出 6px，把这一行顶到 70，成了
+       全页唯一一个不是 64 的行。
+   注：min-width:36 是给标签的（不是给圆的）。色圆只有 24 宽，而 11px
+       的「自定义」三个字要 33px，7 个色板挤在 218px 里时标签会互相
+       咬住（实拍 3x 放大后相邻两个字只隔 2~3px）。整块仍然右缘对齐
+       1254，只是往左多占 82px —— 这一行左侧从 466 到 1030 全是空的，
+       有的是地方。 */
+.setbody .swatches{gap:8px;align-items:flex-start}
+.setbody .sw2{gap:4px;font-size:11px;line-height:1;min-width:36px}
+.setbody .sw2 i{width:24px;height:24px}
+.setbody .sw2 input[type="color"]{inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.setbody .sw2:hover i{box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.55)}
+.setbody .sw2:hover span{color:var(--fg2)}
+.setbody .sw2.on i{box-shadow:0 0 0 2px var(--bg-bottom),0 0 0 3.5px var(--accent)}
+
+
+/* ── 13 · 字号预览框只到 x=1030，右边 220px 空着 ─────────────────────
+   现在：.fprev 是 .field 网格里的第三个子元素，自动掉进第 1 列
+         （minmax(0,1fr)），从 402 到 1030，卡片内容右缘是 1254
+   改成：grid-column:1/-1 跨两列，margin-top 12、padding 16、圆角 14
+   为什么：它是「字号」这一行的结果预览，缩在左半栏会让人以为属于
+           左上那块；跨满整行才对得上"预览"的身份。10/14/16/6 的
+           老内边距也一并归到 4 网格。 */
+.setbody .group .field .fprev{
+  grid-column:1/-1;margin-top:12px;padding:16px;border-radius:14px;gap:8px;
+}
+
+
+/* ── 14 · 预览框里的两行字没有任何样式：.f1/.f2 打不中 ─────────────────
+   现在：CSS 写的是 .fprev .en1 / .zh1，HTML 里是 <div class="f1"> 和
+         <div class="f2"> —— 两条规则从来没生效，两行都是 13.5px 灰白
+   改成：.f1 16px（跟 --read-scale 走）、.f2 12px
+   为什么：这一块存在的唯一目的就是演示"字号"设置，结果不管选小/大/
+           特大，预览框一个字都不变。绑上 var(--read-scale) 之后才真的
+           预览得出来。 */
+.setbody .fprev .f1{font-size:calc(16px * var(--read-scale));color:var(--fg);line-height:1.5}
+.setbody .fprev .f2{font-size:calc(12px * var(--read-scale));color:var(--fg2);line-height:1.6}
+
+
+/* ── 15 · 折叠行文字比同列标签右移 2px，行高 48 却用 14px 撑 ──────────
+   现在：.foldrow padding 14px 2px、gap 10px（接口段 4 行 + 快捷键末行），
+         2px 是手写残留，14/10 都不在 4 网格上
+   改成：padding 0 + 定高 48px + gap 8px、字号 14
+   为什么：实拍 接口段 折叠行文字左缘 404，而同段的 .field 标签左缘
+           402，差 2px；一组一行跳 2px 比整体错位更刺眼。高度正好回到
+           它原来的 48（14+19+14+1border），这一档本来就是 4 的倍数，
+           只是靠 padding 撑出来的，字体一换就散。 */
+.setbody .group .foldrow{padding:0;min-height:48px;gap:8px;font-size:14px}
+.setbody .group .foldrow .fsum{
+  font-size:12px;min-width:0;max-width:52%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+
+/* ── 16 · 折叠行右侧画了两个 ›（HTML 一个 + ::after 一个） ─────────────
+   现在：.chev::after{content:"›"} 叠在 <span class="chev">›</span> 上
+   改成：content:none，箭头交给 .chev 自己；hover 右移 2px
+   为什么：实拍 "…不填 key 也能用 ››" —— 双箭头，读起来像「再展开两层」。
+           顺手给箭头加 2px 位移，折叠行才有"点开"的手感。 */
+.setbody .chev{color:var(--fg3);font-size:14px;line-height:1;margin-left:8px;
+  transition:transform .16s cubic-bezier(.22,.9,.18,1),color .16s}
+.setbody .chev::after{content:none}
+.setbody .group .foldrow:hover .chev{color:var(--accent);transform:translateX(2px)}
+
+
+/* ── 17 · 三张当前值卡片：圆角 12、内边距 14、字号 11.5 ───────────────
+   现在：.ncard padding 14px / radius 12px；.nt 与 .nu 都 11.5px
+   改成：16px / 14px / 11px & 12px
+   为什么：卡片是小一号的容器，圆角却比这页的 .group 还大一号才乱；14
+           与卡片外框同族。.nt（大模型）和 .nu（跟随会话 · 温度 0.7）
+           原来同号同色，只能靠位置分主次 —— 拉开到 11 / 12。 */
+.setbody .ncard{padding:16px;border-radius:14px}
+.setbody .nt{font-size:11px}
+.setbody .nu{font-size:12px;margin-top:4px}
+
+
+/* ── 18 · 「给它哪些手」8 行：标签选择器 .pl 是死的 ───────────────────
+   现在：CSS 写 .perm .pl，HTML 里是裸 <span> → 字号颜色全没生效，
+         继承成 13.5px 的 --fg（比 .field 的 13 还亮）；行高 43
+   改成：> span:first-child 14px / --fg2；定高 44px + hover 底
+   为什么：这 8 行是"设置项"，比隔壁按钮行的 14px 粗体标签还亮，等于
+           把从属关系颠倒。改成 --fg2 的常规字重，让它读起来是"一列
+           可开关的条目"。44 是这一档（9+25+9 加 1px 分隔线 = 43）最近
+           的 4 的倍数，也是桌面行可点的最小舒适高度。
+   注：mono 工具名和中文名在同一个 span 里，CSS 拆不开，只能整行同色。 */
+.setbody .perm{padding:0;min-height:44px;border-radius:6px}
+.setbody .perm > span:first-child{
+  font-size:14px;color:var(--fg2);min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.setbody .perm:hover{background:rgba(var(--w),.03)}
+.setbody .perm:hover > span:first-child{color:var(--fg)}
+
+
+/* ── 19 · 快捷键两栏：栏间距 20px，左栏键帽快贴上右栏文字 ─────────────
+   现在：.kgroups gap 6px 34px —— 34 是列间距，但左栏 .krow 内 .kb 是
+         靠 margin-left:auto 顶到栏尾，实测左栏键帽右缘 797、右栏文字
+         左缘 818，视觉间距只剩 21px
+   改成：gap 8px 32px
+   为什么：两栏 21px 的缝跟栏内 12px 的缝差不多，眼睛分不清"这一行
+           到哪结束"；32px 才把两栏分开。8/32 都在 4 网格上。 */
+.setbody .kgroups{gap:8px 32px}
+.setbody .kgrp{padding:8px 0}
+.setbody .kgh{padding:4px 0 8px;font-size:11px}
+
+
+/* ── 20 · 快捷键每行的标签选择器 .lab 是死的，长标签没有省略号 ─────────
+   现在：.krow .lab{…ellipsis} 打不中裸 <span> → 长标签（搁置（今天不再
+         出现，明天自动回来））既没有 nowrap 也没有省略号，靠运气不换行
+   改成：> span:first-child 12px + nowrap + ellipsis；整行定高 44px
+   为什么：全页最长的三条标签都在这一栏，宽度一收就换行，把两栏的
+           行对齐整个带歪。12px 是这里唯一能保住"一行一条"的档位：
+           实测该标签现在已占 333px，可用宽度只有 343px，14px 会需要
+           373px 直接被截。
+   顺带：行 hover 只改键帽边框、文字不动，光标扫过去只有右边 40px 有
+         反应；标签一起提亮才是"整行可点"。行高 9+20+9+1border = 39
+         不在网格上，定高 44 后两栏的行能对上同一把尺子。 */
+.setbody .krow{padding:0;min-height:44px;align-items:center}
+.setbody .krow > span:first-child{
+  font-size:12px;color:var(--fg2);min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.setbody .krow:hover > span:first-child{color:var(--fg)}
+
+
+/* ── 21 · 键帽：圆角 5/7、字 11.5 ─────────────────────────────────────
+   现在：.krow .kb radius 7px、font 11.5px；.kbd radius 5px
+   改成：6px / 11px
+   为什么：5 和 7 是两个规格外圆角，而全站最小的圆角档位就是 6（--r-xs）。
+           11.5 是台阶外字号，键帽本来就该是最小的一档，落 11。 */
+.setbody .krow .kb{border-radius:6px;font-size:11px;padding:2px 8px;min-height:22px}
+.setbody .kbd{border-radius:6px;font-size:11px;padding:2px 6px}
+
+
+/* ── 22 · 「点键位直接按新键，Esc 取消」这句唯一说明被撤掉了 ───────────
+   现在：.setbody .group .keyhint{display:none}（密度层统一撤小字）
+   改成：恢复，12px / --fg3
+   为什么：快捷键这页最需要一句话告诉人"键帽是可以点着改的"，撤掉之后
+           只能靠猜。它不在密度该牺牲的范围内 —— 一行说明换来整块可
+           操作性。 */
+.setbody .group .keyhint{display:block;font-size:12px;color:var(--fg3);margin-top:12px;line-height:1.6}
+
+
+/* ── 23 · 最后那个 ＋ 是个 30px 的胶囊，不是图标按钮 ──────────────────
+   现在：.plus padding 7px 12px + 12.5px 字 → 高 30px、宽 33px，
+         7px 不在网格上，形状是横胶囊
+   改成：32×32 正圆
+   为什么：它在这一行是纯图标（内容只有一个 ＋），横胶囊会让它跟左边的
+           文字黏成一句；32 也是硬规格里图标按钮的尺寸。 */
+.setbody .plus{
+  width:32px;height:32px;padding:0;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:14px;line-height:1;
+}
+
+
+/* ── 24 · 危险操作和备份/恢复长得一模一样（最严重的一条） ─────────────
+   现在：HTML 写了两个类 `<div class="lab danger">` 和
+         `<button class="btn ghost danger">`，但 app.css 里 .lab.danger /
+         .btn.danger / .btn.ghost.danger 一个规则都没有 → 重置数据那行
+         的字色、按钮、边框跟「备份」「恢复」完全相同
+   改成：标签用 --danger、按钮用 --danger 描边 + 8% 底、hover 上实底
+   为什么：整页只有这一个动作会删光账本/素材/音频，却排在最后一行、
+           长得跟前一行"导入/导出"一样。红字 + 红边是唯一在暗底上
+           能一眼分出"这个别按"的做法，而且只用现有 --danger token，
+           不引入新色相。 */
+.setbody .group .field .lab.danger{color:var(--danger);font-weight:600}
+.setbody .group .field .lab.danger:first-child{color:var(--danger)}
+.setbody .btn.ghost.danger{
+  color:var(--danger);
+  border-color:rgba(230,144,137,.42);
+  background:rgba(230,144,137,.08);
+}
+.setbody .btn.ghost.danger:hover{
+  color:#F2B4AE;
+  border-color:rgba(230,144,137,.62);
+  background:var(--danger-cont);
+}
+.setbody .btn.ghost.danger:active{background:rgba(230,144,137,.24)}
+
+
+/* ── 25 · 「删除不可撤销 —— 先做一次备份」这行被密度层撤掉了 ───────────
+   现在：.field .desc 一律 display:none，包括重置数据那行的警告
+   改成：只给危险行放回来，12px / --danger 82%
+   为什么：全页唯一一句"不可撤销"就在这行 desc 里。危险操作既没有视觉
+           区分、也没有文字警告，等于把最该说的一句话按住了。其余行
+           的 desc 继续按密度策略收着，只有这一条例外。 */
+.setbody .group .field .lab.danger + .desc{
+  display:block;font-size:12px;line-height:1.6;
+  color:rgba(230,144,137,.82);margin-top:4px;max-width:60ch;
+}
+
+
+/* ── 26 · 「已连 / 正常 / 开着」是绿的 ────────────────────────────────
+   现在：.badge-ok 用 --s-green 字 + 绿点 + 绿光晕（通用·通知、接口·
+         连通性、智能体·已连 三处）
+   改成：文字 --fg2、圆点用 --accent + 主色光晕
+   为什么：硬规格只留 1 主色 + 1 警示 + 5 级中性，绿色不在里面。这三处
+           都是"状态正常"，用主色点比绿色更贴这套配色，也不会跟警示
+           红打架。 */
+.setbody .badge-ok{color:var(--fg2);font-size:12px;gap:8px}
+.setbody .badge-ok::before{
+  background:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.16);
+}
+.setbody .badge-ok i{display:none}
+
+
+/* ── 27 · 按钮：13.5px 是台阶外字号，高度没定死 ───────────────────────
+   现在：.btn font-size 13.5px、padding 9px 18px（高度 ≈40.6px，小数）
+   改成：14px、height 40px、padding 0 18px
+   为什么：13.5 让全页出现第四种字号；高度靠 padding 撑出来是 40.6，
+           .field 定高 64 之后这 0.6px 会让分隔线落在半像素上。
+           .btn.sm 一并从 28 提到 32（图标按钮按 32 走）。 */
+.setbody .btn{font-size:14px;height:40px;padding:0 18px;line-height:1}
+.setbody .btn.sm{height:32px;padding:0 12px;font-size:12px}
+
+
+/* ── 28 · 键盘可达：按钮/链接/折叠行一个焦点环都没有 ──────────────────
+   现在：全站只有 .pickbtn / .sw / .drow / #animToggle 有 :focus-visible，
+         Tab 走到按钮、侧栏链接、折叠行时屏幕上什么都不变
+   改成：统一 2px 主色环 + 2px offset
+   为什么：硬规格要求 Tab 可达且焦点环可见。.seg span / .krow / .sw2 是
+           <span>/<div>，CSS 救不了（要改模板加 tabindex），这里把能
+           聚焦的补齐：a、button、.foldrow、.btn、.sw、.stepper i 的父级。 */
+.setnav a:focus-visible,
+.setbody .btn:focus-visible,
+.setbody .group .foldrow:focus-visible,
+.setbody .stepper i:focus-visible,
+.setbody .sw:focus-visible,
+.setbody .ksearch:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+}
+
+
+/* ── 29 · 快捷键搜索框：圆角 10→999、内边距 9/13、比旁边的按钮矮 7px ──
+   现在：.ksearch 两处定义打架（903 行 radius 10px，1190 行 radius 999px
+         胜出），padding 9px 13px → 实测 33px 高，同一行右边「恢复默认」
+         按钮 40px
+   改成：定高 40px、左右 12px、gap 8、字号 12
+   为什么：9/13 都不在 4 网格上；33 与 40 并排，上缘各差 3.5px，扫描线
+           是断的。定高 40 之后这一行整行高 60（模板里这行有 inline
+           padding:12px 0 6px，CSS 压不过 inline，见收尾备注）。 */
+.setbody .ksearch{height:40px;box-sizing:border-box;padding:0 12px;gap:8px;font-size:12px}
+
+
+/* ── 30 · 断点：这一页在 1024 / 900 下不塌，侧栏硬吃 190px ────────────
+   现在：.setwrap 的 grid-template-columns 没有任何 @media 覆盖（全文件
+         搜不到），1440 之外一律 192px + 剩余
+   改成：≤1100px 单栏，导航改成横向胶囊条、取消 sticky
+   为什么：900 宽实拍时卡片只剩 611px，主题配色那行 7 个色圆挤到边缘；
+           而侧栏是 12 项竖排 + sticky，在 768 高的屏上会被视口切掉最后
+           两项（数据/关于），滚到顶也点不到。横向条把它变回一行，
+           .glab 分组标题在窄屏隐藏（分组靠顺序仍然成立）。
+   注：1540 行以后才是「改成」的样子，1440 宽的截图不受影响。 */
+@media (max-width:1100px){
+  .setwrap{grid-template-columns:minmax(0,1fr);gap:16px}
+  .setnav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px;padding:0 0 4px}
+  .setnav .glab{display:none}
+  .setnav a{height:32px;border-radius:999px;padding:0 12px}
+  .setnav a.on::before{display:none}
+  .setbody .group .field{min-height:56px}
+}
+
+
+/* ── 31 · 动效收口：新增的过渡全部走 160ms，尊重 reduced-motion ─────── */
+@media (prefers-reduced-motion:reduce){
+  .setnav a,.setbody .stepper i,.setbody .chev,
+  .setbody .sw2 i,.setbody .perm{transition:none}
+  .setbody .group .foldrow:hover .chev{transform:none}
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   收尾备注
+   1. 只覆盖，没动 app.css / gen.mjs / 分组顺序，也没改 HTML。
+   2. 三条「CSS 救不了」留给模板层：
+      · .seg span 是 <span>、.krow 是 <div>、.sw2 是 <div> —— 键盘不可达，
+        要加 tabindex="0" + role 才能进 Tab 序列；
+      · .perm 的「中文名 · 工具名」挤在同一个 span 里，没法把工具名做成
+        等宽小字，要拆成两个 span；
+      · 快捷键搜索框 .ksearch 本身就是个 <span>，现在只当占位，真要能搜
+        得换成 <input>。
+   3. 开关的双旋钮（.sw i + .sw::after）是全局问题，这里按 .setbody 收窄；
+      要修全站得把 app.css:555 的 .sw i 直接删掉。
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v-faces.css · 五面（听 / 说 / 读 / 写 / 改）+ 教程 —— 节奏对齐覆盖
+   ─────────────────────────────────────────────────────────────────────────
+   只用一种方式加载：接在 app.css 后面
+
+     <link rel="stylesheet" href="./app.css">
+     <link rel="stylesheet" href="./v-faces.css">   ← 后加载，同权重即覆盖
+
+   作用域只有两处，别的地方一个像素都不动：
+     main.screen:has(>.strip)   = 五个练习面（靠顶部 strip 认页）
+     main.screen:has(.docwrap)  = 教程（靠 docwrap 认页）
+   卡片页(.screen.half) / 工厂 / 统计 / 设置 完全不碰。
+
+   这套文件的依据是 1440×900 无头 Chrome 实测的 getBoundingClientRect +
+   getComputedStyle（见 faces-report.md 的一致性对照表），不是看图形容。
+
+   每条都写成三句：现在 → 改成 → 为什么。
+   ══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ══ 0 · 尺子 ═════════════════════════════════════════════════════════════
+   五个面本来各写各的宽度，先把尺子立成变量，后面所有规则只引用变量。
+   列宽取 560 / 720 两档：560 是「操作列」（图、写框、按钮组），
+   720 是「阅读列」（整句英文）。都落在 4 的倍数上，也是 560+80×2 的常见版心。 */
+
+main.screen:has(>.strip),
+main.screen:has(.docwrap){
+  --f-col:560px;      /* 操作列：图 / 写框 / 按钮组 / 答案块 */
+  --f-read:720px;     /* 阅读列：整句英文 / 教程正文 */
+  --f-btn:40px;       /* 按钮统一高度：命中区 ≥28 的规格之上，留出一点呼吸 */
+  --f-btn-min:104px;  /* 右下角主按钮的槽宽：五个面 + 教程都同宽 */
+  --f-radius:14px;    /* 圆角只留 6 / 14 / 999 三档 */
+  --f-fast:160ms;     /* 悬停 / 按下 */
+  --f-slow:420ms;     /* 展开 */
+}
+
+/* R01 · 现在 .screen{gap:22px}（22 不是 4 的倍数） → 改成 24 → 为什么
+   整页的竖节奏就靠这一个 gap，不是倍数的话 4px 网格在拼图时永远差 2。 */
+main.screen:has(>.strip),
+main.screen:has(.docwrap){ gap:24px; }
+
+
+/* ══ 1 · 五面共用：顶部 strip（这一条五个面本来就一致，只做规格收口） ═══ */
+
+/* R02 · 现在 .strip{padding:14px 0 10px}（14 / 10 都不在 4 网格上） → 改成 12px 0
+   → 为什么 12+52+12 仍然等于原来的 76px 高，视觉零位移，但两个数都合规。 */
+main.screen:has(>.strip) .strip{ padding:12px 0; }
+
+/* R03 · 现在 .strip{gap:14px} → 改成 12 → 为什么 同一个 4 网格。 */
+main.screen:has(>.strip) .strip{ gap:12px; }
+
+/* R04 · 现在 .strip .crumb 11.5px / .wchip 11px / .f5row .fi 11.5px
+   → 改成一律 12 → 为什么 字阶只留 11/12/14/16/20/24/28，11.5 这种半档
+   在同一行里和 12 抢，看起来是「没对齐」而不是「层级不同」。 */
+main.screen:has(>.strip) .strip .crumb,
+main.screen:has(>.strip) .strip .f5row .fi{ font-size:12px; }
+main.screen:has(>.strip) .strip .wchip{ font-size:12px; }
+
+/* R05 · 现在 .wchip 高 21.4px，是 strip 里唯一可点的东西 → 改成 28px 高
+   → 为什么 命中区规格 ≥28；21 的胶囊在触屏上基本点不中。
+   宽度不动、圆角仍是 999，视觉上只是上下多出 3px。 */
+main.screen:has(>.strip) .strip .wchip{ height:28px; padding:0 12px; }
+
+/* R06 · 现在 .track / .wave i 圆角 99px → 改成 999 → 为什么 圆角只留 6/14/999。 */
+main.screen:has(>.strip) .strip .track,
+main.screen:has(>.strip) .strip .track i,
+main.screen:has(>.strip) .wave i{ border-radius:999px; }
+
+
+/* ══ 2 · 五面共用：舞台 —— 本轮最大的一条 ══════════════════════════════ */
+
+/* R07 · 现在 .stage{justify-content:center; padding:24px 0 10px}，标题行跟着内容
+   在屏幕中间浮：实测标题行 y = 听 371.9 / 说 190.1 / 读 355.9 / 写 204.9 / 改 328.1。
+   → 改成 justify-content:flex-start + padding:24px 0 8px
+   → 为什么 切一个面标题就上下跳 180px，这五个面就没法当成「同一句话的五个面」。
+   改成从固定位置起排之后，五页标题行都落在 y≈208，只有下面的内容在换。 */
+main.screen:has(>.strip) .stage{
+  justify-content:flex-start;
+  padding:24px 0 8px;
+  gap:16px;
+}
+
+/* R08 · 现在 .stage 内容超出时溢出到底部操作条上（.stage{overflow:visible} 是
+   app.css 里为塞进一屏故意写死的） → 改成 overflow-y:auto + min-height:0
+   → 为什么 展开「看画面 / 对答案」后答案块比舞台高，实测写面展开时内容会压到
+   actbar 上；改成舞台内部滚动，actbar 永远在自己那一格。 */
+main.screen:has(>.strip) .stage{
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+
+/* R37 · 现在 .screen:has(>.strip){min-height:calc(100vh - 96px)} 只有下限没有上限，
+   于是内容最多的「说」把整列撑高：实测 stage 605、actbar 掉到 y813，整页 915 出现滚动条，
+   而其余四面 actbar 停在 778。→ 改成 补一个同值的 max-height + 舞台 flex:1 1 0
+   → 为什么 底部操作条必须钉在同一行；「说」比「听」多一个大圆按钮和一行提示，
+   多出来的高度应该由舞台内部消化，不该把整列和操作条一起推下去。 */
+main.screen:has(>.strip){
+  max-height:calc(100vh - 96px);
+}
+main.screen:has(>.strip) .stage{
+  flex:1 1 0;
+}
+
+/* R09 · 现在 .stage 的直接子元素是 shrink-to-fit（align-items:center 的副作用），
+   答案块里的图片被压到 150px 宽（实测 listen 答案图 150.1×111.1）。
+   → 改成 答案块定宽 = 操作列 560
+   → 为什么 「看答案」是这个页面的第二主角，现在缩成缩略图大小，等于答案不给看。 */
+main.screen:has(>.strip) .stage > .reveal{
+  width:var(--f-col);
+  max-width:100%;
+  align-self:center;
+}
+main.screen:has(>.strip) .stage > .reveal > div{ width:100%; }
+
+/* R10 · 现在 说/写两页的场面图 560×342，听/读的答案图只有 150 宽
+   → 改成 图一律 560 宽 → 为什么 同一个场面在四个页面里必须同一个尺寸，
+   否则切面的时候「看图」这件事的两个面看起来不是一件事。 */
+main.screen:has(>.strip) .stage > img.shot,
+main.screen:has(>.strip) .reveal img.shot{
+  width:var(--f-col);
+  max-width:100%;
+  border-radius:var(--f-radius);
+}
+
+/* R11 · 现在 .writein{width:min(100%,560px)} 却被父级 .row 收缩，
+   实测三种宽度：听 388.5 / 读 388.5 / 说 416.1 / 写 560。
+   → 改成 输入行与单输入框都定宽 560，输入框吃满剩余宽度
+   → 为什么 同一套「写一句」的动作，四个页面四个宽度，是最显眼的不一致。 */
+main.screen:has(>.strip) .stage > .row:has(> input),
+main.screen:has(>.strip) .stage > input.writein{
+  width:var(--f-col);
+  max-width:100%;
+  gap:8px;              /* 原来行内 gap:10px 不在 4 网格上 */
+  justify-content:center;
+}
+main.screen:has(>.strip) .stage > .row:has(> input) .writein{
+  flex:1 1 auto;
+  width:auto;
+  min-width:0;
+}
+
+/* R12 · 现在 .inp / .writein 圆角 10px、高 46px → 改成 14px / 44px
+   → 为什么 圆角只留 6/14/999；46 不在 4 网格上。 */
+main.screen:has(>.strip) .writein{
+  border-radius:var(--f-radius);
+  height:44px;
+  font-size:14px;
+}
+
+/* R13 · 现在 写框的过渡是 .2s → 改成 160ms → 为什么 悬停/按下规格 120–180ms。 */
+main.screen:has(>.strip) .writein{
+  transition:border-color var(--f-fast) ease, background var(--f-fast) ease;
+}
+
+/* R14 · 现在 句子字级三档：读 26 / 改 22 / 听·说·写的答案 19（全是内联 style）
+   → 改成 主句 24、答案句 20，宽一律 720
+   → 为什么 26 和 22 都在字阶之外；同一句英文在五个面之间大跳，读者会以为
+   换了内容。24 是「主句」，20 是「核对用」。内联 style 必须 !important 才盖得住。 */
+main.screen:has(>.strip) .stage > .cue{
+  font-size:24px !important;
+  line-height:1.5 !important;
+  max-width:var(--f-read) !important;
+  width:100%;
+  font-weight:400;
+}
+main.screen:has(>.strip) .stage .reveal .cue{
+  font-size:20px !important;
+  line-height:1.6 !important;
+  max-width:var(--f-read) !important;
+  width:100%;
+}
+
+/* R15 · 现在 改面把替换词写成 <b style="...">，字重 700 → 改成 600
+   → 为什么 字重只有 400/500/600；700 在一屏里像标题。 */
+main.screen:has(>.strip) .cue b{ font-weight:600 !important; }
+
+/* R16 · 现在 .defn 是 max-width:820 内联 + 句子 19px 内联 + .mut 15px
+   → 改成 宽 560（操作列），句子 20px，注 14px → 为什么 它是「改完是这样」的
+   预览块，属于答案区，跟操作列同宽；15px 不在字阶上。 */
+main.screen:has(>.strip) .stage > .defn{
+  width:var(--f-col);
+  max-width:100% !important;
+  border-left-width:2px;
+  padding:8px 0 8px 16px;
+}
+main.screen:has(>.strip) .defn > p{ font-size:20px !important; line-height:1.5; }
+main.screen:has(>.strip) .defn > p.mut{ font-size:14px !important; line-height:1.6; margin-top:8px; }
+
+/* R17 · 现在 .chip 高 22px，而改面的换词胶囊是主要操作 → 改成 28px / 12px
+   → 为什么 命中区 ≥28；22 的胶囊在触屏上点不中，而且 11px 的字在 22 的胶囊里
+   上下几乎贴边。只改舞台里的 chip，工厂/卡片的 chip 不动。 */
+main.screen:has(>.strip) .stage .chip{
+  height:28px;
+  padding:0 12px;
+  font-size:12px;
+  border-radius:999px;
+  gap:8px;
+}
+
+
+/* ══ 3 · 五面共用：按钮与底部操作条 ═══════════════════════════════════ */
+
+/* R18 · 现在 按钮字 13.5px、内边距 9/18、高度 38.4~40.9，而 actbar 里
+   .actbar .btn 又把内边距压成 7/16（高 36.9） → 改成 全套统一 14px / 高 40
+   → 为什么 13.5 不在字阶上；同一栏里的按钮差 4px 高，右边缘就参差。 */
+main.screen:has(>.strip) .btn,
+main.screen:has(.docwrap) .btn{
+  font-size:14px;
+  height:var(--f-btn);
+  padding:0 16px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  line-height:1;
+  font-weight:600;
+  transition:background var(--f-fast) ease, color var(--f-fast) ease,
+             border-color var(--f-fast) ease, opacity var(--f-fast) ease,
+             transform 120ms ease, box-shadow var(--f-fast) ease;
+}
+
+/* R19 · 现在 .actbar{padding:9px 14px;gap:9px}（9 / 14 都不在网格上）
+   → 改成 8px 16px / gap 8 → 为什么 4 网格 + 左右内边距和 .strip 对齐。 */
+main.screen:has(>.strip) .actbar{
+  padding:8px 16px;
+  gap:8px;
+}
+
+/* R20 · 现在 右下角主按钮宽 102（下一面）或 74.5（改面的「回卡片」）
+   → 改成 槽宽 104 → 为什么 五个面 + 教程的同一个位置应该是同一块面积，
+   否则「下一步在哪」每切一个面都要重新找。 */
+main.screen:has(>.strip) .actbar > .btn.primary,
+main.screen:has(.docwrap) .hdr .act .btn{
+  min-width:var(--f-btn-min);
+}
+
+/* R21 · 现在 教程页头部那个「回卡片」是 .hdr .btn.ghost{padding:8/16;font-size:12px}
+   （高 36.6，比 actbar 里的按钮矮一档） → 改成跟其他页 40 高 / 14px
+   → 为什么 同一个动作，教程里一种体格、改面里另一种。 */
+main.screen:has(.docwrap) .hdr .btn.ghost{
+  padding:0 16px;
+  font-size:14px;
+  height:var(--f-btn);
+}
+
+/* R22 · 现在 .kbd 圆角 5px → 改成 6 → 为什么 圆角只留 6/14/999。 */
+main.screen:has(>.strip) .kbd{ border-radius:6px; }
+
+
+/* ══ 4 · 五面共用：反馈节奏与命中区 ═══════════════════════════════════ */
+
+/* R23 · 现在 .shot:hover{transform:scale(1.01)} 过渡 .2s → 改成 160ms
+   → 为什么 悬停/按下 120–180ms；200ms 摸起来是「慢半拍」。 */
+main.screen:has(>.strip) .shot{
+  transition:transform var(--f-fast) ease, box-shadow var(--f-fast) ease;
+}
+
+/* R24 · 现在 展开答案没有动画（details 原生直出） → 改成 420ms 淡入+上移 4px
+   → 为什么 展开规格 380–520ms；五个面里「看答案 / 对答案」是同一个反馈动作，
+   现在有的页面瞬开、有的页面带 .reveal 的箭头过渡，节奏不齐。 */
+main.screen:has(>.strip) .reveal[open] > div{
+  animation:face-open var(--f-slow) cubic-bezier(.22,.61,.36,1) both;
+}
+@keyframes face-open{
+  from{opacity:0; transform:translateY(4px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+/* R25 · 现在 .q 是 16×16 的图标按钮 → 命中区只有 16 → 改成 视觉仍 16，
+   用伪元素把可点面积撑到 32 → 为什么 图标按钮规格 32px，但真去改宽度会把
+   标题行撑高；透明白边是唯一既不动布局又能点中的做法。 */
+main.screen:has(>.strip) .q{ position:relative; border-radius:999px; }
+main.screen:has(>.strip) .q::after{
+  content:"";
+  position:absolute;
+  inset:-8px;
+  border-radius:999px;
+}
+
+/* R26 · 现在 五个面的状态点：.fi.ok 是绿 #6BB76B、.fi.warn 是琥珀 #D4A558
+   → 改成 主色 / 警示色 → 为什么 配色只有 1 主 + 1 警示 + 中性，绿和琥珀都在禁令里；
+   app.css 后半段已经把这个口径用在 chip 上了，这五颗点漏掉了。 */
+main.screen:has(>.strip) .f5row .fi.ok .pd{
+  background:var(--accent);
+  box-shadow:0 0 0 2px rgba(var(--accent-rgb),.18);
+}
+main.screen:has(>.strip) .f5row .fi.warn .pd{
+  background:var(--danger);
+  box-shadow:0 0 0 2px rgba(230,144,137,.18);
+}
+
+
+/* ══ 5 · 教程 ═════════════════════════════════════════════════════════════
+   教程现在几乎没写过样式：h2 是浏览器默认的 1.5em（21px），p 的 margin 是
+   全局的 0，正文直接铺满 1108px。它不是「另一个设计」，是「没设计」。 */
+
+/* R27 · 现在 教程 h1 22px（全局 h1） → 改成 24 → 为什么 它是页面标题，
+   和卡片页的 .hdr h1 24 对齐；22 和正文的 21 挤在同一档。 */
+main.screen:has(.docwrap) .hdr h1{ font-size:24px; line-height:1.3; }
+
+/* R28 · 现在 article.doc h2 = 浏览器默认 21px/600，和页标题 22 只差 1px
+   → 改成 20px + 32/8 的上下间距 → 为什么 章节标题必须明显小于页标题；
+   21 这个数根本不在字阶上（它只是 14×1.5）。 */
+main.screen:has(.docwrap) .doc h2{
+  font-size:20px;
+  line-height:1.4;
+  letter-spacing:0;
+  margin:32px 0 8px;
+}
+main.screen:has(.docwrap) .doc h2:first-child{ margin-top:0; }
+
+/* R29 · 现在 正文 720 才是可读行宽，实际是 1108（约 130 字符/行）
+   → 改成 max-width:720 → 为什么 这一页是拿来读的；720 也是五个面的阅读列，
+   教程和练习页因此共用同一个「一行字有多长」。 */
+main.screen:has(.docwrap) .doc{ max-width:720px; }
+
+/* R30 · 现在 全局 p{margin:0}，段落之间零间距（实测上一段底边就是下一段顶边）
+   → 改成 段间 12px、行高 1.7 → 为什么 现在整篇是一堵字墙，段落边界只能靠
+   句号猜。1.7 只给正文，不改全局。 */
+main.screen:has(.docwrap) .doc p{
+  margin:0 0 12px;
+  line-height:1.7;
+  font-size:14px;
+}
+main.screen:has(.docwrap) .doc p:last-child{ margin-bottom:0; }
+
+/* R31 · 现在 教程里的 <b> 是 700 → 改成 600 → 为什么 字重只有 400/500/600。 */
+main.screen:has(.docwrap) .doc b{ font-weight:600; color:var(--fg); }
+
+/* R32 · 现在 列表用浏览器默认（缩进 40、项间无距） → 改成 缩进 20、项间 8
+   → 为什么 五个面那一节全是 li，现在项与项粘在一起，读起来像一段。 */
+main.screen:has(.docwrap) .doc ul{
+  margin:0 0 12px;
+  padding-left:20px;
+}
+main.screen:has(.docwrap) .doc li{
+  margin:8px 0;
+  line-height:1.7;
+}
+main.screen:has(.docwrap) .doc li::marker{ color:var(--ghost); }
+
+/* R33 · 现在 .docnav 的六个链接之间只有源码里的一个空格（实测间距 4px），
+   14px 主色，看起来像一长串字 → 改成 flex + gap 16、12px 次级色、悬停才亮
+   → 为什么 目录是导航不是正文；4px 间距点不中，也分不清是六个入口。 */
+main.screen:has(.docwrap) .docnav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-bottom:24px;
+}
+main.screen:has(.docwrap) .docnav a{
+  font-size:12px;
+  color:var(--fg3);
+  padding:4px 0;
+  transition:color var(--f-fast) ease;
+}
+main.screen:has(.docwrap) .docnav a:hover{ color:var(--accent); }
+
+/* R34 · 现在 .doc .quote 就是一段普通 14px 文字 → 改成 左侧 2px 主色细线的
+   引文块（和改面的 .defn 同一个手感） → 为什么 「学习原则」那条是全文唯一的
+   引用，现在和正文一模一样，读者会当成正文读过去。 */
+main.screen:has(.docwrap) .doc .quote{
+  border-left:2px solid var(--accent-cont);
+  padding:4px 0 4px 16px;
+  color:var(--fg2);
+}
+
+/* R35 · 现在 正文里的行内代码没有样式 → 改成 mono / 12px / 6 圆角浅底
+   → 为什么 隐私那节有一整条路径，跟正文同字体时会被读成句子。 */
+main.screen:has(.docwrap) .doc code{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--accent);
+  background:rgba(var(--accent-rgb),.12);
+  padding:4px 8px;
+  border-radius:6px;
+}
+
+/* R36 · 现在 教程页头的 .sub 12px 和正文 14px 贴得太近，且 hdr 没有下边距
+   → 改成 sub 12px + 段间 8 → 为什么 副标题是说明不是正文，隔 8 才分得开。 */
+main.screen:has(.docwrap) .hdr .sub{ margin-top:8px; font-size:12px; }
+
+
+/* ══ 6 · 空态 / 载入态 / 错态 ═════════════════════════════════════════════
+   先说结论：这六个页面生成出来的 HTML 里没有任何空态/载入态/错态的标记
+   （六个文件里 class 含 empty/skel/load/err 的元素数 = 0）。
+   下面 A 组只靠属性，不需要动 gen.mjs；B 组需要 gen.mjs 多吐一个 div。
+   报告里第 3 节列了 B 组需要的标记。 */
+
+/* A1 · 载入中：给 .stage 加 aria-busy="true" 即可（JS 一行）
+   现在 载入时页面就是全亮、写框能点，看起来像已经就绪
+   → 改成 舞台降透明度 + 波形继续动 + 写框禁点
+   → 为什么 练习页最怕「假就绪」：用户会对着还没加载的句子开始打分。 */
+main.screen:has(>.strip) .stage[aria-busy="true"] > *{
+  opacity:.5;
+  transition:opacity var(--f-fast) ease;
+}
+main.screen:has(>.strip) .stage[aria-busy="true"] .wave i{
+  animation:face-cycle 1.4s ease-in-out infinite;
+}
+@keyframes face-cycle{
+  0%,100%{opacity:.35}
+  50%{opacity:1}
+}
+main.screen:has(>.strip) .stage[aria-busy="true"] .writein{ pointer-events:none; }
+
+/* A2 · 禁用态：现在 .writein:disabled / .btn:disabled 没有专门样子
+   → 改成 统一 40% + 禁点光标 → 为什么 灰的「能写但不要写」(.dim) 和
+   真不能写是两件事，不能长得一样。 */
+main.screen:has(>.strip) .writein:disabled,
+main.screen:has(>.strip) .btn:disabled,
+main.screen:has(.docwrap) .btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+/* A3 · 图片缺失：现在 图片没 src 时只留 alt 文字撑着，行高乱掉
+   → 改成 有固定比例的占位块 → 为什么 这是唯一能用纯 CSS 表达的空态：
+   不需要改模板，只要 src 为空。 */
+main.screen:has(>.strip) img.shot:not([src]),
+main.screen:has(>.strip) img.shot[src=""]{
+  aspect-ratio:16/10;
+  width:var(--f-col);
+  max-width:100%;
+  display:block;
+  border:1px dashed rgba(var(--w),.14);
+  border-radius:var(--f-radius);
+  background:repeating-linear-gradient(135deg, rgba(var(--w),.03) 0 8px, transparent 8px 16px);
+}
+
+/* B · 需要 gen.mjs 多吐一个 <div class="fstate" data-kind="empty|load|err"> 才有用：
+   空态 = 今天这一面没有到期；载入态 = 正在取句子；错态 = 取挂了。
+   三种用同一个骨架，只有边框和字色不同，位置固定在操作列里。 */
+main.screen:has(>.strip) .fstate{
+  width:var(--f-col);
+  max-width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  padding:24px 16px;
+  border:1px dashed rgba(var(--w),.14);
+  border-radius:var(--f-radius);
+  background:rgba(var(--w),.02);
+  color:var(--fg3);
+  font-size:14px;
+  line-height:1.6;
+  text-align:center;
+}
+main.screen:has(>.strip) .fstate b{ font-weight:600; color:var(--fg2); font-size:14px; }
+main.screen:has(>.strip) .fstate[data-kind="load"]{ border-style:solid; color:var(--fg3); }
+main.screen:has(>.strip) .fstate[data-kind="load"]::before{
+  content:"";
+  width:16px; height:16px;
+  border-radius:999px;
+  border:2px solid rgba(var(--w),.14);
+  border-top-color:var(--accent);
+  animation:face-spin .9s linear infinite;
+}
+@keyframes face-spin{ to{ transform:rotate(360deg) } }
+main.screen:has(>.strip) .fstate[data-kind="err"]{
+  border-color:var(--danger-cont);
+  border-style:solid;
+  color:var(--danger);
+}
+main.screen:has(>.strip) .fstate[data-kind="err"] b{ color:var(--danger); }
+
+/* ════════════════════════════════════════════════════════════════
+   v72 · 启动页（index.html）打磨覆盖层
+   （第一行带 v72 标记：apply.mjs 的幂等靠 cur.includes(标记)，
+     少了它每跑一次 apply-all.ps1 就会把整块再追加一遍）
+   ------------------------------------------------------------------
+   加载方式：放在 app.css 之后（或整段追加到 app.css 末尾）。
+   本文件只写「覆盖」，不改 app.css 本体。
+
+   动手范围：文字排版 / 按钮 / 间距 / 字在星点上的可读性 / 焦点·按下·加载反馈。
+   没动：#sky 的 canvas 绘制、splash.js 的任何逻辑、.sky-veil（把 veil 调浓
+        等于把星点压暗 = 改了星空观感，铁律禁止）。星空绘制未改动。
+
+   每条格式：现在 → 改成 → 为什么
+   数值约束：间距只用 4 的倍数；字阶 11/12/14/16/20/24/28（本页标题是唯一
+   的显示级，48）；字重 400/500/600；圆角 6/14/999。
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 01 · 标题：字阶 / 行高 / 字重 ───────────────────────────────
+   现在：font-size 52px、line-height 1.2 = 62.4px、font-weight 700
+   改成：font-size 48px、line-height 64px、font-weight 600
+   为什么：52 和 62.4 都不在字阶、也不在 4px 网格上；700 超出 400/500/600。
+           48 是本页唯一的显示级（只用在标题这一处，不下放到正文），
+           行高 64px 让两行正好 128px，整块落回网格。 */
+.sp2-title{
+  font-size:48px;
+  line-height:64px;
+  font-weight:600;
+}
+
+/* ── 02 · 标题在星点上的可读性 ───────────────────────────────────
+   现在：text-shadow:0 2px 32px rgba(0,0,0,.45) —— 32px 模糊等于没有边
+   改成：0 1px 2px rgba(2,3,7,.55), 0 2px 24px rgba(2,3,7,.6)
+   为什么：星点用 'lighter' 合成，最亮那几颗接近纯白，压在字边上会把笔画
+           啃掉一块；紧边（2px）只压字缘、宽影（24px）只做体积，
+           两层各干一件事，比一层大模糊顶用。 */
+.sp2-title{
+  text-shadow:0 1px 2px rgba(2,3,7,.55), 0 2px 24px rgba(2,3,7,.6);
+}
+
+/* ── 03 · 品牌字：13px → 12px ────────────────────────────────────
+   现在：font-size 13px，无文字阴影
+   改成：font-size 12px + 0 1px 8px rgba(2,3,7,.7)
+   为什么：13 不在台阶上；12px 的 --fg3 灰字压在星场里偏虚，
+           补一道很短的暗影就清得住，不用动那块压暗层。 */
+.sp2-brand{
+  font-size:12px;
+  text-shadow:0 1px 8px rgba(2,3,7,.7);
+}
+
+/* ── 04 · 品牌小方块：圆角与字重 ─────────────────────────────────
+   现在：border-radius 10px、font-weight 700
+   改成：border-radius var(--r-md)（末段 :root 把它定成 14px）、font-weight 600
+   为什么：全站圆角只有 6/14/999，10 是第 4 种；字重 700 不在集合里。
+           （方块里那层 28% 主色渐变属于品牌标识，不是装饰色块，保留。） */
+.sp2-logo{
+  border-radius:var(--r-md);
+  font-weight:600;
+}
+
+/* ── 05 · 品牌行内间距：9px → 8px ────────────────────────────────
+   现在：gap 9px
+   改成：gap 8px
+   为什么：9 不是 4 的倍数。 */
+.sp2-wordmark{
+  gap:8px;
+}
+
+/* ── 06 · 主按钮尺寸：130×52 的小胶囊 → 139×56 的入口 ────────────
+   现在：padding:15px 48px + font-size 15.5px，高度靠字高凑出来 = 52px
+   改成：height:56px、padding:0 52px、font-size:16px、line-height:24px、
+         inline-flex 居中
+   为什么：15.5 不在台阶（→16）；高度写死 56 才落在 4px 网格上（现在 52 是
+           15+22+15 凑的，字一换就飘）；56px 命中区远高于「≥36px」的下限，
+           139×56（实测）配 48px 标题，按钮才像个「入口」而不是标题下面的小胶囊。 */
+.splash-body .sp2-act .btn.lg{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:56px;
+  padding:0 52px;
+  font-size:16px;
+  line-height:24px;
+}
+
+/* ── 07 · hover 的过渡被砍掉了（本屏最实的一个 bug）───────────────
+   现在：app.css:3782 的 .splash-body .sp2-act .btn 用 (0,3,0) 盖掉了
+         app.css:2677 那份显式 transition 列表，只剩 opacity .4s / transform .4s
+         → transform 那 400ms 其实白给（见 09：抬升被 !important 关死了），
+           而真正在变的 box-shadow / filter / 颜色一项都没有过渡 = 硬闪
+   改成：显式五条属性：box-shadow 240ms、filter 160ms、background-color 160ms、
+         color 160ms、opacity 400ms（留给退场）
+   为什么：只列真的会变的属性，不用 transition:all（all 会把 background-image
+           也拖进来重绘）；transform 不列，因为这一屏它被 2747 / 2755 的
+           !important 按死了，列了也是空转。 */
+.splash-body .sp2-act .btn.lg{
+  transition:
+    box-shadow 240ms var(--ease),
+    filter 160ms var(--ease),
+    background-color 160ms var(--ease),
+    color 160ms var(--ease),
+    opacity 400ms var(--ease);
+}
+
+/* ── 08 · hover 换渐变 = 天然硬切，换成叠一层白膜 ─────────────────
+   现在：.btn.primary:hover 把 background 换成另一条 linear-gradient
+   改成：hover 保持 base 那条渐变；改用 ::before 叠 10% 白，配合已有的
+         brightness(1.04) 和 box-shadow 加厚来表达 hover
+   为什么：background-image（渐变）不能插值，换渐变永远是「啪」一下；
+           叠一层 opacity 可插值的白膜才有过渡。按钮已经是
+           position:relative + overflow:hidden + 999 圆角（app.css:2495），
+           白膜会被裁成胶囊形，不用额外处理。
+           注意：hover 的 translateY(-2px) 在 app.css:2747 被
+           transform:none!important 关死了（v37 的决定），所以这屏的 hover
+           反馈不能靠位移，只能靠亮度 + 光晕 + 白膜。 */
+.splash-body .sp2-act .btn.lg::before{
+  content:'';
+  position:absolute; inset:0;
+  border-radius:inherit;
+  background:rgba(255,255,255,.10);
+  opacity:0;
+  transition:opacity 160ms var(--ease);
+  pointer-events:none;
+}
+.splash-body .sp2-act .btn.lg:hover::before{
+  opacity:1;
+}
+.splash-body .sp2-act .btn.primary:hover{
+  background:linear-gradient(135deg, #A8BEF4 0%, var(--accent) 100%);
+}
+
+/* ── 09 · 按下反馈：现在等于没按，而且不能用 transform 修 ──────────
+   现在：.sp2-act .btn.lg:active{transform:translateY(0)} —— 想从 hover 的
+         -2px 回到 0；但 hover 那 -2px 在 app.css:2747 被
+         `transform:none!important` 关死，:active 又在 2748-2757 被
+         `transform:none!important; transition-duration:0s` 关死
+         → 这一屏按下去只剩 .btn.primary:active 换了一条更深的渐变（硬切）
+   改成：不跟 !important 的 transform 较劲（v37 明确删掉了抬升和通用压下），
+         改用三样都能插值/瞬时可见的：filter brightness(.95) 整体压暗、
+         内阴影从「上缘亮线」翻成「上缘暗坑」、外光晕从 32px 收到 14px，
+         时长压到 70ms
+   为什么：按下要的是「这件东西陷进去了」，不是「它移动了」；
+           光晕收干 + 内部翻暗 = 陷进去，而且不受那两条 !important 影响。
+           70ms 是「立刻」的体感上限，再慢就像加载。 */
+.splash-body .sp2-act .btn.lg:active{
+  filter:brightness(.95);
+  background:linear-gradient(135deg, #9AB4F0 0%, #8AAAE8 100%);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.24),
+    0 4px 14px rgba(var(--accent-rgb),.30);
+  transition-duration:70ms;
+}
+
+/* ── 10 · 焦点环：现在完全没有 ──────────────────────────────────
+   现在：按钮没有 focus-visible 样式（全站只有 .pickbtn / .sw / .drow 有）
+   改成：outline:2px solid rgba(var(--accent-rgb),.9)、outline-offset:4px
+   为什么：splash.js 全局监听 Enter / Space 直接进门，键盘用户 Tab 过来
+           是一颗「看不见焦点」的按钮，按下去页面就跳走了。
+           2px 正好卡在「装饰色只能出现在 2px 以下」的上限。 */
+.splash-body .sp2-act .btn.lg:focus-visible{
+  outline:2px solid rgba(var(--accent-rgb),.9);
+  outline-offset:4px;
+  outline-style:solid;
+}
+
+/* ── 11 · 加载中状态：CSS 预埋了 .busy，但它是空的 ────────────────
+   现在：app.css:3783 只有 .busy{pointer-events:none}，没有视觉；
+         splash.js / smooth.js 里也没有任何地方加这个类
+         → 点「开启」到遮罩开始盖（约 2 帧 = 32ms）之间，屏幕什么都不变
+   改成：把 .busy 的视觉补齐 —— 指针变 progress、按钮压到 78%、
+         底部一条 2px 扫光；另外 .leaving 期间也给 progress 指针
+         （这条纯 CSS 立刻生效，不依赖 JS）
+   为什么：样式先备好，JS 只要 classList.add('busy') 就能用；在 JS 补上之前，
+           .leaving 的 progress 指针至少让点击当下有回应。
+           扫光条 2px = 装饰色的合法粗细，压在按钮底边不挡字。 */
+.splash-body .sp2-act .btn.busy{
+  pointer-events:none;
+  cursor:progress;
+  opacity:.78;
+  filter:saturate(.85);
+}
+.splash-body .sp2-act .btn.busy::after{
+  content:'' !important;          /* app.css:2745 把 ::after 设成了 content:none!important */
+  display:block !important;
+  position:absolute;
+  top:auto;                       /* base 的 2496 写了 top:0，不关掉这条会被钉在顶边 */
+  left:0; right:0; bottom:0;
+  height:2px;
+  width:100%;
+  transform:none;
+  border-radius:999px;
+  background:linear-gradient(90deg,
+    rgba(18,28,52,0) 0%,
+    rgba(18,28,52,.55) 50%,
+    rgba(18,28,52,0) 100%);
+  background-size:45% 100%;
+  background-repeat:no-repeat;
+  opacity:1;
+  animation:sp-busy-sweep 1.1s linear infinite !important;   /* 2745 的 animation:none!important 也要压过 */
+}
+@keyframes sp-busy-sweep{
+  0%  {background-position:-45% 0}
+  100%{background-position:145% 0}
+}
+/* 点击之后、遮罩盖满之前：指针立刻变 progress（零 JS） */
+.splash-body.leaving .sp2-act .btn{
+  cursor:progress;
+}
+
+/* ── 12 · 移动端：38px/45.6 与 -18px 都不在网格上 ─────────────────
+   现在：@media (max-width:760px) 里 title 38px（行高 45.6px）、
+         .sp2-inner translateY(-18px)
+   改成：40px / 48px、translateY(-20px)
+   为什么：45.6 不是 4 的倍数，-18 也不是；40/48 是显示级在窄屏的等比档。 */
+@media (max-width:760px){
+  .sp2-title{font-size:40px;line-height:48px}
+  .sp2-inner{transform:translateY(-20px)}
+}
+
+/* ── 13 · 减少动效时别把扫光转成鬼影 ────────────────────────────
+   现在：app.css:2733 在 prefers-reduced-motion 下把 animation-duration 强制成
+         .01ms!important，无限循环的扫光会变成一条静止的 2px 亮线
+   改成：该模式下关掉扫光，只留压暗 + progress 指针
+   为什么：静止的亮线看着像渲染坏了，不如不画。 */
+@media (prefers-reduced-motion:reduce){
+  .splash-body .sp2-act .btn.busy::after{
+    display:none !important;
+  }
+}
+
+/* ==========================================================================
+   v-states.css · 空态 / 加载态 / 错误态 · 状态反馈动效
+   --------------------------------------------------------------------------
+   这是补丁层：追加在 design/app.css 之后，只覆盖、不替换，也不改任何结构。
+   写的四件事：POLISH ⑦（三种状态都要画，空态要说清下一步点哪）
+                POLISH ⑨（180–260ms 状态反馈 + 必要位移，不要弹跳）
+
+   命名（全站统一）
+     .state          状态块（默认空态外观，另外两个态在它上面改色）
+     .state-empty    空：数据是 0，要给下一步
+     .state-loading  加载：在等，用户别乱点
+     .state-error    出错：说清哪儿错了 + 一个可点的重试
+     里面四件套：.state-fig（占位图）/ .state-title（一句结论）
+                 .state-hint（为什么、下一步点哪）/ .state-acts（按钮行）
+
+   两条路
+     1) 纯 CSS：容器本来就是空的（:empty / :not(:has())）→ 自动长出提示，
+        一行 HTML 都不用改。第 2 节各页的「空态兜底」全走这条。
+     2) 要让 JS 配合：整块替换成 .state-*（自定义文案 + 按钮）、
+        加载中（aria-busy）、出错（data-error / .state-error）。
+        浏览器自己不知道「正在等」和「失败了」，这三个词得由 JS 说出来。
+
+   约束（违反就是白干，所以写在这里当自检表）
+     间距只用 4 的倍数；字阶只用 11/12/14/16/20；字重 400/500/600；
+     圆角只用 6/14/999；颜色只有 --accent / --danger / 五级中性 + 白通道；
+     悬停按下 120–180ms，展开收起 380–520ms，状态反馈 200ms；
+     进场 cubic-bezier(.22,.9,.18,1)，退场 cubic-bezier(.4,0,.85,.55)；
+     两条曲线都没有 overshoot，所以不会有弹跳。
+   ========================================================================== */
+
+/* ── 0. 本文件自用的令牌 ──────────────────────────────────────────────────
+   作用：把四种时长、两条曲线、错误色通道收在一处。
+   为什么：app.css 已有 --ease / --t-fast / --t-mid，但少了「按下」「反馈」
+          两个档；加进来以后这一层不再出现裸数字，改节奏只要动这里。
+          错误色没有 rgb 通道变量（--danger 是 hex），补一个 --st-bad。 */
+:root{
+  --st-in:cubic-bezier(.22,.9,.18,1);   /* 进场：先快后慢，收尾不冲过头 */
+  --st-out:cubic-bezier(.4,0,.85,.55);  /* 退场：先慢后快，走得干脆 */
+  --st-hover:160ms;   /* 悬停/抬升：规格 120–180，取偏慢的一档，抬升才看得见 */
+  --st-press:120ms;   /* 按下：同规格，按下去要「立刻」，比悬停快一档 */
+  --st-fb:200ms;      /* 状态反馈：规格 180–260，取中段，一屏三个元素也不打架 */
+  --st-xp:420ms;      /* 展开收起：规格 380–520，取中段 */
+  --st-bad:230,144,137;/* = #E69089 的通道；错误底色用低透明度，不用实色 */
+  --st-line:rgba(var(--w),.10); /* 空态虚框的统一灰度，比 --line 还淡一级 */
+}
+
+/* ==========================================================================
+   1. 空态
+   ========================================================================== */
+
+/* ── 1.0 三种状态之间怎么切 ──────────────────────────────────────────────
+   作用：[hidden] 永远不显示；[data-empty] 原地说一句空态的话。
+   为什么：一块区域在「空 / 在等 / 有内容」之间切换，最小代价是 JS 只翻
+          一个属性，而不是增删一整块 DOM。
+          :empty 与 :not(:has())）留给「本来就没有内容」的纯 CSS 判断，
+          这两条路 HTML 一行都不用改；要换文案/加按钮才落到 .state-* 上。
+          这里给 [hidden] 补 !important：下面各页的 ::before/::after
+          提示是 display:block，不加这一条，JS 挂 hidden 也压不掉它。 */
+[hidden]{display:none!important}
+/* 宿主是 .litem 这种横排 flex 行时，只有让它换行，下面那条 flex:1 0 100%
+   才真的把提示顶到第二行；不换行的 flex 会把它挤在同一行尾巴上。 */
+[data-empty]{flex-wrap:wrap}
+[data-empty]::after{
+  content:attr(data-empty);
+  display:block;
+  /* flex:1 0 100%：宿主是 .litem 这种横向 flex 行时，提示必须自己占一行，
+     否则会接在「补偿」后面横着滚出去。块级容器里这两条不生效，无害。 */
+  flex:1 0 100%;
+  margin-top:8px;
+  font-size:12px;
+  font-weight:400;
+  line-height:1.7;
+  color:var(--fg3);
+}
+
+/* ── 1.1 状态块的骨架 .state ─────────────────────────────────────────────
+   作用：任何一块「这块区域该有内容但现在没有」的容器，套上 .state 就成型。
+   为什么：虚线框是这套设计里「这里可以长东西」的既有语言（.addsense /
+          .drop / .rv.dim 都是虚线），空态沿用同一条，不新造一种边框。 */
+.state{
+  display:grid;
+  place-items:center;
+  gap:12px;
+  align-content:center;
+  min-height:160px;
+  padding:32px 24px;
+  text-align:center;
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  background:rgba(var(--w),.02);
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+/* 紧凑版：塞在卡片里的一段行内提示，不要撑成一块台面 */
+.state.state-sm{
+  min-height:0;
+  padding:16px 16px;
+  gap:8px;
+}
+
+/* ── 1.2 占位图 .state-fig ───────────────────────────────────────────────
+   作用：48px 的小图位，三种状态共用一个。
+   为什么：这一版没有插画，也没引入图标字体；用两块 CSS 画出来的「空行」
+          代替图片，颜色跟 --accent-rgb 走，换配色（settings 里那六种）时
+          这里跟着变，不需要另做一套图。 */
+.state-fig{
+  position:relative;
+  width:48px;height:48px;
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(var(--accent-rgb),.14),rgba(var(--accent-rgb),.05));
+  box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.22);
+}
+/* 三条空行：读起来就是「一张还没写字的表」 */
+.state-fig::before{
+  content:'';
+  position:absolute;
+  inset:14px;
+  border-radius:6px;
+  background:repeating-linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb),.52) 0 2px,
+    rgba(var(--accent-rgb),0) 2px 6px
+  );
+}
+.state-fig::after{content:none}
+
+/* ── 1.3 文案三层 + 按钮行 ───────────────────────────────────────────────
+   作用：.state-title 一句结论（14/500），.state-hint 说下一步（12/400），
+        .state-note 补一句代价/说明（11/400）。
+   为什么：POLISH ⑦ 点名「空态不要写『暂无数据』，要说清下一步点哪」——
+          所以结论和动作用两层分开写，动作那层永远写按钮的原话。
+          hint 限宽 360px：中文一行 22 字左右最好读，太宽就成说明书了。 */
+.state-title{
+  font-size:14px;font-weight:500;line-height:1.5;
+  color:var(--fg2);
+}
+.state-hint{
+  max-width:360px;
+  font-size:12px;font-weight:400;line-height:1.7;
+  color:var(--fg3);
+}
+.state-note{
+  font-size:11px;font-weight:400;line-height:1.6;
+  color:var(--ghost);
+}
+.state-acts{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+  margin-top:4px;
+}
+/* 空态里的主按钮：用现成的 .btn.primary，只把圆角收成胶囊，
+   让它比页面里的普通按钮更「像下一步」。 */
+.state .btn{white-space:nowrap}
+.state-acts .btn.primary{border-radius:999px;padding:8px 20px;font-size:12px}
+.state-acts .btn.ghost{border-radius:999px;padding:8px 16px;font-size:12px}
+
+/* ── 1.4 空态进场/退场 ───────────────────────────────────────────────────
+   作用：.state 出现 200ms 淡入上移 4px；.state.leaving 160ms 淡出上移。
+   为什么：4px 是「刚放上去」的最小位移，再大就像弹窗；退场刻意比进场快，
+          因为用户已经知道它要走，多等 40ms 都是浪费。 */
+@keyframes st-in{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:none}
+}
+@keyframes st-out{
+  from{opacity:1;transform:none}
+  to{opacity:0;transform:translateY(-4px)}
+}
+.state.leaving{animation:st-out var(--st-hover) var(--st-out) both}
+
+
+/* ── 1.5 各页「数据为空」的纯 CSS 兜底 ───────────────────────────────────
+   下面每条都是「容器里确实没有内容」时才成立，靠 :empty / :not(:has())
+   判断，不需要 JS。文案里一律写出按钮原话（获取牌组 / 导入素材 / 开始练）
+   —— 空态要能当路标用，不能只报丧。 */
+
+/* 卡片页：整块牌组表还在，但一行数据都没有 */
+/* 作用：.deckcard 里一个 .drow 都没有时，表头下面接一段带虚线的提示。
+   为什么：表头（牌组 / 未学习 / 学习中 / 待复习）得留着，用户才知道
+          这张表本该有什么；空态只补身体，不动头。 */
+.card.deckcard:not(:has(.drow))::after{
+  content:'这个包里还没有牌组。点下面「获取牌组」拿一套现成的，或者「创建牌组」自己建一个。';
+  display:block;
+  padding:32px 24px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+}
+
+/* 卡片页：连牌组表都没有（第一次打开、一个包都没导入） */
+/* 作用：.c-l 里没有 .deckcard 时，整个左栏长成一块虚线占位。
+   为什么：这时表头也没有了，得让「获取 / 创建 / 导入」三个入口显得是
+          在等用户点，而不是页面加载坏了。 */
+.c-l:not(:has(.deckcard)){display:grid;place-items:center}
+.c-l:not(:has(.deckcard))::before{
+  content:'还没有牌组。先点下面的「获取牌组」从 AnkiWeb 拿一套，或者「创建牌组」。';
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  min-height:200px;
+  padding:32px 24px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  background:rgba(var(--w),.02);
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 句库 / 详情：左栏的说法列表空了（右栏是句表，靠 table 排除掉） */
+/* 作用：.split 里没有 .litem、也没有 table 的那张卡 → 虚线占位。
+   为什么：句库和详情页共用同一套 .split 壳，这条能一次覆盖两页。 */
+.split>section.card:not(:has(.litem)):not(:has(table)){display:grid;place-items:center}
+.split>section.card:not(:has(.litem)):not(:has(table))::before{
+  content:'一个说法都没收。点右上「导入素材」贴一段字幕，或者去「工厂」造一句。';
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  min-height:160px;
+  padding:32px 24px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 句库 / 详情：右栏句表一行都没有 */
+/* 作用：卡里有 table、但 tbody 没有 tr → 表格下面接提示。
+   为什么：不能往 tbody 里塞伪元素（表格布局不认），只能在表尾加一段；
+          表头留着，用户照样知道列是「读/打/听/说/改」。 */
+.split>section.card:has(table):not(:has(tbody tr))::after{
+  content:'这张表还是空的。换个筛选看看，或者点右上「导入素材」贴一段字幕加句子。';
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  padding:24px 20px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  margin-top:12px;
+}
+
+/* 统计页：图表区一颗像素都没有 */
+/* 作用：.card.stat 里 .chartbox 空（或 chartbox 里的 .box 空）→ 卡内虚线提示。
+   为什么：只认「图都没画出来」这一条硬信号。图例为空、留存表没行这两种
+          在「有数据但不够」时也会成立（比如只练了 3 天、留存表本来就
+          要 20 句才排队），拿它们判空会把正常卡画成没数据。
+          汇总数字和结论句（.sums / .takeaway）不在这里清，它们是 JS
+          写进去的，0 数据时该由 JS 换成「还没有」—— 见报告里「等 JS」那栏。 */
+.card.stat:has(.chartbox:empty)::after,
+.card.stat:has(.chartbox>.box:empty)::after{
+  content:'这张卡还没有数据。至少练过 20 个句子，这里才会长出曲线 —— 先去「卡片」页把今天该练的练掉。';
+  display:grid;
+  place-items:center;
+  width:100%;
+  box-sizing:border-box;
+  min-height:120px;
+  padding:24px 20px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  margin-top:12px;
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 工厂：左栏词表空了 */
+/* 作用：.fx-words 里没有 li → 列表位置长出一块虚线提示。
+   为什么：工厂的空词表是「新用户第一屏」，必须告诉他搜索框在哪，
+          不然那块窄条看着像加载失败。 */
+.fx-words:not(:has(li))::before{
+  content:'左边还没有词。上面搜索框敲一个，第一项会自动加进来。';
+  display:grid;
+  place-items:center;
+  width:100%;
+  box-sizing:border-box;
+  min-height:120px;
+  padding:16px 12px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  margin-top:4px;
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 工厂：右栏还没选词（没有词头） */
+.fx-main:not(:has(.fx-wordhd))::after{
+  content:'右边还没选词。左边点一个，就能在这里编例句、配图、排读音。';
+  display:grid;
+  place-items:center;
+  width:100%;
+  box-sizing:border-box;
+  min-height:200px;
+  padding:32px 24px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 工厂：这个词一个义项都没有 */
+.fx-list:not(:has(.fx-sense))::after{
+  content:'这个词还没有义项。点下面「加义项」，先写一句例句，再挑图。';
+  display:grid;
+  place-items:center;
+  width:100%;
+  box-sizing:border-box;
+  min-height:120px;
+  padding:24px 20px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  margin-top:12px;
+}
+
+/* 工厂：右栏整个空着的时候，上面已经有一条「还没选词」，这里再长一条会
+   变成两层虚线框叠在一起。只留外层。
+   注意：这条要写在 .fx-list 那条之后，靠后覆盖。 */
+.fx-main:not(:has(.fx-wordhd)) .fx-list:not(:has(.fx-sense))::after{content:none}
+
+/* 卡片页：牌组表空着时，模板里那句「随包是空的…」会和上面这条撞车
+   （一句说没牌组、一句介绍样例牌组），留一句就够。 */
+.c-l:has(.deckcard:not(:has(.drow))) .deckstat{display:none}
+
+/* 学习页：抽屉拉开以后是空的（这一面还没内容） */
+/* 作用：.drw-p 里没有任何元素 → 抽屉里显示一行提示。
+   为什么：学习页有 7 个抽屉，内容由句子决定；缺一面时不能给白板。
+          用 ::before 是因为 .drw-p::after 已经被「拉开窗帘」的亮边占用了。 */
+.drw-p:not(:has(*))::before{
+  content:'这一面还没有内容。去工厂给这个词补一句，回来这里就有了。';
+  display:block;
+  padding:12px 0;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--ghost);
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 挖句（mine）：字幕列表空了 */
+.sublines:not(:has(.subline))::before{
+  content:'还没有挖到句子。播放上面的原声，听到想要的按「挖这一句」，就会落进这里。';
+  display:grid;
+  place-items:center;
+  min-height:160px;
+  padding:32px 24px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 单句练习页（听/说/读/打/改）：这句还没语音 */
+/* 作用：.stage 里没有 .play 播放键 → 练习区顶上给一句提示。
+   为什么：没语音时波形区是空的，用户会以为是网卡了；直接告诉他去点
+          「生成语音」，比留一块空白强。 */
+.stage:not(:has(.play))::after{
+  content:'这一句还没有语音。点右上「生成语音」，几秒就好，之后就能直接听。';
+  display:block;
+  padding:12px 16px;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+}
+/* 波形空：只给一行小字，不占块 */
+/* 只在这一句「有播放键但波形没生出来」时才说话 —— 没语音的那种情况上面
+   已经有一条完整提示，这里再说一遍就是两张嘴。 */
+.stage:has(.play) .wave:not(:has(i))::after{
+  content:'还没有波形';
+  font-size:11px;
+  line-height:1.6;
+  color:var(--ghost);
+  letter-spacing:.04em;
+}
+/* 配图空：figure 还在、图没有 */
+.shot:not(:has(img))::after{
+  content:'这句还没配图。去工厂换一张真实场景的图，练习时会好记很多。';
+  display:grid;
+  place-items:center;
+  min-height:120px;
+  padding:24px 16px;
+  text-align:center;
+  font-size:11px;
+  line-height:1.7;
+  color:var(--ghost);
+  border:1px dashed var(--st-line);
+  border-radius:6px;
+}
+
+/* 设置页：没开的东西一眼看得出来 */
+/* 作用：开关关着的那一行，标题退到 --fg2；开着的是 --fg。
+   为什么：设置页最常被问的是「我到底开没开」——一个 24px 的开关不够显眼，
+          让这一行的标题跟着变重量，扫一眼就知道哪几项没开。 */
+.field:has(.sw:not(.on)) .lab{color:var(--fg2)}
+/* 作用：「其他语言（未做）」这类占位选项后面补一个「未做」标签。
+   为什么：.seg span.off 现在只是变灰，灰和「没选中」长得一样；
+          写出来才知道是功能没做，不是选项被禁用。 */
+.seg span.off::after{
+  content:'未做';
+  margin-left:4px;
+  font-size:11px;
+  font-weight:400;
+  color:var(--ghost);
+  letter-spacing:.04em;
+}
+/* 作用：接口页三张卡都没接时，整行给一句提示。
+   为什么：三张 ncard 各自写着「关」，凑在一起才知道是「一个都没接」。 */
+.nowrow:not(:has(.ncard))::before{
+  content:'三类接口都还没接。先填一个 API key，右上角的状态点会跟着亮起来。';
+  display:grid;
+  place-items:center;
+  min-height:96px;
+  padding:24px 20px;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--fg3);
+  border:1px dashed var(--st-line);
+  border-radius:14px;
+  animation:st-in var(--st-fb) var(--st-in) both;
+}
+
+/* 教程页不涉及：内容是写的，不是读出来的，没有空的时候。 */
+
+
+/* ==========================================================================
+   2. 加载态
+   ========================================================================== */
+
+/* ── 2.1 加载中的状态块 .state-loading ───────────────────────────────────
+   作用：复用 .state 的骨架，只换占位图和边框。
+   为什么：三种态要是三种长相，用户就得多认两套语言；换成同骨架后，
+          「这块在长东西」这个意思不用重新学。 */
+.state-loading{
+  border-style:solid;
+  border-color:rgba(var(--w),.08);
+  background:transparent;
+}
+.state-loading .state-fig{
+  background:none;
+  box-shadow:inset 0 0 0 1px rgba(var(--w),.10);
+}
+/* 转圈：只有一环缺口在动，不带阴影、不带发光 */
+.state-loading .state-fig::before{
+  inset:8px;
+  border-radius:999px;
+  background:none;
+  border:2px solid rgba(var(--accent-rgb),.20);
+  border-top-color:var(--accent);
+  animation:st-spin .8s linear infinite;
+}
+.state-loading .state-fig::after{content:none}
+@keyframes st-spin{to{transform:rotate(360deg)}}
+
+/* ── 2.2 骨架行 .st-sk ───────────────────────────────────────────────────
+   作用：.st-sk 里放 3 个 <i>，就是三条灰条 + 一道扫光。
+   为什么：首次进页面要读本地 ledger.json，那一下是 100–300ms 的空白；
+          三根条比转圈更能说明「这里马上会有一列表」，也不会让布局跳。
+          宽度用 calc(100% - 48px) 而不是 84%，这样所有数字还是 4 的倍数。 */
+.st-sk{
+  display:grid;
+  gap:12px;
+  width:100%;
+  max-width:360px;
+  margin-top:4px;
+}
+.st-sk i{
+  position:relative;
+  display:block;
+  height:12px;
+  border-radius:6px;
+  background:rgba(var(--w),.06);
+  overflow:hidden;
+}
+.st-sk i::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(100deg,rgba(var(--w),0) 24%,rgba(var(--w),.10) 50%,rgba(var(--w),0) 76%);
+  background-size:220% 100%;
+  animation:st-sweep 1.4s var(--st-in) infinite;
+}
+.st-sk i:nth-child(2){width:calc(100% - 48px)}
+.st-sk i:nth-child(3){width:calc(100% - 96px)}
+@keyframes st-sweep{
+  from{background-position:120% 0}
+  to{background-position:-120% 0}
+}
+
+/* ── 2.3 容器级「正在等」 ────────────────────────────────────────────────
+   作用：给容器挂 aria-busy="true"，里面的内容降到 30% 透明，上面扫一道光。
+   为什么：aria-busy 是浏览器与读屏器都认识的既有属性，JS 只要置这一个
+          属性，样式和语义一起到位，不用再加 class。
+          只挂在四种宿主上（main / section / .card / .chartbox），
+          避免误伤 .btn.primary 那种自己要用 ::after 做流光的地方。 */
+main[aria-busy="true"],
+section[aria-busy="true"],
+.card[aria-busy="true"],
+.chartbox[aria-busy="true"]{
+  position:relative;
+}
+main[aria-busy="true"]>*,
+section[aria-busy="true"]>*,
+.card[aria-busy="true"]>*,
+.chartbox[aria-busy="true"]>*{
+  opacity:.3;
+  transition:opacity var(--st-fb) var(--st-out);
+}
+main[aria-busy="true"]::after,
+section[aria-busy="true"]::after,
+.card[aria-busy="true"]::after,
+.chartbox[aria-busy="true"]::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(100deg,rgba(var(--w),0) 24%,rgba(var(--w),.07) 50%,rgba(var(--w),0) 76%);
+  background-size:220% 100%;
+  animation:st-sweep 1.4s var(--st-in) infinite;
+}
+
+/* ── 2.4 整页跳转时的进度条 ──────────────────────────────────────────────
+   作用：body 挂 data-busy="page" → 视口顶部一条 2px 的主色扫光。
+   为什么：卡片页点一句就跳学习页，这中间是白的；一条细线说明「在走了」，
+          比盖一层遮罩轻，也不会打断用户对上一屏的注意力。 */
+body[data-busy="page"]::after{
+  content:'';
+  position:fixed;
+  z-index:120;
+  top:0;left:0;
+  width:40%;
+  height:2px;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(var(--accent-rgb),0),var(--accent),rgba(var(--accent-rgb),0));
+  animation:st-prog 1.1s var(--st-in) infinite;
+}
+@keyframes st-prog{
+  from{transform:translateX(-100%)}
+  to{transform:translateX(300%)}
+}
+
+/* ── 2.5 启动页 ──────────────────────────────────────────────────────────
+   不碰。index 的加载动画在 v-splash.css 里（.sp2-* 那一套），
+   这里只提供上面通用的 aria-busy / data-busy，两者不重叠。 */
+
+
+/* ==========================================================================
+   3. 错误态
+   ========================================================================== */
+
+/* ── 3.1 错误块 .state-error ─────────────────────────────────────────────
+   作用：换成实线 + 警示色低透明底，占位图里画一个叹号。
+   为什么：空态是「还没长」，错误是「长坏了」，两者必须一眼分开；
+          所以空用虚线（可填），错用实线（先修）。
+          底色只用 5% 的 --danger，不用实心：错误块经常整块出现，
+          实心红会把整页压暗，读不了别的内容。 */
+.state-error{
+  border-style:solid;
+  border-color:rgba(var(--st-bad),.34);
+  background:rgba(var(--st-bad),.05);
+}
+.state-error .state-title{color:var(--fg)}
+.state-error .state-hint{color:var(--fg3)}
+.state-error .state-fig{
+  background:rgba(var(--st-bad),.10);
+  box-shadow:inset 0 0 0 1px rgba(var(--st-bad),.28);
+}
+/* 叹号：一根竖杠 + 一个点，纯 CSS，不引图标 */
+.state-error .state-fig::before{
+  content:'';
+  inset:auto;
+  left:50%;
+  top:12px;
+  width:2px;
+  height:16px;
+  border-radius:999px;
+  background:var(--danger);
+  transform:translateX(-1px);
+}
+.state-error .state-fig::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  width:4px;height:4px;
+  border-radius:999px;
+  background:var(--danger);
+  transform:translateX(-2px);
+}
+/* 错误块里的主按钮改成「重试」的样子：警示色描边，不抢主色 */
+.state-error .btn.primary{
+  background:transparent;
+  color:var(--danger);
+  box-shadow:inset 0 0 0 1px rgba(var(--st-bad),.42);
+}
+.state-error .btn.primary:hover{
+  background:rgba(var(--st-bad),.10);
+  color:var(--danger);
+}
+
+/* ── 3.2 行内报错 [data-error] ───────────────────────────────────────────
+   作用：任何元素挂 data-error="文案"，就在它下面多一行 11px 的警示字。
+   为什么：字段级报错（key 填错、路径不存在）不该整页盖一层错误块；
+          只加属性、不改 DOM，是 JS 最省事的一条路。
+          注意：<input>/<img> 这种替换元素不生成伪元素，
+          要挂就挂在包着它的 .ctl / .field 上。 */
+[data-error]::after{
+  content:attr(data-error);
+  display:block;
+  margin-top:8px;
+  font-size:11px;
+  font-weight:400;
+  line-height:1.6;
+  color:var(--danger);
+}
+/* 出错的那一行，标题跟着变成警示色，扫一眼找得到 */
+.field[data-error] .lab{color:var(--danger)}
+
+/* ── 3.3 空但「全是 0」 ──────────────────────────────────────────────────
+   作用：容器挂 data-zero，补一句「数字是有的，但都是 0」。
+   为什么：统计页第一周最常见的情况不是没数据，是数据全 0；这时图会
+          画成一条贴底的直线，看着像坏了。CSS 判断不了数值，只能等 JS 说。 */
+[data-zero]::after{
+  content:'这一周全是 0。练过几次以后，这里才有起伏。';
+  display:block;
+  margin-top:8px;
+  font-size:11px;
+  line-height:1.6;
+  color:var(--ghost);
+}
+
+
+/* ==========================================================================
+   4. 反馈动效
+   只补「点了有反应」这一层，不做装饰性动效（v37 已经把流光、光斑删掉了，
+   这次不往回加）。所有位移都在 1–2px，没有回弹。
+   ========================================================================== */
+
+/* ── 4.1 按下位移 1px ────────────────────────────────────────────────────
+   作用：所有可点的件按下时整体下沉 1px，120ms 走完。
+   为什么：v37 为了去「浮夸」把按下反馈全清了（transform:none!important），
+          结果按钮按下去毫无回执，点快了会怀疑没点上。1px 是手感下限，
+          不动色、不加阴影，就不会变成「装饰」。
+          这里必须用 !important：v37 那几条是 !important + 0s，
+          不抢就压不过去。 */
+button:active:not([disabled]),
+.btn:active:not([disabled]),
+.mini:active:not([disabled]),
+.chip:active,
+.tab:active,
+.dg:active,
+.rv:active,
+.st-r:active,
+.fb:active,
+.ex:active,
+.play:active,
+.drw-h:active,
+.drow:active,
+.litem:active,
+.fx-words li:active,
+.sw:active{
+  transform:translateY(1px)!important;
+  transition-duration:var(--st-press)!important;
+  transition-timing-function:var(--st-in)!important;
+}
+
+/* 悬停保持平（v37 的决定），只有按下才动 —— 这里显式写一遍，
+   防止以后有人把 4.1 的 !important 抄到 :hover 上去。 */
+.btn:hover{transform:none}
+
+/* ── 4.2 卡片 hover 抬升 ─────────────────────────────────────────────────
+   作用：.card 悬停上浮 2px，160ms；表格卡（deckcard）和 .focus 大面板不抬。
+   为什么：抬升是「这块可以点/可以看」的最便宜信号。2px 配 160ms，
+          扫过一排卡片时是「浮起来」而不是「跳一下」。
+          deckcard 里面全是可点的行，整张表抬会跟行抢注意力；
+          .card.focus 是页面主面板，抬起来像能拖走。 */
+.card{
+  transition:
+    transform var(--st-hover) var(--st-in),
+    border-color var(--st-hover) var(--st-in),
+    box-shadow var(--st-hover) var(--st-in);
+}
+.card:hover{transform:translateY(-2px)}
+.card.deckcard:hover,
+.card.focus:hover{transform:none}
+
+/* ── 4.3 开关拖动 160ms ──────────────────────────────────────────────────
+   作用：.sw 的轨道与旋钮统一 160ms，曲线用进场曲线。
+   为什么：v63 已经把旋钮改成 160ms / cubic-bezier(.22,.9,.18,1)，
+          但轨道背景还挂着 .22s、旋钮背景 .2s，两个速度不齐会看着「分家」。
+          这条把两者拉到同一档，顺带把 2618 那个会过冲的
+          cubic-bezier(.34,1.3,.64,1) 顶掉 —— 开关不许弹。 */
+.sw,.sw::after{
+  transition-duration:160ms;
+  transition-timing-function:var(--st-in);
+}
+
+/* ── 4.4 列表项出现 200ms 淡入（--d 错开） ───────────────────────────────
+   作用：行一多，按 --d 每行晚 40ms 出现，200ms 淡入 + 上移 4px。
+   为什么：句库一屏 7 行、牌组一屏十几行，同时出现会「闪一下」；
+          逐行 40ms 的差，眼睛能读出「这是列表」而不是「图变了」。
+          --d 是 app.css 里 .legend li 已经在用的同一个变量，不新造。
+          注意：这些元素上有 :active 的 !important 位移，
+          动画不会把它顶掉（!important 的优先级高于动画填充）。 */
+@keyframes st-rise{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:none}
+}
+.litem,
+.drow,
+.fx-words li,
+.sublines .subline,
+table.rt tbody tr{
+  animation:st-rise var(--st-fb) var(--st-in) both;
+  animation-delay:var(--d,0ms);
+}
+/* 前 8 项逐个错开 40ms；第 9 项往后一起在 280ms 出现，不无限拖 */
+:is(.litem:nth-child(1),.drow:nth-child(2),.fx-words li:nth-child(1),.subline:nth-child(1),table.rt tbody tr:nth-child(1)){--d:0ms}
+:is(.litem:nth-child(2),.drow:nth-child(3),.fx-words li:nth-child(2),.subline:nth-child(2),table.rt tbody tr:nth-child(2)){--d:40ms}
+:is(.litem:nth-child(3),.drow:nth-child(4),.fx-words li:nth-child(3),.subline:nth-child(3),table.rt tbody tr:nth-child(3)){--d:80ms}
+:is(.litem:nth-child(4),.drow:nth-child(5),.fx-words li:nth-child(4),.subline:nth-child(4),table.rt tbody tr:nth-child(4)){--d:120ms}
+:is(.litem:nth-child(5),.drow:nth-child(6),.fx-words li:nth-child(5),.subline:nth-child(5),table.rt tbody tr:nth-child(5)){--d:160ms}
+:is(.litem:nth-child(6),.drow:nth-child(7),.fx-words li:nth-child(6),.subline:nth-child(6),table.rt tbody tr:nth-child(6)){--d:200ms}
+:is(.litem:nth-child(7),.drow:nth-child(8),.fx-words li:nth-child(7),.subline:nth-child(7),table.rt tbody tr:nth-child(7)){--d:240ms}
+:is(.litem:nth-child(8),.drow:nth-child(9),.fx-words li:nth-child(8),.subline:nth-child(8),table.rt tbody tr:nth-child(8)){--d:280ms}
+:is(.litem,.drow,.fx-words li,.subline,table.rt tbody tr):nth-child(n+9){--d:280ms}
+
+/* ── 4.5 抽屉展开/收起 ───────────────────────────────────────────────────
+   .drw-b 已经是 520ms 的 grid-template-rows 动画（app.css:3641），
+   落在规格 380–520 的上沿，不动它；只把里面内容的淡入从 340ms 收到 200ms，
+   跟别的状态反馈对齐 —— 之前 340ms 会让抽屉比内容「晚一步」。 */
+.drw-p>*{
+  transition-duration:var(--st-fb);
+  transition-timing-function:var(--st-in);
+}
+
+/* ── 4.6 系统要求减少动效时 ──────────────────────────────────────────────
+   作用：prefers-reduced-motion:reduce 时，本文件加的东西全部 0 时长。
+   为什么：规格要求「全部动画立即完成」。注意只关这一层的动画，
+          不碰统计页的图表动画 —— 那几段的作者明确写了「动画本身就是内容」，
+          关掉会让图表变成一坨静止的块，属于另一个人的决定，这里不越权。 */
+@media (prefers-reduced-motion:reduce){
+  .state,
+  .state.leaving,
+  .state-fig::before,
+  .state-loading .state-fig::before,
+  .st-sk i::after,
+  .litem,
+  .drow,
+  .fx-words li,
+  .subline,
+  .card,
+  .sw,
+  .sw::after,
+  body[data-busy="page"]::after,
+  main[aria-busy="true"]::after,
+  section[aria-busy="true"]::after,
+  .card[aria-busy="true"]::after,
+  .chartbox[aria-busy="true"]::after{
+    animation:none!important;
+    transition-duration:0s!important;
+  }
+}
+
+/* v74 · 硬规格补丁 */
+/* 用法：<link rel="stylesheet" href="app.css"> 之后再 link 这个文件（它不是 app.css 的替代品，是最后一层覆盖）。
+   内容全部是「同一个选择器、只改一个数值」，不新增选择器结构、不新增颜色、不新增字号。
+   每条后面的注释写了 app.css 里的行号和原值，方便逐条核对或回滚。
+   这里只放我认为零风险的部分；拿不准的都在 spec-audit.md 里，没进这个文件。 */
+
+/* ── 1 间距：把 5/7/9/11/13/17px 收到 4 的倍数。每次只动 1px，
+      不影响任何容器能否装下内容。────────────────────────────────── */
+.chip.live{gap:8px}  /* app.css:417  gap:7px → 8px */
+.drow .dname{gap:8px}  /* app.css:393  gap:7px → 8px */
+.mi{gap:8px}  /* app.css:450  gap:9px → 8px */
+.ck{gap:8px}  /* app.css:529  gap:7px → 8px */
+.sw2{gap:4px}  /* app.css:559  gap:5px → 4px */
+.sums>div{gap:4px}  /* app.css:685  gap:5px → 4px */
+.legend .tot{padding-top:8px}  /* app.css:721  padding-top:9px → 8px */
+table.rt thead th{padding-bottom:8px}  /* app.css:757  padding-bottom:9px → 8px */
+.gfield{margin-bottom:8px}  /* app.css:896  margin-bottom:9px → 8px */
+.ksearch{gap:8px}  /* app.css:1190  gap:9px → 8px */
+.chk{gap:8px}  /* app.css:992  gap:7px → 8px */
+.actbar{gap:8px}  /* app.css:1315  gap:9px → 8px */
+.fsteps{gap:8px}  /* app.css:1445  gap:9px → 8px */
+.fdef{margin-top:8px}  /* app.css:1507  margin-top:9px → 8px */
+.f5r{gap:8px}  /* app.css:1512  gap:9px → 8px */
+.popbox b{margin-bottom:4px}  /* app.css:1565  margin-bottom:5px → 4px */
+.popbox .pl{gap:4px}  /* app.css:1568  gap:5px → 4px */
+.popbox .pl li{gap:8px}  /* app.css:1569  gap:7px → 8px */
+.voicepick{gap:8px}  /* app.css:1771  gap:7px → 8px */
+.reveal>summary{gap:8px}  /* app.css:1819  gap:7px → 8px */
+.whead{gap:8px}  /* app.css:1901  gap:9px → 8px */
+.wblk{gap:8px}  /* app.css:1946  gap:9px → 8px */
+.fr{gap:8px}  /* app.css:1968  gap:9px → 8px */
+.wfoot{margin-top:12px}  /* app.css:2010  margin-top:11px → 12px */
+.wfoot{padding-top:12px}  /* app.css:2010  padding-top:11px → 12px */
+.kwrow{gap:4px}  /* app.css:2031  gap:5px → 4px */
+.fx-src{gap:8px}  /* app.css:2240  gap:9px → 8px */
+.fx-mini{gap:4px}  /* app.css:2248  gap:5px → 4px */
+.fx-wordhd{gap:8px}  /* app.css:2260  gap:9px → 8px */
+.fx-right .kwrow{gap:4px}  /* app.css:2320  gap:5px → 4px */
+.fx-right .vopts{gap:4px}  /* app.css:2328  gap:5px → 4px */
+.fx-right .chips{gap:4px}  /* app.css:2331  gap:5px → 4px */
+.fx-right .chips{margin-bottom:8px}  /* app.css:2331  margin-bottom:7px → 8px */
+.mhd{gap:8px}  /* app.css:2342  gap:9px → 8px */
+.egg{gap:8px}  /* app.css:2366  gap:9px → 8px */
+.ords{gap:8px}  /* app.css:2463  gap:9px → 8px */
+.ords b{margin-right:8px}  /* app.css:2371  margin-right:7px → 8px */
+.mbody-in label{gap:4px}  /* app.css:2385  gap:5px → 4px */
+.olist label{gap:8px}  /* app.css:2388  gap:9px → 8px */
+.bgl li{gap:8px}  /* app.css:3422  gap:9px → 8px */
+.dops{gap:4px}  /* app.css:2414  gap:5px → 4px */
+.fx-def .prob{gap:4px}  /* app.css:2840  gap:5px → 4px */
+.dg-h{margin-bottom:8px}  /* app.css:2582  margin-bottom:9px → 8px */
+.as-main{gap:8px}  /* app.css:2853  gap:9px → 8px */
+.tg{gap:8px}  /* app.css:2868  gap:7px → 8px */
+.st-faces{gap:4px}  /* app.css:2926  gap:5px → 4px */
+.st-crumb{gap:8px}  /* app.css:2996  gap:7px → 8px */
+.st-crumb{margin-bottom:8px}  /* app.css:2996  margin-bottom:7px → 8px */
+.resl li{gap:8px}  /* app.css:3008  gap:9px → 8px */
+.rlink li{gap:8px}  /* app.css:3081  gap:7px → 8px */
+.b-type{gap:8px}  /* app.css:3091  gap:7px → 8px */
+.rv{margin-bottom:4px}  /* app.css:3114  margin-bottom:5px → 4px */
+.enrow{gap:8px}  /* app.css:3133  gap:9px → 8px */
+.enrow{margin-bottom:8px}  /* app.css:3133  margin-bottom:9px → 8px */
+.fx-blk.bbg .bgl li{gap:8px}  /* app.css:3167  gap:9px → 8px */
+.pw-hd{gap:8px}  /* app.css:3307  gap:7px → 8px */
+.pw-bd .zhbox{margin-top:8px}  /* app.css:3319  margin-top:9px → 8px */
+.pw-bd .zhbox{padding-top:8px}  /* app.css:3319  padding-top:9px → 8px */
+.pw-ft{gap:8px}  /* app.css:3320  gap:7px → 8px */
+.edimg{gap:8px}  /* app.css:3335  gap:9px → 8px */
+.pw-add{margin-top:8px}  /* app.css:3476  margin-top:9px → 8px */
+.drw-h{gap:4px}  /* app.css:3745  gap:5px → 4px */
+.dlist{gap:8px}  /* app.css:3603  gap:7px → 8px */
+
+/* ── 2 圆角：只有 6 / 14 / 999 三档。
+      7/8/9px → 6px（小控件、角标、菜单行，差 1–3px）
+      10/11/12/13/15/16/18/20px → 14px（卡片、面板、抽屉、输入框）
+      99px 是「胶囊」的写法，视觉与 999px 完全等价（元素两轴都 < 198px 时浏览器一样夹到半高），
+      这里只做写法归一，不改观感。──────────────────────────────── */
+.days .bar{border-radius:999px}  /* app.css:327  99px → 999px（胶囊写法归一，视觉等价）*/
+.track{border-radius:999px}  /* app.css:340  99px → 999px（胶囊写法归一，视觉等价）*/
+.track i{border-radius:999px}  /* app.css:341  99px → 999px（胶囊写法归一，视觉等价）*/
+.mi{border-radius:6px}  /* app.css:450  9px → 6px（小控件 → 6）*/
+.setnav a{border-radius:6px}  /* app.css:470  9px → 6px（小控件 → 6）*/
+.inp{border-radius:14px}  /* app.css:499  10px → 14px（容器 → 14）*/
+.fprev{border-radius:14px}  /* app.css:580  12px → 14px（容器 → 14）*/
+.picker input[type="color"]{border-radius:6px}  /* app.css:587  8px → 6px（小控件 → 6）*/
+.prompt{border-radius:14px}  /* app.css:622  10px → 14px（容器 → 14）*/
+.card.stat{border-radius:14px}  /* app.css:646  18px → 14px（容器 → 14）*/
+.legend li{border-radius:6px}  /* app.css:2099  9px → 6px（小控件 → 6）*/
+table.rt tbody tr:hover{border-radius:6px}  /* app.css:766  8px → 6px（小控件 → 6）*/
+.tip{border-radius:6px}  /* app.css:840  9px → 6px（小控件 → 6）*/
+.krow .kb{border-radius:6px}  /* app.css:915  7px → 6px（小控件 → 6）*/
+.pal-item{border-radius:6px}  /* app.css:941  9px → 6px（小控件 → 6）*/
+.kbd{border-radius:6px}  /* app.css:953  5px → 6px（小控件 → 6）*/
+.ncard{border-radius:14px}  /* app.css:972  12px → 14px（容器 → 14）*/
+.deckmenu{border-radius:14px}  /* app.css:1198  12px → 14px（容器 → 14）*/
+.deckmenu button{border-radius:6px}  /* app.css:1205  8px → 6px（小控件 → 6）*/
+.nd-preview{border-radius:6px}  /* app.css:1414  8px → 6px（小控件 → 6）*/
+.fvoice .sel{border-radius:14px}  /* app.css:1506  10px → 14px（容器 → 14）*/
+.popbox code{border-radius:6px}  /* app.css:1567  5px → 6px（小控件 → 6）*/
+.windex .wi{border-radius:14px}  /* app.css:1622  11px → 14px（容器 → 14）*/
+.wsec{border-radius:14px}  /* app.css:1684  12px → 14px（容器 → 14）*/
+.src4 button{border-radius:14px}  /* app.css:1724  11px → 14px（容器 → 14）*/
+.shots .s{border-radius:6px}  /* app.css:1995  9px → 6px（小控件 → 6）*/
+.voicepick .vr{border-radius:14px}  /* app.css:1773  11px → 14px（容器 → 14）*/
+.pips i{border-radius:999px}  /* app.css:4091  99px → 999px（胶囊写法归一，视觉等价）*/
+.icobtn{border-radius:6px}  /* app.css:1934  7px → 6px（小控件 → 6）*/
+.fr{border-radius:6px}  /* app.css:1969  8px → 6px（小控件 → 6）*/
+.seg4{border-radius:6px}  /* app.css:1986  9px → 6px（小控件 → 6）*/
+.pickbtn{border-radius:6px}  /* app.css:2052  9px → 6px（小控件 → 6）*/
+.pickmenu{border-radius:14px}  /* app.css:2070  11px → 14px（容器 → 14）*/
+.pickitem{border-radius:6px}  /* app.css:2077  7px → 6px（小控件 → 6）*/
+.fx-words li{border-radius:6px}  /* app.css:2250  9px → 6px（小控件 → 6）*/
+.fx-info{border-radius:14px}  /* app.css:2266  11px → 14px（容器 → 14）*/
+.fx-row>summary{border-radius:14px}  /* app.css:2280  10px → 14px（容器 → 14）*/
+.f5row em{border-radius:999px}  /* app.css:2309  99px → 999px（胶囊写法归一，视觉等价）*/
+.fx-right .shots .s{border-radius:6px}  /* app.css:2323  8px → 6px（小控件 → 6）*/
+.mcard{border-radius:14px}  /* app.css:2452  20px → 14px（容器 → 14）*/
+.mta{border-radius:14px}  /* app.css:2459  12px → 14px（容器 → 14）*/
+.mest{border-radius:14px}  /* app.css:2460  13px → 14px（容器 → 14）*/
+.mtile{border-radius:14px}  /* app.css:2359  10px → 14px（容器 → 14）*/
+.egg{border-radius:14px}  /* app.css:2366  10px → 14px（容器 → 14）*/
+.dcard{border-radius:14px}  /* app.css:2466  16px → 14px（容器 → 14）*/
+.dimg{border-radius:14px}  /* app.css:2374  10px → 14px（容器 → 14）*/
+.mbody-in{border-radius:14px}  /* app.css:2383  10px → 14px（容器 → 14）*/
+.olist label{border-radius:6px}  /* app.css:2388  8px → 6px（小控件 → 6）*/
+.dfront{border-radius:14px}  /* app.css:2415  10px → 14px（容器 → 14）*/
+.fx-def .prob i{border-radius:999px}  /* app.css:2441  99px → 999px（胶囊写法归一，视觉等价）*/
+.dimg,.dfront{border-radius:14px}  /* app.css:2468  12px → 14px（容器 → 14）*/
+.mx{border-radius:6px}  /* app.css:2471  9px → 6px（小控件 → 6）*/
+.pbar{border-radius:999px}  /* app.css:2478  99px → 999px（胶囊写法归一，视觉等价）*/
+.pbar i{border-radius:999px}  /* app.css:2479  99px → 999px（胶囊写法归一，视觉等价）*/
+.dmini{border-radius:14px}  /* app.css:2522  12px → 14px（容器 → 14）*/
+.f5row .f5name{border-radius:6px}  /* app.css:2553  9px → 6px（小控件 → 6）*/
+.imgbar>img{border-radius:14px}  /* app.css:2572  10px → 14px（容器 → 14）*/
+.dgal{border-radius:14px}  /* app.css:2581  13px → 14px（容器 → 14）*/
+.dg{border-radius:14px}  /* app.css:2586  10px → 14px（容器 → 14）*/
+.dg em{border-radius:999px}  /* app.css:2588  99px → 999px（胶囊写法归一，视觉等价）*/
+.delbar{border-radius:6px}  /* app.css:2658  9px → 6px（小控件 → 6）*/
+.morep{border-radius:999px}  /* app.css:2844  99px → 999px（胶囊写法归一，视觉等价）*/
+.as-main{border-radius:14px}  /* app.css:2853  12px → 14px（容器 → 14）*/
+.tggroup{border-radius:14px}  /* app.css:2864  13px → 14px（容器 → 14）*/
+.t{border-radius:999px}  /* app.css:2870  99px → 999px（胶囊写法归一，视觉等价）*/
+.st-rail{border-radius:14px}  /* app.css:2894  16px → 14px（容器 → 14）*/
+.st-dk{border-radius:14px}  /* app.css:2900  11px → 14px（容器 → 14）*/
+.st-card{border-radius:14px}  /* app.css:2919  18px → 14px（容器 → 14）*/
+.st-face{border-radius:6px}  /* app.css:2922  8px → 6px（小控件 → 6）*/
+.st-answer{border-radius:14px}  /* app.css:2940  16px → 14px（容器 → 14）*/
+.st-shot{border-radius:14px}  /* app.css:2942  12px → 14px（容器 → 14）*/
+.resl li{border-radius:14px}  /* app.css:3008  10px → 14px（容器 → 14）*/
+.giftag{border-radius:6px}  /* app.css:3024  5px → 6px（小控件 → 6）*/
+.st-idx .wd{border-radius:14px}  /* app.css:3034  11px → 14px（容器 → 14）*/
+.rlink li{border-radius:6px}  /* app.css:3081  9px → 6px（小控件 → 6）*/
+.tin{border-radius:14px}  /* app.css:3093  11px → 14px（容器 → 14）*/
+.b-vary{border-radius:14px}  /* app.css:3103  13px → 14px（容器 → 14）*/
+.st-side{border-radius:14px}  /* app.css:3111  16px → 14px（容器 → 14）*/
+.rv{border-radius:6px}  /* app.css:3115  9px → 6px（小控件 → 6）*/
+.enbox{border-radius:14px}  /* app.css:3132  13px → 14px（容器 → 14）*/
+.zhbox{border-radius:14px}  /* app.css:3136  13px → 14px（容器 → 14）*/
+.ex{border-radius:6px}  /* app.css:3243  9px → 6px（小控件 → 6）*/
+.popwin{border-radius:14px}  /* app.css:3296  13px → 14px（容器 → 14）*/
+.edwarn{border-radius:6px}  /* app.css:3329  9px → 6px（小控件 → 6）*/
+.edimg img{border-radius:6px}  /* app.css:3336  7px → 6px（小控件 → 6）*/
+.navstep{border-radius:999px}  /* app.css:3376  99px → 999px（胶囊写法归一，视觉等价）*/
+.bgl li{border-radius:6px}  /* app.css:3423  9px → 6px（小控件 → 6）*/
+.bgadd{border-radius:6px}  /* app.css:3440  8px → 6px（小控件 → 6）*/
+.pw-blk{border-radius:6px}  /* app.css:3450  9px → 6px（小控件 → 6）*/
+.pw-add button{border-radius:6px}  /* app.css:3478  7px → 6px（小控件 → 6）*/
+.db{border-radius:14px}  /* app.css:3566  11px → 14px（容器 → 14）*/
+.dlist li{border-radius:6px}  /* app.css:3605  8px → 6px（小控件 → 6）*/
+.shot img{border-radius:14px}  /* app.css:3611  10px → 14px（容器 → 14）*/
+
+/* ── 3 字号：删掉 9.5 / 10.5 / 11.5 / 12.5 / 13.5 / 14.5 / 15.5 这七档小数，
+      以及 17 / 18 / 19 / 21 / 29 这些孤立档。每次只动 0.5–2px，
+      缩小的方向不会引起新的折行。──────────────────────────────── */
+.btn{font-size:13px}  /* app.css:190  13.5px → 13px */
+.qline{font-size:16px}  /* app.css:289  18px → 16px */
+.days .d span{font-size:10px}  /* app.css:329  10.5px → 10px */
+.qitem{font-size:13px}  /* app.css:333  13.5px → 13px */
+.qitem .en{font-size:14px}  /* app.css:335  14.5px → 14px */
+.strip .crumb{font-size:11px}  /* app.css:339  11.5px → 11px */
+.hint{font-size:12px}  /* app.css:346  12.5px → 12px */
+.defn p{font-size:14px}  /* app.css:350  15px → 14px */
+.deckhint{font-size:11px}  /* app.css:416  11.5px → 11px */
+.deckhead > span{font-size:10px}  /* app.css:388  10.5px → 10px */
+.mi .ext,.mi .mut{font-size:11px}  /* app.css:455  11.5px → 11px */
+.ghead h2{font-size:14px}  /* app.css:488  15px → 14px */
+.ghead .mut{font-size:11px}  /* app.css:489  11.5px → 11px */
+.field .lab{font-size:13px}  /* app.css:495  13.5px → 13px */
+.inp{font-size:12px}  /* app.css:499  12.5px → 12px */
+.seg span{font-size:12px}  /* app.css:515  12.5px → 12px */
+.seg.small span{font-size:11px}  /* app.css:525  11.5px → 11px */
+.sw2{font-size:10px}  /* app.css:559  10.5px → 10px */
+.stepper span{font-size:12px}  /* app.css:567  12.5px → 12px */
+.foldrow{font-size:13px}  /* app.css:573  13.5px → 13px */
+.shead h3{font-size:14px}  /* app.css:606  15px → 14px */
+.shead .x{font-size:14px}  /* app.css:609  15px → 14px */
+.srow .sd{font-size:11px}  /* app.css:618  11.5px → 11px */
+.snote{font-size:11px}  /* app.css:620  11.5px → 11px */
+.plus{font-size:12px}  /* app.css:628  12.5px → 12px */
+.shead2 .stitle{font-size:14px}  /* app.css:662  15px → 14px */
+.shead2 .smut{font-size:11px}  /* app.css:666  11.5px → 11px */
+.sums .mut{font-size:10px}  /* app.css:690  10.5px → 10px */
+.legend li{font-size:12px}  /* app.css:2099  12.5px → 12px */
+.legend .mut{font-size:11px}  /* app.css:719  11.5px → 11px */
+table.rt thead th{font-size:10px}  /* app.css:755  10.5px → 10px */
+.big{font-size:20px}  /* app.css:779  19px → 20px */
+.geyebrow{font-size:11px}  /* app.css:885  11.5px → 11px */
+.gtitle{font-size:16px}  /* app.css:889  17px → 16px */
+.gdesc{font-size:12px}  /* app.css:890  12.5px → 12px */
+.glab2{font-size:11px}  /* app.css:897  11.5px → 11px */
+.gpath .inp{font-size:12px}  /* app.css:899  12.5px → 12px */
+.ksearch{font-size:12px}  /* app.css:1191  12.5px → 12px */
+.kgh .mut{font-size:10px}  /* app.css:910  10.5px → 10px */
+.krow .lab{font-size:12px}  /* app.css:913  12.5px → 12px */
+.krow .kb{font-size:11px}  /* app.css:916  11.5px → 11px */
+.keyhint{font-size:11px}  /* app.css:920  11.5px → 11px */
+.pal-item .mut,.pal-item .kb{font-size:11px}  /* app.css:948  11.5px → 11px */
+.pal-foot{font-size:11px}  /* app.css:951  11.5px → 11px */
+.small{font-size:11px}  /* app.css:968  11.5px → 11px */
+.nt{font-size:11px}  /* app.css:974  11.5px → 11px */
+.nu{font-size:11px}  /* app.css:976  11.5px → 11px */
+.sel{font-size:12px}  /* app.css:1006  12.5px → 12px */
+.year{font-size:12px}  /* app.css:1027  12.5px → 12px */
+.nextup .btn{font-size:12px}  /* app.css:1123  12.5px → 12px */
+.perm .pl{font-size:12px}  /* app.css:1166  12.5px → 12px */
+.deckmenu button{font-size:12px}  /* app.css:1206  12.5px → 12px */
+.toast{font-size:12px}  /* app.css:1227  12.5px → 12px */
+.toast button{font-size:12px}  /* app.css:1234  12.5px → 12px */
+.sp2-act .btn.lg{font-size:16px}  /* app.css:1368  15.5px → 16px */
+.nd-preview{font-size:12px}  /* app.css:1413  12.5px → 12px */
+.frule b{font-size:12px}  /* app.css:1437  12.5px → 12px */
+.frule span{font-size:11px}  /* app.css:1438  11.5px → 11px */
+.fmake .inp{font-size:14px}  /* app.css:1441  15px → 14px */
+.fstep .n{font-size:10px}  /* app.css:1450  10.5px → 10px */
+.fstep .t{font-size:12px}  /* app.css:1453  12.5px → 12px */
+.fp .fp-s{font-size:14px}  /* app.css:1474  14.5px → 14px */
+.fp .fp-z{font-size:11px}  /* app.css:1476  11.5px → 11px */
+.fsent{font-size:20px}  /* app.css:1486  21px → 20px */
+.f5io{font-size:11px}  /* app.css:1519  11.5px → 11px */
+.actbar .mut{font-size:11px}  /* app.css:1523  11.5px → 11px */
+.q.lg{font-size:11px}  /* app.css:1556  11.5px → 11px */
+.popbox b{font-size:12px}  /* app.css:1565  12.5px → 12px */
+.f5row .fi{font-size:11px}  /* app.css:1585  11.5px → 11px */
+.windex .wi b{font-size:14px}  /* app.css:1635  14.5px → 14px */
+.windex .wi span{font-size:11px}  /* app.css:1637  11.5px → 11px */
+.wrow .ws{font-size:14px}  /* app.css:1656  15px → 14px */
+.fline{font-size:12px}  /* app.css:1711  12.5px → 12px */
+.src4 button{font-size:11px}  /* app.css:1724  11.5px → 11px */
+.src4 button b{font-size:12px}  /* app.css:1734  12.5px → 12px */
+.shots .s em{font-size:10px}  /* app.css:2000  10.5px → 10px */
+.voicepick .vr .vt{font-size:11px}  /* app.css:1789  11.5px → 11px */
+.wgh span{font-size:11px}  /* app.css:1889  11.5px → 11px */
+.ws{font-size:14px}  /* app.css:1917  15px → 14px */
+.fr .fio{font-size:11px}  /* app.css:1973  11.5px → 11px */
+.pickbtn{font-size:12px}  /* app.css:2054  12.5px → 12px */
+.pickitem{font-size:12px}  /* app.css:2077  12.5px → 12px */
+.legend li .mut{font-size:11px}  /* app.css:2105  11.5px → 11px */
+.tx.ty{font-size:10px}  /* app.css:2110  10.5px → 10px */
+.pal-chip{font-size:11px}  /* app.css:2227  11.5px → 11px */
+.pal-empty{font-size:12px}  /* app.css:2230  12.5px → 12px */
+.fx-row .s{font-size:14px}  /* app.css:2285  15px → 14px */
+.f5row .d{font-size:11px}  /* app.css:2566  11.5px → 11px */
+.f5row em{font-size:11px}  /* app.css:2431  11.5px → 11px */
+.mx{font-size:16px}  /* app.css:2345  18px → 16px */
+.bgl li{font-size:11px}  /* app.css:2408  11.5px → 11px */
+.fx-def .dt{font-size:12px}  /* app.css:2437  12.5px → 12px */
+.fx-def .prob i{font-size:10px}  /* app.css:2440  10.5px → 10px */
+.imgbar .im span{font-size:10px}  /* app.css:2578  10.5px → 10px */
+.dg-h span{font-size:10px}  /* app.css:2584  10.5px → 10px */
+.mini.ic[data-add]{font-size:14px}  /* app.css:2646  15px → 14px */
+.morep{font-size:10px}  /* app.css:2844  10.5px → 10px */
+.as-main{font-size:12px}  /* app.css:2854  12.5px → 12px */
+.tg-h b{font-size:12px}  /* app.css:2866  12.5px → 12px */
+.tg-h span{font-size:10px}  /* app.css:2867  10.5px → 10px */
+.t{font-size:11px}  /* app.css:2870  11.5px → 11px */
+.t b{font-size:10px}  /* app.css:2874  10.5px → 10px */
+.hsub{font-size:12px}  /* app.css:2889  12.5px → 12px */
+.st-rail-h .mini.ic{font-size:14px}  /* app.css:2898  15px → 14px */
+.st-word{font-size:14px}  /* app.css:2925  15px → 14px */
+.st-faces{font-size:10px}  /* app.css:2926  10.5px → 10px */
+.st-sent{font-size:28px}  /* app.css:2932  29px → 28px */
+.st-cn{font-size:14px}  /* app.css:2945  15px → 14px */
+.st-crumb{font-size:11px}  /* app.css:2996  11.5px → 11px */
+.giftag{font-size:10px}  /* app.css:3024  9.5px → 10px */
+.rlink a{font-size:11px}  /* app.css:3083  11.5px → 11px */
+.vw{font-size:16px}  /* app.css:3106  18px → 16px */
+.rv{font-size:12px}  /* app.css:3115  12.5px → 12px */
+.rv i{font-size:10px}  /* app.css:3118  10.5px → 10px */
+.side-n{font-size:10px}  /* app.css:3126  10.5px → 10px */
+.en-def{font-size:16px}  /* app.css:3135  17px → 16px */
+.zhbox .en-def{font-size:14px}  /* app.css:3138  15px → 14px */
+.ex i{font-size:10px}  /* app.css:3247  10.5px → 10px */
+.pw-hd b{font-size:12px}  /* app.css:3313  12.5px → 12px */
+.pw-bd .en-def{font-size:12px}  /* app.css:3318  12.5px → 12px */
+.edwarn{font-size:11px}  /* app.css:3329  11.5px → 11px */
+.edbg{font-size:11px}  /* app.css:3334  11.5px → 11px */
+.edf5 .chip{font-size:11px}  /* app.css:3338  11.5px → 11px */
+.fb.done::after{font-size:10px}  /* app.css:3341  9.5px → 10px */
+.wordnav{font-size:16px}  /* app.css:3492  17px → 16px */
+.navstep{font-size:11px}  /* app.css:3377  11.5px → 11px */
+.fx-blk.b5 .f5row .f5name b{font-size:14px}  /* app.css:3411  15px → 14px */
+.fx-blk.b5 .f5row em{font-size:11px}  /* app.css:3413  11.5px → 11px */
+.bgadd{font-size:11px}  /* app.css:3441  11.5px → 11px */
+.pw-blk-h b{font-size:10px}  /* app.css:3460  10.5px → 10px */
+.pw-blk-h button{font-size:10px}  /* app.css:3463  10.5px → 10px */
+.pw-blk-b{font-size:12px}  /* app.css:3470  12.5px → 12px */
+.db b{font-size:12px}  /* app.css:3570  12.5px → 12px */
+.db i{font-size:10px}  /* app.css:3571  10.5px → 10px */
+.dlist li b{font-size:11px}  /* app.css:3608  11.5px → 11px */
+.pw-hd .pin{font-size:10px}  /* app.css:3690  10.5px → 10px */
+.fx-blk .fx-bh .mini{font-size:11px}  /* app.css:3709  11.5px → 11px */
+
+/* ── 4 字重：700 → 600、300 → 400，全库就这 8 条。
+      说明：.donut-big / .fx-wordhd h2 是大号数字，改完会略轻一点点，
+      不影响版式，也不影响可读性。────────────────────────────────── */
+.word{font-weight:400}  /* app.css:288  300 → 400 */
+.num{font-weight:400}  /* app.css:330  300 → 400 */
+.donut-big{font-weight:600}  /* app.css:737  700 → 600 */
+.btn.batch{font-weight:600}  /* app.css:2235  700 → 600 */
+.fx-wordhd h2{font-weight:600}  /* app.css:2261  700 → 600 */
+.mhd b{font-weight:600}  /* app.css:2343  700 → 600 */
+.fb.done::after{font-weight:600}  /* app.css:3342  700 → 600 */
+.rv.off::after{font-weight:600}  /* app.css:3539  700 → 600 */
+
+/* ── 5 动效时长（只在 no-preference 下生效，reduced-motion 的 0 时长仍然赢）
+      页面切换：.page 进场 400ms → 520ms（规格 460–580）；body.leaving 退场 280ms → 520ms
+      图表重绘：柱子 540 / 面积 650 / 热力图 400 / 环图 550 → 统一 780ms（规格 600–900）
+      悬停按下不动（--t-fast:.16s = 160ms 已经在规格内）。────────────── */
+@media (prefers-reduced-motion:no-preference){
+  .page{animation-duration:520ms}                       /* app.css:142  animation:page-in .4s → 520ms */
+  body.leaving .page{transition-duration:520ms}         /* app.css:1392 opacity/transform .28s → 520ms */
+  .bar{animation-duration:780ms}                        /* app.css:772  animation:grow .54s → 780ms */
+  .area2{animation-duration:780ms}                      /* app.css:787  area-in .65s → 780ms */
+  .heat rect{animation-duration:780ms}                  /* app.css:858  heat-in .4s → 780ms */
+  .donut circle{animation-duration:780ms}               /* app.css:1089 donut-in .55s → 780ms */
+}
+
+/* ── 没进这个文件的部分（明细与原因都在 spec-audit.md）：
+      app.css:2596 row-gap:7px（媒体查询内，需按断点分别覆盖）
+      app.css:2600 gap:7px（媒体查询内，需按断点分别覆盖）
+      app.css:160 .brand .mark border-radius:10px（高只有 30px 的小件，改成 14px 会明显变圆，交给人看图定）
+      app.css:3410 .fx-blk.b5 .f5row .f5name border-radius:11px（高只有 36px 的小件，改成 14px 会明显变圆，交给人看图定）
+      app.css:2601 font-size:10.5px（媒体查询内）
+      app.css:3389 font-size:10.5px（媒体查询内）
+  */
+
+/* ===== v75 · 牌组名那条常驻的半下划线 =====
+   来由：app.css:3192 给「整行可点」的牌组行加了 1px 底边（18% 白），
+   截图里看像每条牌组名都带下划线，显脏。改成只在悬停/键盘聚焦时出现，
+   可点提示靠 hover 背景与手型本来就有。 */
+
+.drow[data-go] .dname a{border-bottom-color:transparent}
+.drow[data-go]:hover .dname a{border-bottom-color:rgba(var(--accent-rgb),.55)}
+.drow[data-go]:focus-visible .dname a{border-bottom-color:rgba(var(--accent-rgb),.55)}
