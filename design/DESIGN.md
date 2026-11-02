@@ -233,3 +233,53 @@ node tests/panel-preview.mjs      # 产物 design/_shots/panel-{factory,empty,er
 - 学习区（`StudyPanel`）同样只换了令牌，没有按 `study.html` 的一屏一张 + 五面 facebar 重做。
 - 配置卡（`ConfigPage`）没动。
 - 真机验收还差一次：面板要重载插件后在真宿主里点一遍（`plugin_manager set_plugin include:etude` false → true）。
+
+
+## 10. 音频条与学习区（client.js 第二轮）
+
+第 9 节留下五块只换了令牌没重排，这轮先啃两块最影响手感、又最不碰管道的：音频条、学习区。
+
+### 10.1 音频条：进度必须是真的
+
+旧音频条只有一颗按钮加一句「3.29s」，看不出听到哪儿了，"听过大半才能确认"这条规矩在界面上根本没有形状。
+现在是 `[圆钮] [波形] [0:00 / 3.29s] [引擎 · 音色] [我听过了]`：
+
+- 波形不是装饰：72 根竖条，高度按 `ord` 做伪随机（同一句永远同一个形状），已播过的部分是 accent，没播的是 22% 白。
+- `onTimeUpdate` 里 `currentTime > 0.6 * duration` 才 `setHeard(true)`，按钮跟着从灰变实心。这条逻辑本来就是对的，只是之前没有可见的反馈。
+- 已确认的卡不再显示按钮，改成一枚 `✓ 已确认` 胶囊，点它是「取消确认」（解锁后要重新试听）。
+- 引擎名截到 132px：`edge · en-US-AriaNeural` 这种长名字会把按钮挤成竖排（第一次渲染就撞上了，实测按钮变成两行「已/确/认」）。
+
+### 10.2 学习区：一屏一张，别的都让开
+
+`StudyPanel` 的骨架原来是「图 + 场景 + 按钮」直接堆在一个 div 里，图没有上限高度，830 宽的卡片配 4:3 图就是 620 高，一屏顶满还溢出。
+改成：
+
+```
+study（max 820 居中，gap 12）
+├─ studyHead：词 20px + 类型 + 第 n / N ……………… 打回制卡
+├─ studyStage（一张真卡片：边框/圆角/overflow hidden）
+│  ├─ 图（320 高，object-fit: cover）
+│  └─ studyPanel（16/18 padding）：场景提示 + 「想好了？看答案」
+│                              或 句子 + 中文 + 标签 + 语音
+└─ studyBar：上一张 · 1 / 8 · 下一张 …………… 键位提示
+```
+
+- 翻开之后场景让位给答案（原来两行一起摆，同一句读两遍）。
+- 键位提示独占右下，不在按钮堆里挤。
+- 学习区左侧列表的第二行原来照搬制卡区的「补素材中 · 5/8 图」，切到学习区还在说素材 —— 现在按区取词：
+  学习区是 `8 句 · 能练`（新增 locale 键 `study.learnable`），制卡区才是「状态 · n/8 图 · m/8 音」。
+
+### 10.3 预览工具这一轮补的两个洞（都是真会骗人的）
+
+- `svg` 的 `width` / `height` 属性不在白名单里 → 图标全变成 300×150 的默认尺寸，预览里冒出一个占半屏的巨大警告三角。
+  真面板里 Icon 是给 attrs 的，所以只有预览会这样 —— 但看图的人（我）会据此去改代码。
+- 属性白名单没有 `d` / `viewBox` / `stroke` → 图标只剩 `<svg><path></path></svg>` 空壳，按钮看着像没字。
+
+现在 `node tests/panel-preview.mjs` 产出四份：`panel-factory`（制卡区）、`panel-study`（学习区）、`panel-empty`（没包）、`panel-error`（宿主连不上）。
+学习区那份要把假包的 `learnable` 改成 `true` 才渲染得出来，否则是「还没有能练的包」空态。
+
+### 10.4 还没做的
+
+- 例句卡片内部（`ExampleCard`）与九宫格挑图（`CandidateGrid`）：只换到令牌，没有按 `detail.html` / `factory.html` 的结构重排。
+- 配置卡（`ConfigPage`）没动。
+- 真宿主里重载插件点一遍，还没做。

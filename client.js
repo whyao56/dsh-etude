@@ -41,6 +41,7 @@ window.__ModuleLoader__.load({
     const line = {
       a: 'var(--dsw-alias-border-l3)',
       b: 'var(--dsw-alias-border-l2, var(--dsw-alias-border-l3))',
+      c: 'color-mix(in oklab, var(--dsw-alias-label-primary) 22%, transparent)',
     }
     const surf = {
       a: 'var(--dsw-alias-bg-module-platform, var(--dsw-alias-bg-layer-1))',
@@ -301,6 +302,84 @@ window.__ModuleLoader__.load({
         background: 'var(--dsw-alias-label-warning, #dcb47c)',
         flex: '0 0 auto',
       },
+      // 音频条：一条语音一行，波形是真进度。
+      audioWrap: { display: 'flex', flexDirection: 'column', gap: 6, width: '100%', minWidth: 0 },
+      audioBar: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '8px 10px',
+        border: `1px solid ${line.a}`,
+        borderRadius: radius.sm + 2,
+        background: surf.a,
+        minWidth: 0,
+      },
+      playBtn: {
+        flex: '0 0 auto',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 28,
+        height: 28,
+        padding: 0,
+        border: `1px solid ${line.b}`,
+        borderRadius: 999,
+        background: surf.c,
+        color: ink.a,
+        cursor: 'pointer',
+      },
+      playBtnOn: {
+        background: accent,
+        borderColor: accent,
+        color: onAccent,
+      },
+      wave: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        flex: '1 1 auto',
+        minWidth: 0,
+        height: 26,
+        overflow: 'hidden',
+      },
+      waveBar: {
+        flex: '0 0 2px',
+        width: 2,
+        borderRadius: 1,
+        background: line.c,
+      },
+      waveBarOn: { background: accent },
+      audioTime: {
+        flex: '0 0 auto',
+        fontFamily: 'var(--font-mono, ui-monospace, monospace)',
+        fontSize: 11,
+        fontVariantNumeric: 'tabular-nums',
+        color: ink.c,
+      },
+      audioMeta: {
+        flex: '0 1 auto',
+        fontSize: 11,
+        color: ink.c,
+        maxWidth: 132,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      },
+      audioDone: {
+        flex: '0 0 auto',
+        whiteSpace: 'nowrap',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        height: 26,
+        padding: '0 9px',
+        border: '1px solid transparent',
+        borderRadius: 999,
+        background: 'color-mix(in oklab, var(--dsw-alias-label-primary) 8%, transparent)',
+        color: ink.b,
+        fontSize: 11.5,
+        cursor: 'pointer',
+      },
       actions: {
         display: 'flex',
         alignItems: 'center',
@@ -474,15 +553,28 @@ window.__ModuleLoader__.load({
       },
       voiceRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
       // 学习区：一屏一张
-      study: { display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 },
+      study: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        minWidth: 0,
+        maxWidth: 820,
+        margin: '0 auto',
+        width: '100%',
+      },
+      studyPanel: { display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 18px' },
+      studyPrompt: { display: 'flex', flexDirection: 'column', gap: 12 },
       studyHead: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
       studyTarget: { margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.015em' },
       studyCount: { fontSize: 11.5, color: ink.c, fontVariantNumeric: 'tabular-nums' },
       studyStage: {
-        borderRadius: radius.md,
+        display: 'flex',
+        flexDirection: 'column',
         border: `1px solid ${line.a}`,
+        borderRadius: radius.md,
         background: surf.b,
         overflow: 'hidden',
+        minWidth: 0,
       },
       studyShot: { width: '100%', display: 'block', objectFit: 'cover', maxHeight: 320 },
       studySentence: {
@@ -902,6 +994,19 @@ window.__ModuleLoader__.load({
      * 听过大半才让点「我听过了」。播不出来（文件没了）也照实说 ——
      * 上一版就是把「合成成功」当成了「能听」，用户点开一片安静。
      */
+    // ── 音频条 ──────────────────────────────────────────────────────────────
+    // 一条语音要回答四件事：多长、谁念的、听过没有、听没听够。
+    // 「听够」是硬规矩：进度到 60% 才许点「我听过了」，所以波形必须是真的在走，
+    // 不能只是个装饰——用户得看得见自己听到哪儿了。
+
+    const WAVE_SEED = (ord) => {
+      let x = (ord || 1) * 2654435761
+      return () => {
+        x = (x * 1103515245 + 12345) & 0x7fffffff
+        return (x >>> 8) / 0x800000
+      }
+    }
+
     function AudioBar({ example, busy, handlers, t }) {
       const audio = example.audio
       const reviewed = Boolean(example.audioReview?.listened)
@@ -929,15 +1034,20 @@ window.__ModuleLoader__.load({
       if (!file) {
         return React.createElement(
           'div',
-          { style: styles.actions },
+          { style: styles.audioBar },
           React.createElement(
             'button',
             { style: styles.buttonPrimary, onClick: () => handlers.synthesize(example.ord), disabled: busy },
             busy ? t('action.synthBusy') : t('action.playAudio'),
           ),
-          React.createElement('span', { style: { fontSize: 11, color: 'var(--dsw-alias-label-tertiary)' } }, t('label.noAudio')),
+          React.createElement('span', { style: styles.audioMeta }, t('label.noAudio')),
         )
       }
+
+      const total = audio.seconds || 0
+      const ratio = total > 0 ? Math.min(1, current / total) : 0
+      const rand = WAVE_SEED(example.ord)
+      const bars = Array.from({ length: 72 }, () => 0.25 + rand() * 0.75)
 
       const toggle = async () => {
         const element = audioRef.current
@@ -956,45 +1066,61 @@ window.__ModuleLoader__.load({
 
       return React.createElement(
         'div',
-        { style: { display: 'flex', flexDirection: 'column', gap: 6, width: '100%' } },
+        { style: styles.audioWrap },
         React.createElement(
           'div',
-          { style: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' } },
+          { style: styles.audioBar },
           React.createElement(
             'button',
             {
-              style: {
-                ...styles.button,
-                height: 30,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '0 10px 0 7px',
-                opacity: media.url ? 1 : 0.5,
-                cursor: media.url ? 'pointer' : 'progress',
-              },
+              style: { ...styles.playBtn, ...(playing ? styles.playBtnOn : null), opacity: media.url ? 1 : 0.5 },
               onClick: media.url ? toggle : undefined,
+              disabled: !media.url,
               'aria-label': playing ? t('action.playing') : t('action.playAudio'),
             },
-            React.createElement(Icon, { name: playing ? 'stop' : 'play', size: 13 }),
-            secondsText(audio.seconds || current),
+            React.createElement(Icon, { name: playing ? 'pause' : 'play', size: 12 }),
+          ),
+          React.createElement(
+            'div',
+            { style: styles.wave, role: 'presentation' },
+            bars.map((h, i) =>
+              React.createElement('i', {
+                key: i,
+                style: {
+                  ...styles.waveBar,
+                  height: Math.round(6 + h * 18),
+                  ...(i / bars.length <= ratio ? styles.waveBarOn : null),
+                },
+              }),
+            ),
           ),
           React.createElement(
             'span',
-            { style: { fontSize: 11, color: 'var(--dsw-alias-label-tertiary)' } },
+            { style: styles.audioTime },
+            `${secondsText(current)} / ${secondsText(total)}`,
+          ),
+          React.createElement(
+            'span',
+            { style: styles.audioMeta },
             `${audio.engine ?? ''}${audio.voice ? ` · ${audio.voice}` : ''}`,
           ),
           reviewed
             ? React.createElement(
                 'button',
-                { style: { ...styles.button, height: 28, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }, onClick: () => handlers.unlockAudio(example.ord) },
-                React.createElement(Icon, { name: 'check', size: 13 }),
-                t('action.unlockAudio'),
+                {
+                  style: styles.audioDone,
+                  onClick: () => handlers.unlockAudio(example.ord),
+                  title: t('action.unlockAudio'),
+                },
+                React.createElement(Icon, { name: 'check', size: 12 }),
+                t('label.reviewed'),
               )
             : React.createElement(
                 'button',
                 {
-                  style: { ...styles.buttonPrimary, height: 28, fontSize: 12, opacity: heard ? 1 : 0.45, cursor: heard ? 'pointer' : 'not-allowed' },
+                  style: heard
+                  ? { ...styles.buttonPrimary, height: 28, fontSize: 12, whiteSpace: 'nowrap' }
+                  : { ...styles.button, height: 28, fontSize: 12, whiteSpace: 'nowrap', opacity: 0.55 },
                   disabled: !heard,
                   onClick: heard ? () => handlers.confirmAudio(example.ord) : undefined,
                   title: heard ? t('action.markListened') : t('hint.pressPlayFirst'),
@@ -1010,8 +1136,8 @@ window.__ModuleLoader__.load({
           onTimeUpdate: (event) => {
             const element = event.currentTarget
             setCurrent(element.currentTime)
-            const total = Number.isFinite(element.duration) && element.duration > 0 ? element.duration : audio.seconds
-            if (total > 0 && element.currentTime > 0.6 * total) setHeard(true)
+            const span = Number.isFinite(element.duration) && element.duration > 0 ? element.duration : total
+            if (span > 0 && element.currentTime > 0.6 * span) setHeard(true)
           },
           onEnded: () => {
             setPlaying(false)
@@ -1516,6 +1642,7 @@ window.__ModuleLoader__.load({
           { style: styles.studyHead },
           React.createElement('span', { style: styles.studyTarget }, detail.target),
           React.createElement('span', { style: styles.tag }, t(`kind.${detail.kind}`)),
+          React.createElement('span', { style: styles.studyCount }, `${safe + 1} / ${total}`),
           React.createElement('div', { style: { flex: 1 } }),
           React.createElement(
             'button',
@@ -1534,34 +1661,46 @@ window.__ModuleLoader__.load({
                   mediaType: mediaTypeOf(example.image.file),
                 },
                 alt: example.sentence,
-                rounded: 12,
                 style: styles.studyShot,
               })
             : React.createElement('div', { style: { ...styles.studyShot, height: 180 } }),
-          // 场景是「提示」：翻开之前给场合，翻开之后就该让位给答案，
-          // 不然跟中文说法一起摆着，同一句话读两遍。
-          revealed
-            ? null
-            : React.createElement('div', { style: styles.studyScene }, example.sceneZh || example.sceneEn || ''),
-          revealed
-            ? React.createElement(
-                'div',
-                { style: styles.studyAnswer },
-                React.createElement('div', { style: styles.studySentence }, example.sentence),
-                zh ? React.createElement('div', { style: styles.studyZh }, zh) : null,
-                React.createElement(
+          React.createElement(
+            'div',
+            { style: styles.studyPanel },
+            // 场景是「提示」：翻开之前给场合，翻开之后就该让位给答案，
+            // 不然跟中文说法一起摆着，同一句话读两遍。
+            revealed
+              ? React.createElement(
                   'div',
-                  { style: styles.studyTags },
-                  example.register ? React.createElement('span', { style: styles.tag }, example.register) : null,
-                  example.voiceHint ? React.createElement('span', { style: styles.tag }, example.voiceHint) : null,
+                  { style: styles.studyAnswer },
+                  React.createElement('div', { style: styles.studySentence }, example.sentence),
+                  zh ? React.createElement('div', { style: styles.studyZh }, zh) : null,
+                  React.createElement(
+                    'div',
+                    { style: styles.studyTags },
+                    example.register ? React.createElement('span', { style: styles.tag }, example.register) : null,
+                    example.voiceHint ? React.createElement('span', { style: styles.tag }, example.voiceHint) : null,
+                  ),
+                  React.createElement(StudyAudio, { example, t }),
+                )
+              : React.createElement(
+                  'div',
+                  { style: styles.studyPrompt },
+                  React.createElement(
+                    'p',
+                    { style: styles.studyScene },
+                    example.sceneZh || example.sceneEn || '',
+                  ),
+                  React.createElement(
+                    'button',
+                    {
+                      style: { ...styles.buttonPrimary, height: 34, fontSize: 13, alignSelf: 'flex-start' },
+                      onClick: () => setRevealed(true),
+                    },
+                    t('study.reveal'),
+                  ),
                 ),
-                React.createElement(StudyAudio, { example, t }),
-              )
-            : React.createElement(
-                'button',
-                { style: { ...styles.buttonPrimary, height: 34, fontSize: 13 }, onClick: () => setRevealed(true) },
-                t('study.reveal'),
-              ),
+          ),
         ),
         React.createElement(
           'div',
@@ -1577,6 +1716,7 @@ window.__ModuleLoader__.load({
             { style: { ...styles.button, height: 30 }, onClick: () => go(1), disabled: safe >= total - 1 },
             t('study.next'),
           ),
+          React.createElement('div', { style: { flex: 1 } }),
           React.createElement('span', { style: styles.studyKeys }, t('study.keys')),
         ),
       )
@@ -2109,7 +2249,9 @@ window.__ModuleLoader__.load({
                     React.createElement(
                       'span',
                       { style: styles.listMeta },
-                      `${t(`status.${pack.status}`)} · ${pack.progress.images}/${pack.progress.total} 图 · ${pack.progress.audios}/${pack.progress.total} 音`,
+                      zone === 'study'
+                        ? `${pack.progress.total} 句 · ${t('study.learnable')}`
+                        : `${t(`status.${pack.status}`)} · ${pack.progress.images}/${pack.progress.total} 图 · ${pack.progress.audios}/${pack.progress.total} 音`,
                     ),
                   ),
                 )
@@ -2307,6 +2449,7 @@ window.__ModuleLoader__.load({
         'study.noneTitle': '这里只放打完包的卡',
         'study.none': '学习区只列图、音、打包都齐了的包。还在制卡的那些在左边「制卡」里。',
         'study.reopen': '打回制卡',
+        'study.learnable': '能练',
         'study.reopenHint': '退回制卡区重新编辑（导出过的那份不动）',
         'study.keys': '← → 换卡 · 空格看答案',
         'study.reveal': '想好了？看答案',
@@ -2431,6 +2574,7 @@ window.__ModuleLoader__.load({
         'study.noneTitle': 'Only finished packs show up here',
         'study.none': 'Practice lists only packs with every image, every audio and a built pack. Work in progress stays in Make.',
         'study.reopen': 'Send back to Make',
+        'study.learnable': 'ready',
         'study.reopenHint': 'Reopen for editing (an exported copy stays where it is)',
         'study.keys': '← → switch · Space to reveal',
         'study.reveal': 'Ready? Show the sentence',

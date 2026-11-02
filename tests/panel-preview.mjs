@@ -221,7 +221,29 @@ function attrsOf(props) {
   const out = []
   const style = cssOf(props.style)
   if (style) out.push(`style="${esc(style)}"`)
-  for (const key of ['placeholder', 'value', 'title', 'type', 'name', 'href', 'alt', 'src']) {
+  for (const key of [
+    'placeholder',
+    'value',
+    'title',
+    'type',
+    'name',
+    'href',
+    'alt',
+    'src',
+    // 图标全是内联 svg，少了这几个属性就只剩空壳：<svg><path></path></svg>
+    'd',
+    'viewBox',
+    'fill',
+    'stroke',
+    'stroke-width',
+    'stroke-linecap',
+    'stroke-linejoin',
+    'width',
+    'height',
+    'aria-hidden',
+    'aria-label',
+    'role',
+  ]) {
     if (props[key] !== undefined && props[key] !== null) out.push(`${key}="${esc(props[key])}"`)
   }
   if (props.disabled) out.push('disabled')
@@ -306,7 +328,7 @@ const packOf = (id, target, kind) => ({
   updatedAt: '2026-11-02T09:00:00.000Z',
   progress: { total: 8, images: 5, audios: 3, done: 0 },
   lastError: null,
-  learnable: false,
+  learnable: true,
   examples: EXAMPLES.map(([sentence, sceneZh, file], index) => ({
     ord: index + 1,
     sentence,
@@ -369,6 +391,19 @@ const frames = [
   {
     name: 'panel-factory',
     label: '制卡区（有包）',
+    props: { size: 18 },
+    rpc: async (channel, endpoint, payload) => {
+      if (endpoint === 'state') return { ok: true, value: STATE }
+      if (endpoint === 'pack.get') return { ok: true, value: STATE.packs[0] }
+      if (endpoint === 'image.bytes' || endpoint === 'candidate.bytes')
+        return { ok: true, value: { dataBase64: photoFor(payload), mediaType: 'image/jpeg' } }
+      return { ok: true, value: {} }
+    },
+  },
+  {
+    name: 'panel-study',
+    label: '学习区（一屏一张）',
+    props: { size: 18, initialZone: 'study' },
     rpc: async (channel, endpoint, payload) => {
       if (endpoint === 'state') return { ok: true, value: STATE }
       if (endpoint === 'pack.get') return { ok: true, value: STATE.packs[0] }
@@ -429,7 +464,7 @@ input, select, textarea { font-family: inherit; }
 await mkdir(outDir, { recursive: true })
 for (const frame of frames) {
   state.rpc = frame.rpc
-  const html = await renderOnce(main, { size: 18 })
+  const html = await renderOnce(main, frame.props ?? { size: 18 })
   const page = `<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
 <title>${frame.label} · 卡片工厂面板</title>
