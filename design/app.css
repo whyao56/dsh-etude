@@ -5847,6 +5847,12 @@ body:has(.navstep.next) #animToggle{right:108px!important}
            就是两层白块错 1px 叠出来的。24 高的轨道放 16 的旋钮，上下
            各 4px 才对称；原来 top 是按 --sw-h:20/--sw-k:14 算的 3px，
            尺寸被改成 24/16 之后没人回头改 top。 */
+   注：轨道尺寸必须显式写 —— app.css:2609 的 `div.sw{--sw-w:36px;--sw-h:20px;
+        width:var(--sw-w);height:var(--sw-h)}` 特异度 (0,1,1)，一直压着
+        app.css:4042 的 `.sw{width:40px;height:24px}` (0,1,0)。实测 ON 态
+        轨道 bbox 只有 36×21，旋钮 16×16 落在 x1237..1252，右边零间隙、
+        上下 4/1 —— 下面的 top:4「正确」是相对 24 高而言的。 */
+.setbody .sw{width:40px;height:24px}
 .setbody .sw i{display:none}
 .setbody .sw::after{top:4px;left:4px;width:16px;height:16px;background:rgba(255,255,255,.72)}
 .setbody .sw.on::after{transform:translateX(16px);background:#fff}
@@ -6003,7 +6009,9 @@ body:has(.navstep.next) #animToggle{right:108px!important}
            原来同号同色，只能靠位置分主次 —— 拉开到 11 / 12。 */
 .setbody .ncard{padding:16px;border-radius:14px}
 .setbody .nt{font-size:11px}
-.setbody .nu{font-size:12px;margin-top:4px}
+.setbody .nu{font-size:12px;margin-top:4px;
+  display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 
 
 /* ── 18 · 「给它哪些手」8 行：标签选择器 .pl 是死的 ───────────────────
@@ -6034,6 +6042,7 @@ body:has(.navstep.next) #animToggle{right:108px!important}
 .setbody .kgroups{gap:8px 32px}
 .setbody .kgrp{padding:8px 0}
 .setbody .kgh{padding:4px 0 8px;font-size:11px}
+.setbody .kgh .mut{font-size:11px;color:var(--fg3);font-variant-numeric:tabular-nums}
 
 
 /* ── 20 · 快捷键每行的标签选择器 .lab 是死的，长标签没有省略号 ─────────
@@ -6104,8 +6113,8 @@ body:has(.navstep.next) #animToggle{right:108px!important}
   background:rgba(230,144,137,.08);
 }
 .setbody .btn.ghost.danger:hover{
-  color:#F2B4AE;
-  border-color:rgba(230,144,137,.62);
+  color:var(--danger);
+  border-color:var(--danger);
   background:var(--danger-cont);
 }
 .setbody .btn.ghost.danger:active{background:rgba(230,144,137,.24)}
@@ -6119,7 +6128,8 @@ body:has(.navstep.next) #animToggle{right:108px!important}
            的 desc 继续按密度策略收着，只有这一条例外。 */
 .setbody .group .field .lab.danger + .desc{
   display:block;font-size:12px;line-height:1.6;
-  color:rgba(230,144,137,.82);margin-top:4px;max-width:60ch;
+  color:var(--danger);color:color-mix(in srgb,var(--danger) 82%,transparent);
+  margin-top:4px;max-width:60ch;
 }
 
 
@@ -6202,18 +6212,61 @@ body:has(.navstep.next) #animToggle{right:108px!important}
 }
 
 
+/* ── 32 · 能点的 chip 只有 22px 高；关着的开关没有边框 ────────────────
+   现在：.chip 定高 22（工具段的「出声」「先进草稿」、智能体段的「改配置·
+         自动存」都是能点的状态开关），命中区只有 22px；关着的开关是
+         一层 rgba(w,.14) 的底，在卡片 1.7:1 的底色上几乎看不见轮廓
+   改成：chip 用 inset:-5px 的透明 ::after 把命中区撑到 32；
+         .sw:not(.on) 补 1px 内描边 + 底色提到 .16
+   为什么：硬规格：桌面命中区 ≥28。视觉高度不动（22 的胶囊在这页刚好），
+           只把可点区域撑到 32。开关的"关"态如果连轮廓都没有，用户只
+           能靠"没有蓝色"推断它在关 —— 补一圈内描边是这套玻璃底上
+           画边界的统一做法（.btn / .inp 都是 inset 描边）。
+   注：.chip 是 <span>，进不了 Tab 序列；命中区只管鼠标（见收尾备注）。
+   注：选择器必须带 :not(.on)，否则 .setbody .sw 会和 .sw.on 同权重、
+        且在文件里更靠后，把 ON 态的蓝色底一起盖成灰的。 */
+.setbody .chip{position:relative}
+.setbody .chip::after{content:"";position:absolute;inset:-5px;border-radius:999px}
+.setbody .sw:not(.on){
+  background-color:rgba(var(--w),.16);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px rgba(var(--w),.10);
+}
+
+
+/* ── 33 · 列表末尾那行没有任何"到底了"的信号 ──────────────────────────
+   现在：快捷键段最后一行「没有你想要的快捷键？」用的是和上面 27 行
+         一样的 1px 实线，看起来还是"下一行"
+   改成：紧跟 .keyhint 的那条 .foldrow 换成虚线 + --fg3
+   为什么：POLISH §2.7 说整站基本没有空态。这一页 HTML 里唯一允许做
+           "列表结束"的地方就是这行，虚线是"边界"的通用语汇，实线会被
+           读成"还有下一行"。真要做空态（一条快捷键都没有时）得改模板，
+           见收尾备注。 */
+.setbody .group .keyhint + .foldrow{
+  border-top:1px dashed rgba(var(--w),.14);color:var(--fg3);margin-top:8px;
+}
+.setbody .group .keyhint + .foldrow:hover{color:var(--accent)}
+
+
 /* ════════════════════════════════════════════════════════════════════
    收尾备注
    1. 只覆盖，没动 app.css / gen.mjs / 分组顺序，也没改 HTML。
-   2. 三条「CSS 救不了」留给模板层：
-      · .seg span 是 <span>、.krow 是 <div>、.sw2 是 <div> —— 键盘不可达，
-        要加 tabindex="0" + role 才能进 Tab 序列；
+   2. 五条「CSS 救不了」留给模板层：
+      · .seg span 是 <span>、.krow 是 <div>、.sw2 是 <div>、.chip 是
+        <span> —— 键盘不可达，要加 tabindex="0" + role 才能进 Tab 序列；
       · .perm 的「中文名 · 工具名」挤在同一个 span 里，没法把工具名做成
         等宽小字，要拆成两个 span；
       · 快捷键搜索框 .ksearch 本身就是个 <span>，现在只当占位，真要能搜
-        得换成 <input>。
+        得换成 <input>，同时把那行的 inline `padding:12px 0 6px` 删掉
+        （inline 样式优先级高于任何选择器，那行永远是 60 而不是 64）；
+      · 「最近动过什么」只有"有记录"这一种画法，没有一条记录时整块会
+        塌成一行空 label —— 空态要模板给一个 `<div class="empty">`；
+      · 通用段「其他语言（未做）」和它右边那个「未做」chip 说的是同一句
+        话（seg 自己已经带了括号说明），chip 该删。
    3. 开关的双旋钮（.sw i + .sw::after）是全局问题，这里按 .setbody 收窄；
       要修全站得把 app.css:555 的 .sw i 直接删掉。
+   4. 所有数字都在 1440×900 实拍上量过；验证方法是不改 app.css，只在
+      mock 页的 app.css 之后加一行 link 指向本文件再截图。
    ════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -8060,3 +8113,58 @@ table.rt thead th{font-size:10px}  /* app.css:755  10.5px → 10px */
 .drow[data-go] .dname a{border-bottom-color:transparent}
 .drow[data-go]:hover .dname a{border-bottom-color:rgba(var(--accent-rgb),.55)}
 .drow[data-go]:focus-visible .dname a{border-bottom-color:rgba(var(--accent-rgb),.55)}
+
+/* ===== v76 · 规格审计剩下的 17 处装饰色相 =====
+   来由：spec-audit.md 第 5 条 —— 硬规格「1 主 + 1 警示 + 5 级中性 + ≤2 语义色」
+   对装饰色相零容忍，但 app.css 里还留着琥珀 6 处、绿 8 处、紫 2 处。
+   这些是 v60 的「四来路四色」（视频/文章/帖子…）与几个角标。
+   改成：来路靠字重与描边区分，颜色一律回到主色 / 中性 / 警示。
+
+   改动清单（原文位置 → 现在的值）：
+   303  / 1598  渐变绿 #82C282→#6BB76B   → 主色阶（深浅两档）
+   307  / 1602  渐变琥珀 #E0BA6E→#D4A558 → 警示阶
+   2590 .dg.on::after #5ad39a（绿点）    → 主色
+   2591 .dg.warn::after #e0a34a（琥珀点）→ 警示
+   3013 .rt.gif（琥珀文字胶囊）          → 中性
+   3015 .rt.post（松石文字胶囊）         → 主色
+   3025 .giftag（琥珀小角标）            → 中性
+   3205 .mini.c-violet（紫）             → 中性
+   3248 .ex:hover #c8f0e6（松石）        → 主色
+   3250 .ex.on #d7fff4（松石）           → 主色
+   3343 .fb.done::after #6fd29a（绿点）  → 主色
+   3495 .navstep.prev #f6d9b0（琥珀）    → 中性
+   3505 .wordnav.prev #d9c6f2（紫）      → 中性
+   3510 .wordnav.next #b8e8dd（松石）    → 主色 */
+
+/* ── 四来路：色相全下线，靠描边浓度与字重分档 ── */
+.rt{color:var(--fg2);background:rgba(var(--w),.05);border-color:rgba(var(--w),.12)}
+.rt.gif{color:var(--fg2);background:rgba(var(--w),.04);border-color:rgba(var(--w),.10)}
+.rt.post{color:var(--accent);background:rgba(var(--accent-rgb),.10);border-color:rgba(var(--accent-rgb),.28)}
+.rt.vid{color:var(--fg2);background:rgba(var(--w),.04);border-color:rgba(var(--w),.10)}
+.rt.art{color:var(--fg2);background:rgba(var(--w),.04);border-color:rgba(var(--w),.10)}
+
+/* ── 来路渐变块（303 / 1598 / 1602 这两组）── */
+.fx-src.green,.src-dot.green{background:linear-gradient(135deg,#97B1F0,#7E93C8)}
+.fx-src.amber,.src-dot.amber{background:linear-gradient(135deg,#E69089,#C9736C)}
+
+/* ── 状态点（303 / 307 的绿与琥珀渐变）── */
+.pip.ok{background:var(--accent);box-shadow:inset 0 .5px 1px rgba(255,255,255,.3),0 1px 2px rgba(var(--accent-rgb),.25)}
+.pip.warn{background:rgba(var(--w),.34);box-shadow:inset 0 .5px 1px rgba(255,255,255,.2),0 1px 2px rgba(0,0,0,.2)}
+.pip.bad{background:var(--danger);box-shadow:inset 0 .5px 1px rgba(255,255,255,.3),0 1px 2px rgba(230,144,137,.25)}
+.pip.now{background:var(--accent);animation:none}
+
+/* ── 状态小圆点 ── */
+.dg.on::after{background:var(--accent);box-shadow:0 0 0 2px rgba(var(--accent-rgb),.18)}
+.dg.warn::after{background:var(--danger);box-shadow:0 0 0 2px rgba(230,144,137,.18)}
+.dg.off::after{background:var(--ghost);box-shadow:none}
+.fb.done::after{background:var(--accent)}
+
+/* ── 角标 ── */
+.giftag{color:var(--fg2);background:rgba(0,0,0,.55);border:1px solid rgba(var(--w),.16)}
+
+/* ── 按钮的紫 / 松石 / 琥珀 ── */
+.mini.c-violet{color:var(--fg2);border-color:rgba(var(--w),.16);background:rgba(var(--w),.05)}
+.navstep.prev,.wordnav.prev{color:var(--fg2);border-color:rgba(var(--w),.16)}
+.navstep.next,.wordnav.next{color:var(--accent);border-color:rgba(var(--accent-rgb),.48)}
+.ex:hover{border-color:rgba(var(--accent-rgb),.45);color:var(--fg)}
+.ex.on{color:var(--fg);background:rgba(var(--accent-rgb),.16);border-color:rgba(var(--accent-rgb),.55)}
