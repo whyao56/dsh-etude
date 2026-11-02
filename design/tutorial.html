@@ -1,101 +1,164 @@
 <!doctype html>
-<html lang="zh-CN" data-page="tutorial">
-<head>
+<html lang="zh-CN"><head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>卡片工厂</title>
-<link rel="stylesheet" href="./system.css?vmvzc4rgf">
-<script src="./ui.js?vmvzc4rgf" defer></script>
-</head>
-<body class="">
-<div class="app">
-<aside class="side">
-  <a class="brand" href="./cards.html" data-fade><span class="brand-mark">卡</span><span class="brand-txt"><span class="brand-name">卡片工厂</span><span class="brand-sub">dsh-etude · 0.2</span></span></a>
-  <nav class="nav"><p class="nav-g">造卡</p><a class="nav-i " href="./factory.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>工厂</span></a><a class="nav-i " href="./mine.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10.5h12M4 16h16M4 21h8"/></svg><span>挖句</span></a><p class="nav-g">卡片</p><a class="nav-i " href="./cards.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.8-9 4.8L3 7.8z"/><path d="M3 12.4l9 4.8 9-4.8"/><path d="M3 16.8l9 4.8 9-4.8"/></svg><span>卡组</span></a><a class="nav-i " href="./library.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg><span>句库</span></a><p class="nav-g">练习</p><a class="nav-i " href="./study.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg><span>学习</span><span class="n-tag">12</span></a><p class="nav-g">观察</p><a class="nav-i " href="./stats.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 20v-6M12 20V7M17 20v-9"/></svg><span>统计</span></a></nav>
-  <div class="side-foot">
-    <a class="nav-i on" href="./tutorial.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v16.5H6.5A1.5 1.5 0 005 21z"/><path d="M5 17.2h14"/></svg><span>教程</span></a>
-    <a class="nav-i " href="./settings.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg><span>设置</span></a>
-    <a class="side-user" href="./settings.html#about" data-fade><span class="ava">HP</span><span class="u-txt"><span style="display:block;font-size:12.5px;color:var(--c-ink)">本机</span><span style="display:block;font-size:11px;color:var(--c-ink-3)">数据在本地</span></span></a>
-  </div>
-</aside>
-<div class="main">
-<header class="topbar">
-  <nav class="crumbs" aria-label="位置"><span class="cur">教程</span></nav>
-  <div class="topbar-r">
-    <button type="button" class="searchbox" data-open="dlg-search"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><span style="flex:1">搜索词、句子、场景…</span><kbd class="kbd">⌘K</kbd></button>
-    <button type="button" class="iconbtn " aria-label="快捷键" title="快捷键"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
-    <a class="iconbtn " href="./settings.html" data-fade aria-label="设置" title="设置"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg></a>
-  </div>
-</header>
-<main class="page  ">
-<div class="tut-hero">
-        <span class="ph-eyebrow">三分钟</span>
-        <h1 style="font-size:28px;margin:6px 0 8px">从一句话到一张能练的卡</h1>
-        <p class="dim" style="margin:0;max-width:620px">这条线只有五个动作：造例句、挑图、试听、打包、导出。每一步都有人的一票。</p>
+<script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂-测试 · tutorial</title>
+<link rel="stylesheet" href="./app.css?v=vmvzanu97">
+<script src="./app.js?v=vmvzanu97"></script><script src="./app2.js?v=vmvzanu97"></script><script src="./stats.js?v=vmvzanu97"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./transit.js?v=vmvzanu97"></script><script src="./smooth.js?v=vmvzanu97"></script><script src="./decks.js?v=vmvzanu97"></script><script src="./help.js?v=vmvzanu97"></script><script src="./pick.js?v=vmvzanu97"></script><script src="./palette.js?v=vmvzanu97"></script><script src="./factory.js?v=vmvzanu97"></script><script src="./fx.js?v=vmvzanu97"></script><script src="./rows.js?v=vmvzanu97"></script><script src="./bgrows.js?v=vmvzanu97"></script><script>
+/* 说明性小字一律收成一个 ?：页面里只留符号，原文塞进 .pop 里给 help.js 用 */
+(function () {
+  var n = 0
+  function run() {
+  var list = document.querySelectorAll('.fold')
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i]
+    var text = (p.textContent || '').trim()
+    if (!text) { p.remove(); continue }
+    // 找这块的标题行：有就挂上去，标题行已经有一个 ? 就把文字并进去，别多长一个
+    var blk = p.closest('.fx-blk, .blk, .mcard, .card, .st-side')
+    var head = null
+    if (blk) {
+      var heads = blk.querySelectorAll('.fx-bh, .tl, .pw-hd, .side-h')
+      for (var h = 0; h < heads.length; h++) {
+        // 取「在它前面、离它最近」的那个标题行
+        if (heads[h].compareDocumentPosition(p) & 4) head = heads[h]
+      }
+    }
+    var footBlock = p.classList.contains('fx-foot')
+    if (footBlock) {
+      var defs = document.querySelectorAll('.fx-def')
+      head = defs.length ? defs[defs.length - 1] : null
+    }
+    var existing = head ? head.querySelector('.q[data-pop]') : null
+    if (existing) {
+      var pv = document.getElementById(existing.getAttribute('data-pop'))
+      if (pv) {
+        var add = document.createElement('p')
+        add.style.margin = '7px 0 0'
+        add.textContent = text
+        pv.appendChild(add)
+        p.remove()
+        continue
+      }
+    }
+    var id = 'fd' + (n++)
+    var pop = document.createElement('div')
+    pop.className = 'pop'
+    pop.id = id
+    pop.textContent = text
+    document.body.appendChild(pop)
+    var q = document.createElement('button')
+    q.type = 'button'
+    q.className = 'q'
+    q.setAttribute('data-pop', id)
+    q.textContent = '?'
+    if (head && (p.parentElement === blk || footBlock)) {
+      q.classList.add('hq')
+      head.appendChild(q)
+      p.remove()
+    } else {
+      p.replaceWith(q)
+    }
+  }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run)
+  else run()
+})()
+</script><script src="./rain.js?v=vmvzanu97"></script>
+</head><body>
+<canvas class="liquid" aria-hidden="true"></canvas>
+<canvas class="rain" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"><i></i><i></i></div>
+<div class="page">
+<div class="topbar">
+  <div class="tb-left"><details class="menu" id="plugin">
+  <summary class="tbtn"><svg viewBox="0 0 18 18"><rect x="3" y="3" width="5" height="5" rx="1.4"/><rect x="10" y="3" width="5" height="5" rx="1.4"/><rect x="3" y="10" width="5" height="5" rx="1.4"/><rect x="10" y="10" width="5" height="5" rx="1.4"/></svg>插件</summary>
+  <div class="menu-list">
+    <a class="mi" href="./tutorial.html">教程</a>
+    <a class="mi" href="https://github.com/" target="_blank" rel="noreferrer">社区<span class="sp"></span><span class="ext">↗</span></a>
+    <div class="msep"></div>
+    <a class="mi" href="#import">导入…<span class="sp"></span><span class="ext">.srt .txt</span></a>
+    <a class="mi" href="#export">导出…<span class="sp"></span><span class="ext">.json</span></a>
+    <div class="msep"></div>
+    <details class="sub" id="help">
+      <summary class="mi">帮助<span class="chev">›</span></summary>
+      <div class="menu-list">
+        <a class="mi" href="./tutorial.html#use">使用指南</a>
+        <a class="mi" href="https://github.com/whyao56/dsh-etude/issues" target="_blank" rel="noreferrer">报告问题<span class="ext" style="margin-left:auto">↗</span></a>
+        <a class="mi" href="#feedback">意见反馈</a>
+        <a class="mi" href="#diag">诊断<span class="sp"></span><span class="ext">看状态</span></a>
       </div>
-      <div class="tut-shell">
-        <nav class="tut-toc"><a href="#step-1" class="on">造一个词</a><a href="#step-2" class="">挑一张图</a><a href="#step-3" class="">听一遍语音</a><a href="#step-4" class="">打包</a><a href="#step-5" class="">导出</a><a href="#step-6" class="">开始练</a></nav>
-        <div class="prose" style="display:flex;flex-direction:column;gap:36px;max-width:700px"><section id="step-1" style="scroll-margin-top:72px">
-    <div class="row" style="gap:10px;align-items:center;margin:0 0 10px">
-      <span class="t-xs dim2 num" style="width:22px">01</span>
-      <h2 style="margin:0;font-size:20px;font-weight:600">造一个词</h2>
-    </div>
-    <p>输入一个词、一个固定说法，或者一整句。选条数，按「造料」。造的是句子，不是翻译——每一句都要交代谁在说、在哪、说完会怎样。</p>
-      <div class="note">判型规则：有句末标点、开头是 I/you/they…、或者 6 词以上，就当整句处理。</div>
-      <figure><div class="photo r16-9 "><img src="./assets/photos/p-harbor.jpg" alt="" loading="lazy"></div><figcaption>八条例句里的一条：港口，凌晨，船长下最后一道命令。</figcaption></figure>
-      <p>确定性校验会拦四种情况：没含目标词、两句重复、场景照抄句子、场景相似度超过 0.86。不过就带着问题重试一次，还不过就报错。</p>
-  </section><section id="step-2" style="scroll-margin-top:72px">
-    <div class="row" style="gap:10px;align-items:center;margin:0 0 10px">
-      <span class="t-xs dim2 num" style="width:22px">02</span>
-      <h2 style="margin:0;font-size:20px;font-weight:600">挑一张图</h2>
-    </div>
-    <p>搜到的候选图先过体检：短边 ≥ 640、≤ 4MB、文件头对得上、亮度标准差 ≥ 6（防纯色）、二阶差分 ≥ 1.1（防渐变）、量化色数占比 ≥ 0.02。过不了的直接丢，不进九宫格。</p>
-      <figure><div class="photo r16-9 "><img src="./assets/photos/p-office.jpg" alt="" loading="lazy"></div><figcaption>九宫格里挑一张：单击选中，双击锁定。</figcaption></figure>
-      <div class="note">没有「自动入库」这条路。每张图必须有人点过头，才写得进清单。</div>
-  </section><section id="step-3" style="scroll-margin-top:72px">
-    <div class="row" style="gap:10px;align-items:center;margin:0 0 10px">
-      <span class="t-xs dim2 num" style="width:22px">03</span>
-      <h2 style="margin:0;font-size:20px;font-weight:600">听一遍语音</h2>
-    </div>
-    <p>Edge TTS 零配置，装了就能用。一条一条听，听到 60% 才允许点「我听过了」——这个按钮点不下去，就导出不了。</p>
-      <div class="row" style="gap:8px;margin:10px 0"><span class="kbd">R</span><span class="t-sm dim">重放</span><span class="spacer"></span><span class="badge ok">3.4 秒 · Ava</span></div>
-  </section><section id="step-4" style="scroll-margin-top:72px">
-    <div class="row" style="gap:10px;align-items:center;margin:0 0 10px">
-      <span class="t-xs dim2 num" style="width:22px">04</span>
-      <h2 style="margin:0;font-size:20px;font-weight:600">打包</h2>
-    </div>
-    <p>打包前跑硬校验：缺图、缺人工复核、哈希不对，都会拒绝，并说清第几条差什么。</p>
-      <figure><div class="photo r16-9 "><img src="./assets/photos/p-library.jpg" alt="" loading="lazy"></div><figcaption>校验过了才会生成 manifest 和 images/、audio/。</figcaption></figure>
-  </section><section id="step-5" style="scroll-margin-top:72px">
-    <div class="row" style="gap:10px;align-items:center;margin:0 0 10px">
-      <span class="t-xs dim2 num" style="width:22px">05</span>
-      <h2 style="margin:0;font-size:20px;font-weight:600">导出</h2>
-    </div>
-    <p>默认导到 <span class="mono">Downloads\dsh-etude\&lt;词&gt;-&lt;id&gt;\</span>。先清空目标目录，拷完拿副本再验一遍——两处都过了才算「已复验」。</p>
-  </section><section id="step-6" style="scroll-margin-top:72px">
-    <div class="row" style="gap:10px;align-items:center;margin:0 0 10px">
-      <span class="t-xs dim2 num" style="width:22px">06</span>
-      <h2 style="margin:0;font-size:20px;font-weight:600">开始练</h2>
-    </div>
-    <p>五面：听、说、读、写、改。每面给的东西不一样，灰掉不代表禁掉，是这一面不鼓励先看。</p>
-      <figure><div class="photo r16-9 "><img src="./assets/photos/p-coffee.jpg" alt="" loading="lazy"></div><figcaption>读：先给句子，想画面；翻开才给图和中文。</figcaption></figure>
-      <div class="row" style="gap:8px;margin-top:12px"><a href="./study.html" class="btn primary "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg><span>去练习</span></a><a href="./factory.html" class="btn ghost "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>回工厂</span></a></div>
-  </section></div>
-      </div>
+    </details>
+    <a class="mi" href="#sync">同步…<span class="sp"></span><span class="ext">未接</span></a>
+    <div class="msep"></div>
+    <a class="mi" href="./index.html" data-fade="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
+  </div>
+</details></div>
+  <nav class="tabs"><a class="" href="./cards.html">卡片</a><a class="" href="./factory.html">工厂</a><a class="" href="./stats.html">统计</a></nav>
+  <div class="tb-right"><button class="iconbtn" type="button" data-pal title="搜索 · Ctrl K"><svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="4.8"/><path d="M11.6 11.6L15.4 15.4"/></svg></button><a class="iconbtn" href="./settings.html" title="全局设置 · Ctrl Alt ,"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></a></div>
+</div>
+
+<main class="screen">
+  <header class="hdr">
+    <div><h1>教程</h1><div class="sub">这个插件为什么长成这样 · 读一遍大概四分钟</div></div>
+    <div class="act"><a class="btn ghost" href="./cards.html">回卡片</a></div>
+  </header>
+
+  <div class="docwrap">
+    <nav class="docnav">
+      <a href="#why">为什么是句子</a>
+      <a href="#face">五个面</a>
+      <a href="#day">一天怎么过</a>
+      <a href="#use">使用指南</a>
+      <a href="#privacy">隐私</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+
+    <article class="doc">
+      <h2 id="why">为什么不是「一个词八张卡」</h2>
+      <p>《学习观 07》把学一门外语拆成了八步。老插件只做到第 4 步的一半：给一个词造 8 条例句、配图、配语音，然后打包。第 5 步（打字）和第 7 步（说话）根本没有 —— 而把声音和意思连起来，恰恰发生在那两步。</p>
+      <p class="quote">学习原则：1. 明确任务的输入输出 2. 用例子重塑大脑连接</p>
+      <p>所以这里换了起点：<b>不是给一个词造八张卡，是给一句话派五个任务</b>。一句话配一个真实场景，五个面各自把「输入是什么、输出是什么」说清楚。读是英文进、画面出；打是意思进、拼写出；听是声音进、意思出；说是意思进、声音出；改是原句进、换词后的句子出。</p>
+
+      <h2 id="face">五个面，各有一条时间线</h2>
+      <ul>
+        <li><b>读</b> · 输入英文，输出画面。自评：想清楚了 / 没想清楚。别读出声。</li>
+        <li><b>打</b> · 给中文场景，打英文。逐词比对，错在哪标哪。</li>
+        <li><b>听</b> · 放语音，选意思是哪一个。没听懂可以再放，但别看字。</li>
+        <li><b>说</b> · 给中文场景，说出来。只录音、自己回放，<b>不判分</b> —— 判分只会让你想着躲开这一面。</li>
+        <li><b>改</b> · 给原句和换词要求，改完看意思变了没有。</li>
+      </ul>
+      <p>为什么五个面不合成一个「熟练度」：这句话我读得懂、但说不出来，是一个真实状态。合成一个数就看不见了。</p>
+
+      <h2 id="day">一天怎么过</h2>
+      <p>打开先看「卡片」：今天该练哪些面，是按每条线各自的到期日算出来的，不是随机的。等到期的先来，卡过次数多的往前排，新句子最后。一天十几分钟，练不完就顺延，不用补。</p>
+      <p>判定只有四种：过了升一档（1 → 2 → 4 → 8 → 16 → 32 天），想不起来但认得就留在原地，没过归零，跳过只推到明天。</p>
+
+      <h2 id="use">使用指南</h2>
+      <ul>
+        <li>句子从你看过的东西里挖：字幕、视频、贴一段文本。<b>别让模型编</b> —— 编出来的句子语法对、语域不对。</li>
+        <li>「收进来」之后它才进句库；素材文件删了也不影响练习记录。</li>
+        <li>快捷键可以在「全局设置 → 快捷键」里全改一遍。</li>
+        <li>停在某一面超过两秒会记「卡」；卡住次数只用来排序，不惩罚。</li>
+      </ul>
+
+      <h2 id="privacy">隐私</h2>
+      <p>练习账本就是一个 JSON 文件，在 <code>%LOCALAPPDATA%\dsh-etude-test\practice\ledger.json</code>。录音留在本机，不上传，不拿去训练。想搬走就整个目录拷过去。</p>
+
+      <h2 id="faq">常见问题</h2>
+      <ul>
+        <li><b>能不能只练一个面？</b> 能。句库里点某个面单独练，队列会按那个面排。</li>
+        <li><b>为什么说这一面没有分？</b> 因为自动打分不准，而人对着分练会变形。自己回放听得出来就行。</li>
+        <li><b>造卡那一块呢？</b> 这一版先做样子，模型那半还没接。</li>
+      </ul>
+    </article>
+  </div>
 </main>
-</div>
-</div>
-<div class="dlg" id="dlg-search" hidden role="dialog" aria-label="搜索">
-  <div class="dlg-bd" style="padding:14px">
-    <div class="input-ico"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><input class="input lg" placeholder="一个词、一条句子、一个场景，都能搜" autofocus></div>
-    <div class="mt12" style="display:flex;flex-direction:column;gap:2px">
-      <a class="picked on" href="./detail.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span><b style="color:var(--c-ink);font-weight:600">abandon</b> · The crew abandoned ship within minutes.</span></a>
-      <a class="picked" href="./library.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>abandon · 丢掉、放弃 · 3 条例句</span></a>
-      <a class="picked" href="./cards.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>牌组 · 影视对白</span></a>
-    </div>
-  </div>
-  <div class="dlg-ft"><span class="keys"><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> 选 <kbd class="kbd">↵</kbd> 打开 <kbd class="kbd">esc</kbd> 关</span></div>
-</div>
-<div class="scrim" id="scrim" hidden></div>
-</body>
-</html>
+</div><script>
+(function(){
+  var h = location.hash.replace('#','');
+  if (!h) return;
+  var el = document.getElementById(h);
+  if (el && el.tagName === 'DETAILS') el.open = true;
+  if (h === 'plugin') { var help = document.getElementById('help'); if (help) help.open = true; }
+})();
+</script></body></html>

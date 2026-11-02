@@ -1,67 +1,599 @@
 <!doctype html>
-<html lang="zh-CN" data-page="settings">
-<head>
+<html lang="zh-CN"><head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>卡片工厂</title>
-<link rel="stylesheet" href="./system.css?vmvzc4rgf">
-<script src="./ui.js?vmvzc4rgf" defer></script>
-</head>
-<body class="">
-<div class="app">
-<aside class="side">
-  <a class="brand" href="./cards.html" data-fade><span class="brand-mark">卡</span><span class="brand-txt"><span class="brand-name">卡片工厂</span><span class="brand-sub">dsh-etude · 0.2</span></span></a>
-  <nav class="nav"><p class="nav-g">造卡</p><a class="nav-i " href="./factory.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>工厂</span></a><a class="nav-i " href="./mine.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10.5h12M4 16h16M4 21h8"/></svg><span>挖句</span></a><p class="nav-g">卡片</p><a class="nav-i " href="./cards.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.8-9 4.8L3 7.8z"/><path d="M3 12.4l9 4.8 9-4.8"/><path d="M3 16.8l9 4.8 9-4.8"/></svg><span>卡组</span></a><a class="nav-i " href="./library.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg><span>句库</span></a><p class="nav-g">练习</p><a class="nav-i " href="./study.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5l11 6.5-11 6.5z"/></svg><span>学习</span><span class="n-tag">12</span></a><p class="nav-g">观察</p><a class="nav-i " href="./stats.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 20v-6M12 20V7M17 20v-9"/></svg><span>统计</span></a></nav>
-  <div class="side-foot">
-    <a class="nav-i " href="./tutorial.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v16.5H6.5A1.5 1.5 0 005 21z"/><path d="M5 17.2h14"/></svg><span>教程</span></a>
-    <a class="nav-i on" href="./settings.html" data-fade><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg><span>设置</span></a>
-    <a class="side-user" href="./settings.html#about" data-fade><span class="ava">HP</span><span class="u-txt"><span style="display:block;font-size:12.5px;color:var(--c-ink)">本机</span><span style="display:block;font-size:11px;color:var(--c-ink-3)">数据在本地</span></span></a>
-  </div>
-</aside>
-<div class="main">
-<header class="topbar">
-  <nav class="crumbs" aria-label="位置"><span class="cur">设置</span></nav>
-  <div class="topbar-r">
-    <button type="button" class="searchbox" data-open="dlg-search"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><span style="flex:1">搜索词、句子、场景…</span><kbd class="kbd">⌘K</kbd></button>
-    <button type="button" class="iconbtn " aria-label="快捷键" title="快捷键"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg></button>
-    <a class="iconbtn on" href="./settings.html" data-fade aria-label="设置" title="设置"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg></a>
-  </div>
-</header>
-<main class="page  ">
-<header class="ph">
-  <div class="ph-l">
-    <div class="ph-eyebrow">本机 · 0.2</div>
-    <h1>设置</h1>
-    <p class="ph-desc">改完就生效，没有保存按钮。</p>
-  </div>
-  <div class="ph-r"><button type="button" class="btn ghost "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 6.4M20 4.5V11h-6.5"/></svg><span>自检</span></button></div>
-</header><div class="set-shell"><nav class="set-nav"><div class="g"><span>界面</span><a href="#look" class="on" data-set="look"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M3.5 17l5-4.5 4 3.5 3-2.5 5 4"/></svg>外观</a><a href="#general" class="" data-set="general"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M18 8h2M4 16h4M12 16h8"/><circle cx="16" cy="8" r="2"/><circle cx="10" cy="16" r="2"/></svg>通用</a></div><div class="g"><span>能力</span><a href="#agent" class="" data-set="agent"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>能力</a><a href="#iface" class="" data-set="iface"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="3.6"/><path d="M11.6 12H21M17 12v3.5M20 12v3"/></svg>接口</a><a href="#tools" class="" data-set="tools"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5.5 13.5H11l-1 7.5L18 10.5h-5.5z"/></svg>工具</a></div><div class="g"><span>操作</span><a href="#keys" class="" data-set="keys"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>快捷键</a></div><div class="g"><span>其它</span><a href="#data" class="" data-set="data"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A2 2 0 015.5 5.5h3.7l2 2.4h7.3a2 2 0 012 2v7.6a2 2 0 01-2 2H5.5a2 2 0 01-2-2z"/></svg>数据</a><a href="#about" class="" data-set="about"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/></svg>关于</a></div></nav><div class="setbody"><section class="set-group on" data-group="look"><section class="card "><div class="card-bd "><div class="set-row"><span class="lb"><b>主题</b><small>跟着系统走，还是锁死一个</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="" data-v="浅色" aria-pressed="false">浅色</button><button type="button" class="on" data-v="深色" aria-pressed="true">深色</button><button type="button" class="" data-v="跟随系统" aria-pressed="false">跟随系统</button></div></span></div><div class="set-row"><span class="lb"><b>主色</b><small>只换强调色，不换中性色</small></span><span class="ct"><span class="swatches"><span class="swatch on" style="background:#a7bdf6" title="雾蓝" role="button" tabindex="0"><span>雾蓝</span></span><span class="swatch " style="background:#8fbfc4" title="青灰" role="button" tabindex="0"><span>青灰</span></span><span class="swatch " style="background:#9dbf9b" title="苔绿" role="button" tabindex="0"><span>苔绿</span></span><span class="swatch " style="background:#c4b28f" title="沙褐" role="button" tabindex="0"><span>沙褐</span></span><span class="swatch " style="background:#b9a6d6" title="藕紫" role="button" tabindex="0"><span>藕紫</span></span><span class="swatch " style="background:#d6a49a" title="砖红" role="button" tabindex="0"><span>砖红</span></span></span></span></div><div class="set-row"><span class="lb"><b>字体</b><small>句子用衬线，界面用无衬线</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="on" data-v="系统" aria-pressed="true">系统</button><button type="button" class="" data-v="MiSans" aria-pressed="false">MiSans</button><button type="button" class="" data-v="思源黑体" aria-pressed="false">思源黑体</button></div></span></div><div class="set-row"><span class="lb"><b>字号</b><small>只影响正文，不影响标题层级</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="" data-v="小" aria-pressed="false">小</button><button type="button" class="on" data-v="标准" aria-pressed="true">标准</button><button type="button" class="" data-v="大" aria-pressed="false">大</button><button type="button" class="" data-v="特大" aria-pressed="false">特大</button></div></span></div><div class="set-row"><span class="lb"><b>密度</b><small>每一行多高</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="" data-v="松" aria-pressed="false">松</button><button type="button" class="on" data-v="标准" aria-pressed="true">标准</button><button type="button" class="" data-v="紧" aria-pressed="false">紧</button></div></span></div><div class="set-row"><span class="lb"><b>动效</b><small>系统开了「减少动效」时自动关掉</small></span><span class="ct"><button type="button" class="sw " aria-checked="true" aria-label="开关"></button></span></div><div class="mt16"><div class="preview-box">
-            <span class="t-xs dim2">预览</span>
-            <p class="serif" style="font-size:22px;margin:6px 0 2px">The crew abandoned ship within minutes.</p>
-            <p class="dim" style="margin:0;font-size:13px">凌晨四点，货轮在雾里开始进水。船长在驾驶台下了最后一道命令。</p>
-          </div></div></div></section></section><section class="set-group " data-group="general"><section class="card "><div class="card-bd "><div class="set-row"><span class="lb"><b>学的语言</b><small>影响例句、场景和语音的选法</small></span><span class="ct"><div class="sel"><button type="button" class="sel-btn" aria-label="学习语言"><span class="v">English</span><svg viewBox="0 0 24 24" width="1em" height="1em" class="chev" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button><div class="sel-menu" role="listbox" hidden><button type="button" class="sel-opt on" data-v="en" data-label="English" role="option">English<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="ja" data-label="日本語" role="option">日本語<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="ko" data-label="한국어" role="option">한국어<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button></div></div></span></div><div class="set-row"><span class="lb"><b>界面语言</b><small>只换界面文字，不换内容</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="on" data-v="简体中文" aria-pressed="true">简体中文</button><button type="button" class="" data-v="English" aria-pressed="false">English</button></div></span></div><div class="set-row"><span class="lb"><b>每包条数</b><small>一次造几句。多了场景会重复</small></span><span class="ct"><div class="sel"><button type="button" class="sel-btn" aria-label="每包条数"><span class="v">8 句</span><svg viewBox="0 0 24 24" width="1em" height="1em" class="chev" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button><div class="sel-menu" role="listbox" hidden><button type="button" class="sel-opt " data-v="6" data-label="6 句" role="option">6 句<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt on" data-v="8" data-label="8 句" role="option">8 句<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="10" data-label="10 句" role="option">10 句<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button></div></div></span></div><div class="set-row"><span class="lb"><b>候选图上限</b><small>九宫格里最多放几张</small></span><span class="ct"><div class="sel"><button type="button" class="sel-btn" aria-label="候选图"><span class="v">9 张</span><svg viewBox="0 0 24 24" width="1em" height="1em" class="chev" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button><div class="sel-menu" role="listbox" hidden><button type="button" class="sel-opt on" data-v="9" data-label="9 张" role="option">9 张<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="6" data-label="6 张" role="option">6 张<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="12" data-label="12 张" role="option">12 张<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button></div></div></span></div><div class="set-row"><span class="lb"><b>造词时顺手备料</b><small>顺手找候选图和合成语音。关掉更快</small></span><span class="ct"><button type="button" class="sw " aria-checked="true" aria-label="开关"></button></span></div><div class="set-row"><span class="lb"><b>评完自动跳下一张</b><small>260 毫秒后切过去</small></span><span class="ct"><button type="button" class="sw " aria-checked="true" aria-label="开关"></button></span></div></div></section></section><section class="set-group " data-group="agent"><section class="card "><div class="card-bd "><div class="set-row"><span class="lb"><b>模型</b><small>造例句、判场景用它</small></span><span class="ct"><div class="sel"><button type="button" class="sel-btn" aria-label="模型"><span class="v">跟随 Harness 默认</span><svg viewBox="0 0 24 24" width="1em" height="1em" class="chev" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button><div class="sel-menu" role="listbox" hidden><button type="button" class="sel-opt on" data-v="default" data-label="跟随 Harness 默认" role="option">跟随 Harness 默认<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="fast" data-label="快模型（省）" role="option">快模型（省）<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt " data-v="strong" data-label="强模型（准）" role="option">强模型（准）<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button></div></div></span></div><div class="set-row"><span class="lb"><b>提示词版本</b><small>换版本会影响幂等键，等于重造</small></span><span class="ct"><span class="badge ">v3</span><span class="f-hint" style="margin-left:8px">HARD RULES 7 条 + 场景去重</span></span></div><div class="set-row"><span class="lb"><b>场景相似度阈值</b><small>超过就重试一次</small></span><span class="ct"><span class="num">0.86</span></span></div><div class="set-row"><span class="lb"><b>一次最多重试</b><small>仍不过就报错，不悄悄降级</small></span><span class="ct"><span class="num">1</span> 次</span></div></div></section></section><section class="set-group " data-group="iface"><section class="card "><header class="card-hd"><h2>语音</h2></header><div class="card-bd "><div class="set-row"><span class="lb"><b>引擎</b><small>auto 先试 OpenAI，失败退 Edge 并记下来</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="on" data-v="自动" aria-pressed="true">自动</button><button type="button" class="" data-v="Edge" aria-pressed="false">Edge</button><button type="button" class="" data-v="OpenAI 兼容" aria-pressed="false">OpenAI 兼容</button></div></span></div><div class="set-row"><span class="lb"><b>音色</b><small>Edge 零配置，装了就能用</small></span><span class="ct"><div class="sel"><button type="button" class="sel-btn" aria-label="音色"><span class="v">undefined</span><svg viewBox="0 0 24 24" width="1em" height="1em" class="chev" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg></button><div class="sel-menu" role="listbox" hidden><button type="button" class="sel-opt on" data-v="undefined" data-label="undefined" role="option">undefined<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt on" data-v="undefined" data-label="undefined" role="option">undefined<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt on" data-v="undefined" data-label="undefined" role="option">undefined<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button><button type="button" class="sel-opt on" data-v="undefined" data-label="undefined" role="option">undefined<svg viewBox="0 0 24 24" width="1em" height="1em" class="ck" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg></button></div></div></span></div><div class="set-row"><span class="lb"><b>语速</b><small>按句子长短微调 ±18%</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="" data-v="慢" aria-pressed="false">慢</button><button type="button" class="on" data-v="正常" aria-pressed="true">正常</button><button type="button" class="" data-v="快" aria-pressed="false">快</button></div></span></div><div class="set-row"><span class="lb"><b>音量</b><small>只对 Edge 生效</small></span><span class="ct"><div class="seg " role="group"><button type="button" class="" data-v="小" aria-pressed="false">小</button><button type="button" class="on" data-v="正常" aria-pressed="true">正常</button><button type="button" class="" data-v="大" aria-pressed="false">大</button></div></span></div></div></section><section class="card "><header class="card-hd"><h2>接口地址</h2><span class="card-sub">key 不放这里，只填环境变量名</span></header><div class="card-bd "><div class="field"><label>OpenAI 兼容地址</label><input class="input" value="https://api.openai.com/v1"><p class="f-hint">留空就用官方地址</p></div><div class="mt12"><div class="field"><label>key 的环境变量名</label><input class="input" value="OPENAI_API_KEY"><p class="f-hint">凭据由 Harness 保管；这里只写变量名</p></div></div><div class="mt12"><div class="field"><label>模型名</label><input class="input" value="tts-1"></div></div></div></section></section><section class="set-group " data-group="tools"><section class="card "><header class="card-hd"><h2>给智能体用的工具</h2><span class="card-sub">三个，够用了</span></header><div class="card-bd "><div class="tbl">
-        <div class="row" style="padding:10px 0;border-bottom:1px solid var(--c-line)"><span class="mono" style="font-size:12.5px;width:130px">etude_create</span><span class="dim" style="flex:1;font-size:12.5px">造一个卡片包，返回还要人做什么</span><button type="button" class="chip on ">开</button></div><div class="row" style="padding:10px 0;border-bottom:1px solid var(--c-line)"><span class="mono" style="font-size:12.5px;width:130px">etude_status</span><span class="dim" style="flex:1;font-size:12.5px">看某个包做到哪一步、还差什么</span><button type="button" class="chip on ">开</button></div><div class="row" style="padding:10px 0;border-bottom:1px solid var(--c-line)"><span class="mono" style="font-size:12.5px;width:130px">etude_pack</span><span class="dim" style="flex:1;font-size:12.5px">硬校验后打包，缺件就拒绝</span><button type="button" class="chip on ">开</button></div>
+<script>(function(){if(!/[?&]t=fade/.test(location.search))return;var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:2147483000;background:#04060d;opacity:1;pointer-events:none;transition:opacity .58s cubic-bezier(.22,.61,.36,1)";document.documentElement.appendChild(d);document.documentElement.classList.add("kf-in");function out(){document.documentElement.classList.add("kf-go");requestAnimationFrame(function(){requestAnimationFrame(function(){d.style.opacity="0";setTimeout(function(){d.remove()},700)})})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",out);else out()})();</script><title>卡片工厂-测试 · settings</title>
+<link rel="stylesheet" href="./app.css?v=vmvzanu97">
+<script src="./app.js?v=vmvzanu97"></script><script src="./app2.js?v=vmvzanu97"></script><script src="./stats.js?v=vmvzanu97"></script><script>(function(){var d=document.documentElement;d.classList.add("cv-js");var C=".card.stat";var done=new WeakSet();function play(el,first){if(!first){el.classList.remove("cv-play");el.classList.add("cv-reset");void el.offsetWidth;el.classList.remove("cv-reset");}else{el.classList.remove("cv-reset");}el.classList.add("cv-play");}function seen(en){var r=en.boundingClientRect,vh=window.innerHeight||d.clientHeight||800;var v=Math.min(r.bottom,vh)-Math.max(r.top,0);if(v<=0)return false;var need=Math.min(r.height||1,vh);if(v/need>=0.7)return true;return r.top<vh*0.35&&r.bottom>vh*0.35;}function boot(){var cards=[].slice.call(document.querySelectorAll(C));if(!cards.length)return;cards.forEach(function(el){el.classList.remove("cv-play")});var armed=new WeakMap();if("IntersectionObserver" in window){var io=new IntersectionObserver(function(entries){entries.forEach(function(en){var el=en.target;if(seen(en)){if(!armed.get(el)){armed.set(el,true);play(el,!done.has(el));done.add(el);}}else if(en.boundingClientRect.top>0){armed.set(el,false);}});},{threshold:[0,0.25,0.5,0.75,0.9,0.96,1]});cards.forEach(function(el){io.observe(el)});}else{cards.forEach(function(el){el.classList.add("cv-play")});}setTimeout(function(){cards.forEach(function(el){if(armed.get(el))return;var r=el.getBoundingClientRect(),vh=window.innerHeight||800;if(r.top<vh*0.92&&r.bottom>0){armed.set(el,true);play(el,!done.has(el));done.add(el);}});},260);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();function badge(){var b=document.createElement("button");b.id="animToggle";b.type="button";b.textContent="动画 · "+(localStorage.getItem("kf-anim")==="off"?"关":"开");b.style.cssText="position:fixed;right:16px;top:12px;z-index:9000;font:12px/1 ui-sans-serif,system-ui;color:var(--fg2);background:rgba(20,22,28,.86);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(8px)";if(localStorage.getItem("kf-anim")==="off")d.classList.add("cv-off");b.onclick=function(){var off=d.classList.toggle("cv-off");localStorage.setItem("kf-anim",off?"off":"on");b.textContent="动画 · "+(off?"关":"开");if(!off){[].forEach.call(document.querySelectorAll(C),function(el){play(el,!done.has(el));done.add(el)});}};document.body.appendChild(b);}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",badge);else badge();})();</script><script src="./transit.js?v=vmvzanu97"></script><script src="./smooth.js?v=vmvzanu97"></script><script src="./decks.js?v=vmvzanu97"></script><script src="./help.js?v=vmvzanu97"></script><script src="./pick.js?v=vmvzanu97"></script><script src="./palette.js?v=vmvzanu97"></script><script src="./factory.js?v=vmvzanu97"></script><script src="./fx.js?v=vmvzanu97"></script><script src="./rows.js?v=vmvzanu97"></script><script src="./bgrows.js?v=vmvzanu97"></script><script>
+/* 说明性小字一律收成一个 ?：页面里只留符号，原文塞进 .pop 里给 help.js 用 */
+(function () {
+  var n = 0
+  function run() {
+  var list = document.querySelectorAll('.fold')
+  for (var i = 0; i < list.length; i++) {
+    var p = list[i]
+    var text = (p.textContent || '').trim()
+    if (!text) { p.remove(); continue }
+    // 找这块的标题行：有就挂上去，标题行已经有一个 ? 就把文字并进去，别多长一个
+    var blk = p.closest('.fx-blk, .blk, .mcard, .card, .st-side')
+    var head = null
+    if (blk) {
+      var heads = blk.querySelectorAll('.fx-bh, .tl, .pw-hd, .side-h')
+      for (var h = 0; h < heads.length; h++) {
+        // 取「在它前面、离它最近」的那个标题行
+        if (heads[h].compareDocumentPosition(p) & 4) head = heads[h]
+      }
+    }
+    var footBlock = p.classList.contains('fx-foot')
+    if (footBlock) {
+      var defs = document.querySelectorAll('.fx-def')
+      head = defs.length ? defs[defs.length - 1] : null
+    }
+    var existing = head ? head.querySelector('.q[data-pop]') : null
+    if (existing) {
+      var pv = document.getElementById(existing.getAttribute('data-pop'))
+      if (pv) {
+        var add = document.createElement('p')
+        add.style.margin = '7px 0 0'
+        add.textContent = text
+        pv.appendChild(add)
+        p.remove()
+        continue
+      }
+    }
+    var id = 'fd' + (n++)
+    var pop = document.createElement('div')
+    pop.className = 'pop'
+    pop.id = id
+    pop.textContent = text
+    document.body.appendChild(pop)
+    var q = document.createElement('button')
+    q.type = 'button'
+    q.className = 'q'
+    q.setAttribute('data-pop', id)
+    q.textContent = '?'
+    if (head && (p.parentElement === blk || footBlock)) {
+      q.classList.add('hq')
+      head.appendChild(q)
+      p.remove()
+    } else {
+      p.replaceWith(q)
+    }
+  }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run)
+  else run()
+})()
+</script><script src="./rain.js?v=vmvzanu97"></script>
+</head><body>
+<canvas class="liquid" aria-hidden="true"></canvas>
+<canvas class="rain" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"><i></i><i></i></div>
+<div class="page">
+<div class="topbar">
+  <div class="tb-left"><details class="menu" id="plugin">
+  <summary class="tbtn"><svg viewBox="0 0 18 18"><rect x="3" y="3" width="5" height="5" rx="1.4"/><rect x="10" y="3" width="5" height="5" rx="1.4"/><rect x="3" y="10" width="5" height="5" rx="1.4"/><rect x="10" y="10" width="5" height="5" rx="1.4"/></svg>插件</summary>
+  <div class="menu-list">
+    <a class="mi" href="./tutorial.html">教程</a>
+    <a class="mi" href="https://github.com/" target="_blank" rel="noreferrer">社区<span class="sp"></span><span class="ext">↗</span></a>
+    <div class="msep"></div>
+    <a class="mi" href="#import">导入…<span class="sp"></span><span class="ext">.srt .txt</span></a>
+    <a class="mi" href="#export">导出…<span class="sp"></span><span class="ext">.json</span></a>
+    <div class="msep"></div>
+    <details class="sub" id="help">
+      <summary class="mi">帮助<span class="chev">›</span></summary>
+      <div class="menu-list">
+        <a class="mi" href="./tutorial.html#use">使用指南</a>
+        <a class="mi" href="https://github.com/whyao56/dsh-etude/issues" target="_blank" rel="noreferrer">报告问题<span class="ext" style="margin-left:auto">↗</span></a>
+        <a class="mi" href="#feedback">意见反馈</a>
+        <a class="mi" href="#diag">诊断<span class="sp"></span><span class="ext">看状态</span></a>
       </div>
-      <p class="f-hint mt12">机器跑出来的包在清单里写 <span class="mono">auto:not-human</span>，只能看效果，不算交付物。</p></div></section></section><section class="set-group " data-group="keys"><div class="set-sec"><header><h3>全局</h3></header><div class="set-rows"><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">搜索</b></span><span class="ct"><kbd class="kbd">Ctrl K</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">造新包</b></span><span class="ct"><kbd class="kbd">Ctrl N</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">关掉浮层</b></span><span class="ct"><kbd class="kbd">Esc</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">看快捷键</b></span><span class="ct"><kbd class="kbd">?</kbd></span></div></div></div><div class="set-sec"><header><h3>页面</h3></header><div class="set-rows"><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">去卡组</b></span><span class="ct"><kbd class="kbd">G C</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">去工厂</b></span><span class="ct"><kbd class="kbd">G F</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">去统计</b></span><span class="ct"><kbd class="kbd">G S</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">去句库</b></span><span class="ct"><kbd class="kbd">G L</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">去教程</b></span><span class="ct"><kbd class="kbd">G T</kbd></span></div></div></div><div class="set-sec"><header><h3>练习</h3></header><div class="set-rows"><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">翻开</b></span><span class="ct"><kbd class="kbd">space</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">评分</b></span><span class="ct"><kbd class="kbd">1 4</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">换词</b></span><span class="ct"><kbd class="kbd">J K</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">切面</b></span><span class="ct"><kbd class="kbd">← →</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">上一张/下一张</b></span><span class="ct"><kbd class="kbd">, .</kbd></span></div></div></div><div class="set-sec"><header><h3>音频</h3></header><div class="set-rows"><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">重放</b></span><span class="ct"><kbd class="kbd">R</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">循环</b></span><span class="ct"><kbd class="kbd">L</kbd></span></div><div class="set-row" style="padding:9px 0"><span class="lb"><b style="font-weight:400">调音量</b></span><span class="ct"><kbd class="kbd">− +</kbd></span></div></div></div></section><section class="set-group " data-group="data"><section class="card "><header class="card-hd"><h2>放在哪</h2><span class="card-sub">本机磁盘，没有云</span></header><div class="card-bd "><div class="field"><label>数据目录</label><input class="input" value="%LOCALAPPDATA%\dsh-etude"></div><div class="mt12"><div class="field"><label>导出目录</label><input class="input" value="Downloads\dsh-etude"></div></div><p class="f-hint mt12">索引在 <span class="mono">factory/library.json</span>。写文件一律先写临时文件再改名，中途断电不会写坏。</p></div></section><section class="card "><header class="card-hd"><h2>清理</h2></header><div class="card-bd "><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn ghost "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A2 2 0 015.5 5.5h3.7l2 2.4h7.3a2 2 0 012 2v7.6a2 2 0 01-2 2H5.5a2 2 0 01-2-2z"/></svg><span>打开目录</span></button><button type="button" class="btn ghost "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg><span>备份全部</span></button><button type="button" class="btn danger "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6 7l1 13h10l1-13"/></svg><span>清掉没锁定过的候选图</span></button></div>
-          <p class="f-hint mt12">清候选图不会动已经锁定的图，也不会动已经导出的包。</p></div></section></section><section class="set-group " data-group="about"><section class="card "><div class="card-bd "><div class="row" style="gap:14px;align-items:center">
-          <span class="brand-mark" style="width:44px;height:44px;font-size:19px">卡</span>
-          <div><div style="font-size:15px">卡片工厂</div><div class="t-xs dim2">dsh-etude 0.2 · 契约 card-pack v2</div></div>
-          <span class="spacer"></span><button type="button" class="btn ghost "><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 6.4M20 4.5V11h-6.5"/></svg><span>自检</span></button></div>
-        <div class="mt16"><div class="kv"><span class="k">契约版本</span><span class="v">card-pack v2（etude-lesson 只发警告）</span></div><div class="kv"><span class="k">校验器</span><span class="v">validate.js / validate.py 同源</span></div><div class="kv"><span class="k">语音</span><span class="v">Edge TTS 纯 JS · 逐字节对齐</span></div><div class="kv"><span class="k">许可</span><span class="v">MIT</span></div></div></div></section></section></div></div>
-</main>
+    </details>
+    <a class="mi" href="#sync">同步…<span class="sp"></span><span class="ext">未接</span></a>
+    <div class="msep"></div>
+    <a class="mi" href="./index.html" data-fade="./index.html">退出<span class="sp"></span><span class="ext">回启动页</span></a>
+  </div>
+</details></div>
+  <nav class="tabs"><a class="" href="./cards.html">卡片</a><a class="" href="./factory.html">工厂</a><a class="" href="./stats.html">统计</a></nav>
+  <div class="tb-right"><button class="iconbtn" type="button" data-pal title="搜索 · Ctrl K"><svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="4.8"/><path d="M11.6 11.6L15.4 15.4"/></svg></button><a class="iconbtn on" href="./settings.html" title="全局设置 · Ctrl Alt ,"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="2.6"/><path d="M9 2v2M9 14v2M2 9h2M14 9h2M4.2 4.2l1.4 1.4M12.4 12.4l1.4 1.4M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4"/></svg></a></div>
 </div>
-</div>
-<div class="dlg" id="dlg-search" hidden role="dialog" aria-label="搜索">
-  <div class="dlg-bd" style="padding:14px">
-    <div class="input-ico"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/></svg><input class="input lg" placeholder="一个词、一条句子、一个场景，都能搜" autofocus></div>
-    <div class="mt12" style="display:flex;flex-direction:column;gap:2px">
-      <a class="picked on" href="./detail.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span><b style="color:var(--c-ink);font-weight:600">abandon</b> · The crew abandoned ship within minutes.</span></a>
-      <a class="picked" href="./library.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>abandon · 丢掉、放弃 · 3 条例句</span></a>
-      <a class="picked" href="./cards.html" data-fade data-close><span class="ck"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span><span>牌组 · 影视对白</span></a>
+
+<main class="screen">
+  <header class="hdr">
+    <div><h1>全局设置</h1><div class="sub">卡片工厂-测试 · 0.1.0 · 本机<span class="setsec">· <span id="secname">外观</span></span></div></div>
+  </header>
+
+  <div class="setwrap">
+    <nav class="setnav">
+        <div class="glab">界面</div>
+        <a href="#appearance" data-sec="appearance" class="on">外观</a><a href="#general" data-sec="general" class="">通用</a>
+        <div class="glab">能力</div>
+        <a href="#interface" data-sec="interface" class="">接口</a><a href="#agent" data-sec="agent" class="">智能体</a><a href="#tools" data-sec="tools" class="">工具</a>
+        <div class="glab">操作</div>
+        <a href="#shortcuts" data-sec="shortcuts" class="">快捷键</a>
+        <div class="glab">其它</div>
+        <a href="#data" data-sec="data" class="">数据</a><a href="#about" data-sec="about" class="">关于</a>
+      </nav>
+    <div class="setbody">
+
+      <section class="group on" id="appearance">
+        <div class="ghead"><h2>外观</h2><span class="mut">只管这台机器上的样子</span></div>
+
+        <div class="field">
+          <div><div class="lab">主题</div><div class="desc">深色按雾蓝玻璃做；浅色是晨雾蓝，同一套，不另画。</div></div>
+          <div class="ctl"><span class="seg" data-set="theme"><span data-val="light">浅色</span><span class="on" data-val="dark">深色</span><span data-val="system">跟随系统</span></span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">主题配色</div><div class="desc">只换强调色和光晕，中性面不动 —— 换配色不该把整个界面染一遍。</div></div>
+          <div class="ctl">
+            <div class="swatches">
+              <div class="sw2 on" data-accent="mist"><i style="background:#97B1F0"></i><span>雾蓝</span></div>
+              <div class="sw2" data-accent="daiqing"><i style="background:#8CB9D7"></i><span>黛青</span></div>
+              <div class="sw2" data-accent="dusk"><i style="background:#B8ABD2"></i><span>暮紫</span></div>
+              <div class="sw2" data-accent="turquoise"><i style="background:#8DBEB7"></i><span>松石</span></div>
+              <div class="sw2" data-accent="amber"><i style="background:#CCAC87"></i><span>琥珀</span></div>
+              <div class="sw2" data-accent="graphite"><i style="background:#E5E8ED"></i><span>石墨</span></div>
+              <label class="sw2" data-accent="custom"><i style="background:linear-gradient(135deg,#97B1F0 50%,#BEAEDE 50%)"></i><input type="color" id="sw-custom" value="#97B1F0" title="挑一个颜色"><span>自定义</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">字体</div><div class="desc">正文一律系统无衬线；英文句子也不换衬线 —— 混排会变成拼盘。</div></div>
+          <div class="ctl"><span class="seg" data-set="font"><span class="on" data-val="system">系统默认</span><span data-val="misans">MiSans</span><span data-val="source">思源黑体</span></span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">字号</div><div class="desc">只缩放正文与句子，标题跟着按比例走。</div></div>
+          <div class="ctl"><span class="seg" data-set="size"><span data-val="sm">小</span><span class="on" data-val="std">标准</span><span data-val="lg">大</span><span data-val="xl">特大</span></span></div>
+          <div class="fprev">
+            <div class="f1">I'm afraid I succumbed to temptation.</div>
+            <div class="f2">周一早上十点，同事桌上的芝士蛋糕被你拿了一块。</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">缩放</div><div class="desc">整块界面等比缩放，不改变排版比例。</div></div>
+          <div class="ctl"><span class="stepper" data-stepper="zoom"><i data-step="-1">−</i><b>100%</b><i data-step="1">+</i></span></div>
+        </div>
+      </section>
+
+      <section class="group" id="general">
+        <div class="ghead"><h2>通用</h2></div>
+
+        <div class="field">
+          <div><div class="lab">语言</div><div class="desc">界面语言。英文之外的语言先占位。</div></div>
+          <div class="ctl"><span class="seg" data-set="lang"><span class="on" data-val="zh">简体中文</span><span data-val="en">English</span><span class="off">其他语言（未做）</span></span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">练完自动跳下一张</div><div class="desc">评完分就换下一句；关掉就留在这一句，自己按右下角「下一个」。</div></div>
+          <div class="ctl"><button class="sw on" type="button" id="sw-autonext"></button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">通知</div><div class="desc">到点提醒今天该练了；只在有到期卡片时才提醒。</div></div>
+          <div class="ctl"><span class="badge-ok"><i></i>开着</span><button class="btn ghost" data-modal="m-notify" type="button">设置</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">权限</div><div class="desc">麦克风（说这一面要录音）、读文件（导入字幕）。</div></div>
+          <div class="ctl"><span class="chip">麦克风 · 已允许</span><span class="chip">文件 · 已允许</span><button class="btn ghost" data-modal="m-perm" type="button">检查</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">隐私</div><div class="desc">录音只留在本机；不上传、不训练。账本就是一个 JSON。</div></div>
+          <div class="ctl"><button class="btn ghost" data-modal="m-privacy" type="button">细节</button></div>
+        </div>
+      </section>
+
+      <script>
+      (function () {
+        var b = document.getElementById('sw-autonext')
+        if (!b) return
+        var on = localStorage.getItem('kf-study:autonext') !== '0'
+        b.classList.toggle('on', on)
+        b.addEventListener('click', function () {
+          var v = !b.classList.contains('on')
+          b.classList.toggle('on', v)
+          try { localStorage.setItem('kf-study:autonext', v ? '1' : '0') } catch (e) {}
+        })
+      })()
+      </script>
+
+      <section class="group" id="interface">
+        <div class="ghead"><h2>接口</h2><span class="mut">常用的摆外面，细节折起来</span></div>
+
+        <div class="nowrow">
+          <div class="ncard">
+            <div class="nt">大模型</div>
+            <div class="nv">deepseek-chat</div>
+            <div class="nu">跟随会话 · 温度 0.7</div>
+            <button class="btn ghost">换</button>
+          </div>
+          <div class="ncard">
+            <div class="nt">语音</div>
+            <div class="nv">edge · Aria</div>
+            <div class="nu">en-US · 语速 +0%</div>
+            <button class="btn ghost">换</button>
+          </div>
+          <div class="ncard">
+            <div class="nt">图片</div>
+            <div class="nv">关</div>
+            <div class="nu">练习不用图，造卡也不配</div>
+            <button class="btn ghost">开</button>
+          </div>
+        </div>
+
+        <button class="foldrow" type="button" data-modal="m-model"><span>大模型</span><span class="fsum">跟随会话 · 不填 key 也能用</span><span class="chev">›</span></button>
+
+        <button class="foldrow" type="button" data-modal="m-voice"><span>语音</span><span class="fsum">edge · en-US-AriaNeural · +0%</span><span class="chev">›</span></button>
+
+        <button class="foldrow" type="button" data-modal="m-image"><span>图片</span><span class="fsum">关 · 练习不用图</span><span class="chev">›</span></button>
+
+        <button class="foldrow" type="button" data-modal="m-request"><span>请求</span><span class="fsum">直连 · 超时 60s · 重试 2 次</span><span class="chev">›</span></button>
+
+        <div class="field">
+          <div><div class="lab">连通性</div><div class="desc">最近一次：造句子调用成功 · 1.2 秒 · 用了 386 tokens。失败就直说原因，不糊。</div></div>
+          <div class="ctl"><span class="badge-ok"><i></i>正常 · 1.2s</span><button class="btn ghost">全部测一遍</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">配置随手带</div><div class="desc">把这一页的设置（不含 key）导出成一份 JSON，换机器导入回去。</div></div>
+          <div class="ctl"><button class="btn ghost">导出配置</button><button class="btn ghost">导入配置</button></div>
+        </div>
+      </section>
+
+      <section class="group" id="agent">
+        <div class="ghead"><h2>智能体</h2><span class="mut">让 DSH 直接读这个插件、改它、再接着迭代</span></div>
+
+        <div class="field">
+          <div><div class="lab">接入哪个 DSH</div><div class="desc">「跟随会话」就是此刻正在跟你说话的这个 —— 不用填地址、不用 token，插件把能力挂到已经开着的连接上。换机器或跑后台任务才用本机端口。</div></div>
+          <div class="ctl"><span class="seg"><span class="on">跟随会话</span><span>本机端口</span><span>手动</span></span><span class="badge-ok"><i></i>已连</span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">当前连接</div><div class="desc">会话 c14fed2f-df3a · 插件 dsh-etude-test 0.1.0 · RPC 通道 <b style="color:var(--fg2)">/etude-test</b> · 界面与 Agent 用同一套 handler</div></div>
+          <div class="ctl"><span class="chip">只读先开</span><span class="chip">写操作要确认</span></div>
+        </div>
+
+        <div class="field" style="padding-bottom:4px">
+          <div><div class="lab">给它哪些手</div><div class="desc">勾上的才出现在它的工具表里；关掉的动作它连名字都看不到，不是调了被拒。</div></div>
+          <div class="ctl"><span class="chip accent">默认 6 项</span></div>
+        </div>
+
+        <div class="perms">
+          <div class="perm"><span>读练习账本 · practice.summary</span><span class="sw on"><i></i></span></div><div class="perm"><span>改设置 · settings.patch</span><span class="sw on"><i></i></span></div><div class="perm"><span>改提示词模板 · prompt.write</span><span class="sw on"><i></i></span></div><div class="perm"><span>跑造卡任务 · factory.build</span><span class="sw on"><i></i></span></div><div class="perm"><span>导入字幕挖句 · source.import</span><span class="sw on"><i></i></span></div><div class="perm"><span>导出报告 · report.export</span><span class="sw on"><i></i></span></div><div class="perm"><span>改代码并重载 · plugin.patch</span><span class="sw"><i></i></span></div><div class="perm"><span>删数据 · data.reset</span><span class="sw"><i></i></span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">提示词模板</div><div class="desc">造句子、补中文场景、写英英释义各一份。它改完要保存成新版本，旧的留着能回滚。</div></div>
+          <div class="ctl"><span class="chip">system v3</span><span class="chip">造句 v5</span><span class="chip">场景 v2</span><button class="btn ghost">编辑</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">让它自己看一遍</div><div class="desc">跑一遍体检：账本有没有坏句子、模板有没有自相矛盾、哪些面一直卡住。产出的是清单，不直接动手改。</div></div>
+          <div class="ctl"><button class="btn ghost">开始体检</button><button class="btn primary">看上次的 3 条建议</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">按建议改</div><div class="desc">打开后它可以直接改配置和模板，改之前自动存一份；代码改动一律要你点头。</div></div>
+          <div class="ctl"><span class="chip">改配置 · 自动存</span><span class="chip">改代码 · 要确认</span><span class="sw on"><i></i></span></div>
+        </div>
+
+        <div class="field" style="display:block">
+          <div class="lab" style="margin-bottom:6px">最近动过什么</div>
+          <button class="foldrow" type="button" data-modal="m-log"><span>23:41 改模板 · 22:06 改配置 · 21:58 体检</span><span class="fsum">4 条</span><span class="chev">›</span></button>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">安全</div><div class="desc">只认本机回环；写操作逐次确认；每次改动前自动备份，出问题一键回到上一版。</div></div>
+          <div class="ctl"><span class="chip">仅本机</span><span class="chip">改前备份</span><button class="btn ghost">回到上一版</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">给它的说明书</div><div class="desc">一份契约文件，写清每个动作的入参出参和边界。它读这个就知道能做什么、不能做什么。</div></div>
+          <div class="ctl"><button class="btn ghost">打开工具表</button><button class="btn ghost">导出契约</button><button class="btn ghost">复制提示词</button></div>
+        </div>
+      </section>
+
+      <section class="group" id="tools">
+        <div class="ghead"><h2>工具</h2></div>
+
+        <div class="field">
+          <div><div class="lab">个性化</div><div class="desc">每天多少分钟、每天放几个新说法、练的时候出不出声、说这一面要不要计时。</div></div>
+          <div class="ctl"><span class="chip">12 分钟</span><span class="chip">2 个说法</span><span class="chip">出声</span><button class="btn ghost" data-modal="m-personal" type="button">调整</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">造卡默认</div><div class="desc">一个说法造几句、每句几种中文说法、要不要顺手把候选图配齐。</div></div>
+          <div class="ctl"><span class="chip">4 句</span><span class="chip">3 种说法</span><span class="chip">配图 关</span><button class="btn ghost" data-modal="m-card" type="button">调整</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">素材</div><div class="desc">导入的字幕放哪、挖出来的句子是先进草稿还是直接进句库。</div></div>
+          <div class="ctl"><span class="chip">先进草稿</span><button class="btn ghost" data-modal="m-source" type="button">调整</button><button class="btn ghost">打开目录</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">实验</div><div class="desc">还没做完的开关放这里，默认全关；开了出问题不用报，直接关掉。</div></div>
+          <div class="ctl"><button class="btn ghost" data-modal="m-exp" type="button">看看有哪些</button></div>
+        </div>
+      </section>
+
+      <section class="group" id="shortcuts">
+        <div class="ghead"><h2>快捷键</h2><span class="mut">27 个动作 · 分 6 组 · 全部可改</span></div>
+
+        <div class="field" style="padding:12px 0 6px">
+          <div class="ksearch"><svg viewBox="0 0 18 18"><circle cx="8" cy="8" r="4.8"/><path d="M11.6 11.6L15.4 15.4"/></svg><span>搜动作或键位…</span><span class="kbd" style="margin-left:auto">Ctrl F</span></div>
+          <div class="ctl"><button class="btn ghost">恢复默认</button></div>
+        </div>
+
+        <div class="kgroups">
+          <div class="kgrp">
+            <div class="kgh"><span>全局</span><span class="mut">4</span></div>
+            <div class="krow"><span>打开全局搜索</span><span class="kbd kb" title="点一下就能改">Ctrl K</span></div><div class="krow"><span>打开全局设置</span><span class="kbd kb" title="点一下就能改">Ctrl Alt ,</span></div><div class="krow"><span>打开当前页设置</span><span class="kbd kb" title="点一下就能改">Ctrl ,</span></div><div class="krow"><span>退出当前流程</span><span class="kbd kb" title="点一下就能改">Esc</span></div>
+          </div><div class="kgrp">
+            <div class="kgh"><span>页面</span><span class="mut">5</span></div>
+            <div class="krow"><span>打开「卡片」</span><span class="kbd kb" title="点一下就能改">Ctrl 1</span></div><div class="krow"><span>打开「工厂」</span><span class="kbd kb" title="点一下就能改">Ctrl 2</span></div><div class="krow"><span>当前页搜索</span><span class="kbd kb" title="点一下就能改">Ctrl F</span></div><div class="krow"><span>关闭当前标签页</span><span class="kbd kb" title="点一下就能改">Ctrl W</span></div><div class="krow"><span>下一个标签页</span><span class="kbd kb" title="点一下就能改">Ctrl Tab</span></div>
+          </div><div class="kgrp">
+            <div class="kgh"><span>练习</span><span class="mut">6</span></div>
+            <div class="krow"><span>显示答案</span><span class="kbd kb" title="点一下就能改">Space</span></div><div class="krow"><span>语音录制开关</span><span class="kbd kb" title="点一下就能改">Ctrl R</span></div><div class="krow"><span>搁置（今天不再出现，明天自动回来）</span><span class="kbd kb" title="点一下就能改">Shift S</span></div><div class="krow"><span>暂停（无限期，必须手动解除）</span><span class="kbd kb" title="点一下就能改">Shift P</span></div><div class="krow"><span>重置（进度清零）</span><span class="kbd kb" title="点一下就能改">Shift R</span></div><div class="krow"><span>信息（模板·历史·当前间隔·难度）</span><span class="kbd kb" title="点一下就能改">I</span></div>
+          </div><div class="kgrp">
+            <div class="kgh"><span>评级</span><span class="mut">5</span></div>
+            <div class="krow"><span>重来</span><span class="kbd kb" title="点一下就能改">1</span></div><div class="krow"><span>困难</span><span class="kbd kb" title="点一下就能改">2</span></div><div class="krow"><span>良好</span><span class="kbd kb" title="点一下就能改">3</span></div><div class="krow"><span>简单</span><span class="kbd kb" title="点一下就能改">4</span></div><div class="krow"><span>撤销上一次评分</span><span class="kbd kb" title="点一下就能改">Ctrl Z</span></div>
+          </div><div class="kgrp">
+            <div class="kgh"><span>音频</span><span class="mut">4</span></div>
+            <div class="krow"><span>重播音频</span><span class="kbd kb" title="点一下就能改">Ctrl Space</span></div><div class="krow"><span>暂停音频</span><span class="kbd kb" title="点一下就能改">Ctrl .</span></div><div class="krow"><span>录制自己的声音</span><span class="kbd kb" title="点一下就能改">Ctrl Shift R</span></div><div class="krow"><span>重播自己的声音</span><span class="kbd kb" title="点一下就能改">Ctrl Shift P</span></div>
+          </div><div class="kgrp">
+            <div class="kgh"><span>编辑</span><span class="mut">3</span></div>
+            <div class="krow"><span>加粗</span><span class="kbd kb" title="点一下就能改">Ctrl B</span></div><div class="krow"><span>标记</span><span class="kbd kb" title="点一下就能改">Ctrl M</span></div><div class="krow"><span>删除</span><span class="kbd kb" title="点一下就能改">Del</span></div>
+          </div>
+        </div>
+        <div class="keyhint">点键位直接按新键，Esc 取消；撞车会当场标红让你二选一。</div>
+        <button class="foldrow" type="button" data-modal="m-shortcut"><span>没有你想要的快捷键？</span><span class="fsum">去 DSH 加一个</span><span class="plus">＋</span></button>
+      </section>
+
+      <section class="group" id="data">
+        <div class="ghead"><h2>数据</h2><span class="mut">账本 · 素材 · 音频</span></div>
+
+        <div class="field">
+          <div><div class="lab">数据备份与恢复</div><div class="desc">导出一份账本 + 素材清单；换机器时导入回去。</div></div>
+          <div class="ctl"><button class="btn ghost">备份</button><button class="btn ghost">恢复</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">数据目录</div><div class="desc">%LOCALAPPDATA%\dsh-etude-test\ · 当前 4.2 MB</div></div>
+          <div class="ctl"><button class="btn ghost">打开目录</button><button class="btn ghost" data-modal="m-datadir" type="button">更改存放位置</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">清除缓存</div><div class="desc">只清合成的音频，账本和句子不动；清完还能重新合成。</div></div>
+          <div class="ctl"><span class="chip">可清 1.8 MB</span><button class="btn ghost">清除</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">迁移数据</div><div class="desc">把整个数据目录搬到别处，路径记住，下次还从这个位置读。</div></div>
+          <div class="ctl"><button class="btn ghost" data-modal="m-datadir" type="button">改到这里</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">导入 / 导出</div><div class="desc">导入字幕或别人的账本；导出成 JSON 或一份可读的清单。</div></div>
+          <div class="ctl"><button class="btn ghost">导入</button><button class="btn ghost">导出</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab danger">重置数据</div><div class="desc">进度清零，句子、素材、音频全部删掉。删除不可撤销 —— 先做一次备份。</div></div>
+          <div class="ctl"><button class="btn ghost danger">重置…</button></div>
+        </div>
+      </section>
+
+      <section class="group" id="about">
+        <div class="ghead"><h2>关于</h2></div>
+
+        <div class="field">
+          <div><div class="lab">版本</div><div class="desc">卡片工厂-测试 0.1.0 · 后端账本已跑通，界面还没接</div></div>
+          <div class="ctl"><span class="chip">0.1.0</span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">检查更新</div><div class="desc">目前是本地插件，没有发布渠道，检查更新先留位。</div></div>
+          <div class="ctl"><button class="btn ghost">检查</button></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">自动检查更新</div><div class="desc">每次启动查一次；没有渠道时不发请求。</div></div>
+          <div class="ctl"><span class="sw"><i></i></span></div>
+        </div>
+
+        <div class="field">
+          <div><div class="lab">项目地址</div><div class="desc">github.com/whyao56/dsh-etude</div></div>
+          <div class="ctl"><a class="btn ghost" href="https://github.com/whyao56/dsh-etude" target="_blank" rel="noreferrer">打开</a></div>
+        </div>
+      </section>
+
     </div>
   </div>
-  <div class="dlg-ft"><span class="keys"><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> 选 <kbd class="kbd">↵</kbd> 打开 <kbd class="kbd">esc</kbd> 关</span></div>
-</div>
-<div class="scrim" id="scrim" hidden></div>
-</body>
-</html>
+
+      <!-- ── 设置里的弹窗（一）── -->
+      <div class="mask" id="m-notify" hidden><div class="sheet sm">
+        <div class="shead"><h3>通知</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">到点提醒</div><div class="sd">每天 21:00 提醒一次；今天已经练过就不响。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">只在有到期卡片时提醒</div><div class="sd">没有到期的面就安静，不为了刷存在感发通知。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">连续 3 天没练再催</div><div class="sd">断一天不算断，第三天开始每天一次。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">声音</div><div class="sd">系统提示音；关掉就只剩一条角标。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+          <div class="snote">通知由操作系统发出，这里只负责到点。系统那边关掉了这里也不报错。</div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">关掉</button><button class="btn primary" data-close type="button">知道了</button></div>
+      </div></div>
+
+      <div class="mask" id="m-perm" hidden><div class="sheet">
+        <div class="shead"><h3>权限</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">麦克风</div><div class="sd">只在「说」这一面录音；松手就停，不后台录。</div></div><div class="sr"><span class="badge-ok"><i></i>已允许</span></div></div>
+          <div class="srow"><div><div class="sl">读文件</div><div class="sd">导入字幕、读素材目录；只读你选中的，不扫盘。</div></div><div class="sr"><span class="badge-ok"><i></i>已允许</span></div></div>
+          <div class="srow"><div><div class="sl">写文件</div><div class="sd">写数据目录、导出卡片包到下载目录。</div></div><div class="sr"><span class="badge-ok"><i></i>已允许</span></div></div>
+          <div class="srow"><div><div class="sl">剪贴板</div><div class="sd">「复制提示词」用；不读剪贴板里的内容。</div></div><div class="sr"><span class="chip">按需请求</span></div></div>
+          <div class="srow"><div><div class="sl">网络</div><div class="sd">造句子、合成语音、找图；走你填的代理。</div></div><div class="sr"><span class="badge-ok"><i></i>已允许</span></div></div>
+          <div class="srow"><div><div class="sl">开机自启</div><div class="sd">关着。插件不该自己开机。</div></div><div class="sr"><span class="chip">关</span></div></div>
+          <div class="snote">权限是系统的事，这里只把「拿它做什么」讲清楚。</div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">关掉</button><button class="btn primary" id="perm-check" type="button">重新检查</button></div>
+      </div></div>
+
+      <div class="mask" id="m-privacy" hidden><div class="sheet">
+        <div class="shead"><h3>隐私</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">存在本机的</div><div class="sd">练习账本（一个 JSON）、导入的字幕原文、合成出来的音频、你自己录的音。</div></div></div>
+          <div class="srow"><div><div class="sl">不做的</div><div class="sd">不上传账本、不拿你的句子训练、不做使用统计。接口页填的 key 只写在本机配置里。</div></div></div>
+          <div class="srow"><div><div class="sl">会出网的只有</div><div class="sd">造句子（发目标词和提示词）、合成语音（发句子文本）、找图（发关键词）。都不带练习记录。</div></div></div>
+          <div class="srow"><div><div class="sl">删起来多干净</div><div class="sd">删数据目录就是全没了；没有云端副本，也没有埋在别处的回收站。</div></div></div>
+          <div class="snote">现在的位置：<b>%LOCALAPPDATA%/dsh-etude-test/</b></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">关掉</button><button class="btn primary" data-close type="button">知道了</button></div>
+      </div></div>
+
+      <div class="mask" id="m-model" hidden><div class="sheet">
+        <div class="shead"><h3>大模型</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">服务商</div><div class="sd">留「跟随会话」就借当前对话的模型，不额外填 key。</div></div><div class="sr"><span class="seg"><span class="on">跟随会话</span><span>DeepSeek</span><span>OpenAI 兼容</span><span>自定义</span></span></div></div>
+          <div class="srow"><div><div class="sl">Base URL</div><div class="sd">OpenAI 兼容格式，带不带 /v1 都认。</div></div><div class="sr"><span class="inp wide">api.deepseek.com/v1</span></div></div>
+          <div class="srow"><div><div class="sl">API Key</div><div class="sd">只存本机；显示时打码到后四位。</div></div><div class="sr"><span class="inp">sk-••••••4f2c</span><button class="btn ghost" type="button">显示</button></div></div>
+          <div class="srow"><div><div class="sl">模型</div><div class="sd">造句子用便宜的就够；补场景和英英释义建议强一点。</div></div><div class="sr"><span class="inp">deepseek-chat</span><span class="chip">温度 0.7</span></div></div>
+          <div class="srow"><div><div class="sl">深度思考</div><div class="sd">开着更准也更慢；批量造卡建议关。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn ghost" data-close type="button">测一下</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <div class="mask" id="m-voice" hidden><div class="sheet sm">
+        <div class="shead"><h3>语音</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">引擎</div><div class="sd">Edge 不要 key；OpenAI 兼容要 base + key。</div></div><div class="sr"><span class="seg"><span class="on">Edge</span><span>OpenAI</span><span>本地</span></span></div></div>
+          <div class="srow"><div><div class="sl">音色</div><div class="sd">en-US · Aria，女声，最像真人。</div></div><div class="sr"><span class="inp">en-US-AriaNeural</span></div></div>
+          <div class="srow"><div><div class="sl">语速</div><div class="sd">按引擎换算：Edge 用 rate，OpenAI 用 speed。</div></div><div class="sr"><span class="chip">+0%</span></div></div>
+          <div class="srow"><div><div class="sl">优先原声</div><div class="sd">字幕能抠出原声就用原声，抠不出来才合成。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn ghost" data-close type="button">试听</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <div class="mask" id="m-image" hidden><div class="sheet sm">
+        <div class="shead"><h3>图片</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">来源</div><div class="sd">练习不用图；造卡时用图库检索，不是生图。</div></div><div class="sr"><span class="seg"><span class="on">关</span><span>图库</span><span>自定义</span></span></div></div>
+          <div class="srow"><div><div class="sl">像素预检</div><div class="sd">48×48 上算方差、二阶差分、唯一色占比，糊图不进候选。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">每句候选数</div><div class="sd">挑图时一次给几张。</div></div><div class="sr"><span class="chip">9 张</span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <div class="mask" id="m-request" hidden><div class="sheet sm">
+        <div class="shead"><h3>请求</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">代理</div><div class="sd">不走就留空；走就填 http://127.0.0.1:7897。</div></div><div class="sr"><span class="inp">（空）</span></div></div>
+          <div class="srow"><div><div class="sl">超时</div><div class="sd">到点就断，不无限等。</div></div><div class="sr"><span class="chip">60s</span></div></div>
+          <div class="srow"><div><div class="sl">重试</div><div class="sd">只重试网络层失败，不重试「答得不好」。</div></div><div class="sr"><span class="chip">2 次</span></div></div>
+          <div class="srow"><div><div class="sl">并发</div><div class="sd">同时发几个请求；网络差就降到 1。</div></div><div class="sr"><span class="chip">2</span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <!-- ── 设置里的弹窗（二）── -->
+      <div class="mask" id="m-log" hidden><div class="sheet">
+        <div class="shead"><h3>最近动过什么</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">23:41 · 改模板</div><div class="sd">把「造句」模板的「一条一句」换成「一条一个场景」。旧版本留着，能回滚。</div></div><div class="sr"><span class="chip">模板 v5</span></div></div>
+          <div class="srow"><div><div class="sl">22:06 · 改配置</div><div class="sd">每天新句上限 3 → 2，理由写在建议里：「连续三天练不完，先降量」。</div></div><div class="sr"><span class="chip">配置</span></div></div>
+          <div class="srow"><div><div class="sl">21:58 · 体检</div><div class="sd">37 句里有 2 句场景是编的，标了待换；没有直接改。</div></div><div class="sr"><span class="chip">只报告</span></div></div>
+          <div class="srow"><div><div class="sl">21:40 · 你说的话</div><div class="sd">「别把读这一面变成精读」—— 已记进提示词模板的偏好段。</div></div><div class="sr"><span class="chip">偏好</span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">关掉</button><button class="btn primary" data-close type="button">回到上一版</button></div>
+      </div></div>
+
+      <div class="mask" id="m-personal" hidden><div class="sheet sm">
+        <div class="shead"><h3>个性化</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">每天练多久</div><div class="sd">到点提醒，练不完就顺延。</div></div><div class="sr"><span class="chip">12 分钟</span></div></div>
+          <div class="srow"><div><div class="sl">每天放几个新说法</div><div class="sd">超了当天不再给新词。</div></div><div class="sr"><span class="chip">2 个</span></div></div>
+          <div class="srow"><div><div class="sl">练的时候出声</div><div class="sd">关掉就只做读、打、听。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">说这一面计时</div><div class="sd">只记时长，不判分。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <div class="mask" id="m-card" hidden><div class="sheet sm">
+        <div class="shead"><h3>造卡默认</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">一个说法造几句</div><div class="sd">少于 3 句场景不够用。</div></div><div class="sr"><span class="chip">4 句</span></div></div>
+          <div class="srow"><div><div class="sl">每句几种中文说法</div><div class="sd">听这一面要用它做干扰项。</div></div><div class="sr"><span class="chip">3 种</span></div></div>
+          <div class="srow"><div><div class="sl">顺手配候选图</div><div class="sd">练习不用图，只在导出卡片包时才需要。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">造完自动合成语音</div><div class="sd">还没配语音的句子一起补上。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <div class="mask" id="m-source" hidden><div class="sheet sm">
+        <div class="shead"><h3>素材</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">导入的字幕放哪</div><div class="sd">跟数据目录一起走，默认在 sources/。</div></div><div class="sr"><button class="btn ghost" type="button">打开目录</button></div></div>
+          <div class="srow"><div><div class="sl">挖出来的句子</div><div class="sd">先进草稿，你点头才进句库。</div></div><div class="sr"><span class="seg"><span class="on">先进草稿</span><span>直接进句库</span></span></div></div>
+          <div class="srow"><div><div class="sl">同一个说法不重复收</div><div class="sd">再遇到就算这张卡的一个新场景。</div></div><div class="sr"><span class="sw on"><i></i></span></div></div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" data-close type="button">存下</button></div>
+      </div></div>
+
+      <div class="mask" id="m-exp" hidden><div class="sheet sm">
+        <div class="shead"><h3>实验</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">影子跟读</div><div class="sd">原句播一遍，你跟着念；不判分，只记录。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">阶梯改成 1.3 倍</div><div class="sd">1/2/4/8/16/32 换成更陡的一档试试。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+          <div class="srow"><div><div class="sl">读这一面加计时</div><div class="sd">超过 8 秒算没想清楚。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+          <div class="snote">开了出问题不用报，直接关掉。</div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">关掉</button></div>
+      </div></div>
+
+      <div class="mask" id="m-datadir" hidden><div class="sheet">
+        <div class="shead"><h3>改数据存放位置</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">现在的位置</div><div class="sd">%LOCALAPPDATA%/dsh-etude-test/ · 当前 4.2 MB</div></div></div>
+          <div class="srow"><div><div class="sl">新的位置</div><div class="sd">换了之后账本、素材、音频一起搬过去。</div></div>
+            <div class="sr"><span class="inp wide" contenteditable="true">D:/卡片工厂数据</span><button class="btn ghost" type="button">选择…</button></div></div>
+          <div class="srow"><div><div class="sl">搬完删掉旧目录</div><div class="sd">确认新位置能读能写再删；不确认不删。</div></div><div class="sr"><span class="sw"><i></i></span></div></div>
+          <div class="snote">路径会记住；下次启动直接从新位置读。</div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" id="dd-go" type="button">改到这里</button></div>
+      </div></div>
+
+      <div class="mask" id="m-shortcut" hidden><div class="sheet">
+        <div class="shead"><h3>没有你想要的快捷键？</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="snote" style="padding-top:0">下面这段是给 DeepSeek Harness 的提示词。点「去 DSH 说」会开一个新会话，提示词已经带过去。</div>
+          <pre class="prompt" id="sc-prompt">我想给「卡片工厂」加一个快捷键动作。
+
+- 插件：dsh-etude-test（F:/dsharness/dsh-etude-test）
+- 界面：mock/ 下的静态稿；按键绑定在 app.js，页面由 gen.mjs 生成
+- 要加的动作：「____」（写清楚在哪一页生效、按下去做什么）
+- 键位：留空就你自己挑，避开已经用掉的 Ctrl K / Ctrl F / Space / 1–4 / Esc
+- 改完要：① 加进 KEYS_GROUPS 对应分组 ② 真正绑上事件 ③ 在快捷键页能看到
+- 别动其它东西；改完告我改了哪几行
+
+先读 gen.mjs 和 app.js，再动手。</pre>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn ghost" id="sc-copy" type="button">复制提示词</button><a class="btn primary" href="http://127.0.0.1:13129/" target="_blank" rel="noreferrer">去 DSH 说</a></div>
+      </div></div>
+
+      <div class="mask" id="m-custom" hidden><div class="sheet sm">
+        <div class="shead"><h3>自定义配色</h3><button class="x" data-close type="button">✕</button></div>
+        <div class="sbody">
+          <div class="srow"><div><div class="sl">强调色</div><div class="sd">你只挑一个色，深色版和浅色版自动调出来，不用配四份。</div></div>
+            <div class="sr picker"><input type="color" id="ac-pick" value="#97B1F0"><span class="chip" id="ac-val">#97B1F0</span></div></div>
+          <div class="srow"><div><div class="sl">预览</div><div class="sd">主按钮、选中项、进度环都用这一个色。</div></div>
+            <div class="sr"><button class="btn primary" type="button" style="pointer-events:none">开始 · 12 分钟</button></div></div>
+          <div class="snote">中性面（背景、卡片、文字）永远不动 —— 换配色不该把整个界面染一遍。</div>
+        </div>
+        <div class="sfoot"><button class="btn ghost" data-close type="button">取消</button><button class="btn primary" id="ac-go" type="button">用这个色</button></div>
+      </div></div>
+
+</main>
+</div></body></html>
