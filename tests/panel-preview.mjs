@@ -136,6 +136,24 @@ const moduleExports = captured.factory((name) => {
 })
 
 // ── 会记账的 ctx ────────────────────────────────────────────────────────────
+const CONFIG_VALUE = {
+  ttsEngine: 'auto',
+  ttsVoiceEdge: 'en-US-AriaNeural',
+  rate: '+10%',
+  volume: '+10%',
+  examplesPerLesson: 8,
+  candidateLimit: 9,
+  exportDir: 'D:\\Downloads\\dsh-etude',
+  dataDir: 'C:\\Users\\HP\\AppData\\Local\\dsh-etude',
+  proxyUrl: 'http://127.0.0.1:7897',
+}
+
+const CONFIG_FORM = {
+  getSnapshot: () => ({ status: 'ready', value: CONFIG_VALUE }),
+  subscribe: () => () => {},
+  mutate: async () => {},
+}
+
 const registrations = []
 const state = { rpc: async () => ({ ok: true, value: {} }), width: 1280 }
 
@@ -146,6 +164,15 @@ const ctx = {
   },
   get(name) {
     if (name === 'connection') return { rpc: { call: (...args) => state.rpc(...args) } }
+    if (name === 'configForms') {
+      return {
+        get: () => CONFIG_FORM,
+        whileServed: (keys, fn) => {
+          const dispose = fn()
+          return typeof dispose === 'function' ? dispose : () => {}
+        },
+      }
+    }
     return undefined
   },
   locale: { register: () => {}, bind: () => (key) => key },
@@ -246,6 +273,10 @@ function attrsOf(props) {
   ]) {
     if (props[key] !== undefined && props[key] !== null) out.push(`${key}="${esc(props[key])}"`)
   }
+  // React 的 defaultValue 在 HTML 里就是 value；不转一下的话，配置卡上的输入框全是空的。
+  if (props.defaultValue !== undefined && props.defaultValue !== null)
+    out.push(`value="${esc(props.defaultValue)}"`)
+  if (props.defaultChecked) out.push('checked')
   if (props.disabled) out.push('disabled')
   return out.length ? ' ' + out.join(' ') : ''
 }
@@ -413,6 +444,12 @@ const frames = [
     },
   },
   {
+    name: 'panel-config',
+    label: '配置卡（插件设置页）',
+    props: { form: CONFIG_FORM, view: 'page' },
+    componentName: 'plugins.bundle.config',
+  },
+  {
     name: 'panel-empty',
     label: '一个新包也没有',
     rpc: async () => ({
@@ -464,7 +501,10 @@ input, select, textarea { font-family: inherit; }
 await mkdir(outDir, { recursive: true })
 for (const frame of frames) {
   state.rpc = frame.rpc
-  const html = await renderOnce(main, frame.props ?? { size: 18 })
+  const component = frame.componentName
+    ? registrations.find((one) => one.declaration.name === frame.componentName)?.component
+    : main
+  const html = await renderOnce(component, frame.props ?? { size: 18 })
   const page = `<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
 <title>${frame.label} · 卡片工厂面板</title>

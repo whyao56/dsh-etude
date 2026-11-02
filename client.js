@@ -413,6 +413,23 @@ window.__ModuleLoader__.load({
         objectFit: 'cover',
         display: 'block',
       },
+      cfgWrap: { display: 'flex', flexDirection: 'column', gap: 14, padding: '2px 0 10px' },
+      cfgGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        padding: '14px 16px',
+        border: `1px solid ${line.a}`,
+        borderRadius: radius.md,
+        background: surf.b,
+        minWidth: 0,
+      },
+      cfgHead: {
+        fontSize: 11,
+        letterSpacing: '.07em',
+        textTransform: 'uppercase',
+        color: ink.c,
+      },
       gridHead: {
         gridColumn: '1 / -1',
         fontSize: 11.5,
@@ -2345,7 +2362,7 @@ window.__ModuleLoader__.load({
       const field = (label, key, options) =>
         React.createElement(
           'label',
-          { key, style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, fontSize: 12.5 } },
+          { key, style: { display: 'flex', alignItems: 'center', gap: 12, fontSize: 12.5 } },
           React.createElement('span', { style: { width: 132, color: 'var(--dsw-alias-label-tertiary)' } }, label),
           options
             ? React.createElement(
@@ -2366,26 +2383,45 @@ window.__ModuleLoader__.load({
               }),
         )
 
+      // 九个字段摊成一列很难扫：分成「声音 / 造卡 / 位置」三块，
+      // 每块自己回答一个问题，人就不用在九行里找那一行。
+      const group = (title, rows) =>
+        React.createElement(
+          'section',
+          { style: styles.cfgGroup },
+          React.createElement('div', { style: styles.cfgHead }, title),
+          ...rows,
+        )
+
+      const hint = (text) =>
+        React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: ink.c } }, text)
+
       return React.createElement(
         'div',
-        { style: { padding: '2px 0 8px' } },
-        field(t('config.engine'), 'ttsEngine', [
-          { value: 'auto', label: t('config.engineAuto') },
-          { value: 'edge', label: t('config.engineEdge') },
-          { value: 'openai', label: t('config.engineOpenAI') },
+        { style: styles.cfgWrap },
+        group(t('config.groupVoice'), [
+          field(t('config.engine'), 'ttsEngine', [
+            { value: 'auto', label: t('config.engineAuto') },
+            { value: 'edge', label: t('config.engineEdge') },
+            { value: 'openai', label: t('config.engineOpenAI') },
+          ]),
+          field(t('config.voice'), 'ttsVoiceEdge'),
+          field(t('config.rate'), 'rate'),
+          field(t('config.volume'), 'volume'),
         ]),
-        field(t('config.voice'), 'ttsVoiceEdge'),
-        field(t('config.rate'), 'rate'),
-        field(t('config.volume'), 'volume'),
-        field(t('config.examples'), 'examplesPerLesson'),
-        field(t('config.candidates'), 'candidateLimit'),
-        field(t('config.exportDir'), 'exportDir'),
-        field(t('config.dataDir'), 'dataDir'),
-        // 代理是「搜不到图」时唯一能自救的旋钮，所以必须在这一页上，
-        // 而不是只写进文档 —— 写文档的东西没人会在报错当场去翻。
-        field(t('config.proxy'), 'proxyUrl'),
-        React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: 'var(--dsw-alias-label-tertiary)', marginTop: 4 } }, t('config.hintProxy')),
-        React.createElement('div', { style: { fontSize: 11, lineHeight: 1.7, color: 'var(--dsw-alias-label-tertiary)', marginTop: 2 } }, t('config.hint')),
+        group(t('config.groupMake'), [
+          field(t('config.examples'), 'examplesPerLesson'),
+          field(t('config.candidates'), 'candidateLimit'),
+        ]),
+        group(t('config.groupWhere'), [
+          field(t('config.exportDir'), 'exportDir'),
+          field(t('config.dataDir'), 'dataDir'),
+          // 代理是「搜不到图」时唯一能自救的旋钮，所以必须在这一页上，
+          // 而不是只写进文档 —— 写文档的东西没人会在报错当场去翻。
+          field(t('config.proxy'), 'proxyUrl'),
+          hint(t('config.hintProxy')),
+          hint(t('config.hint')),
+        ]),
       )
     }
 
@@ -2515,6 +2551,9 @@ window.__ModuleLoader__.load({
         'config.dataDir': '数据目录',
         'config.proxy': '代理地址',
         'config.hintProxy': 'Node 的 fetch 不读系统代理。搜不到候选图时先把这里填上（例如 http://127.0.0.1:7897），改完立刻生效，不用重启。',
+        'config.groupVoice': '声音',
+        'config.groupMake': '造卡',
+        'config.groupWhere': '位置',
         'config.hint': '语速和音量对 Edge 生效；OpenAI 兼容的那类接口只有语速（换成 speed），没有音量。',
         'config.summaryExamples': '每包 {n} 条例句',
       },
