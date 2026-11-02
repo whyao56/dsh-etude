@@ -169,3 +169,67 @@ node tools/montage.mjs _shots/sheet.png _shots/a.png _shots/b.png   # 联络表
   `design/` 是这一轮的成果物和规格书，下一轮按 `system.css` 的令牌把面板照着重画。
 - `docs/GUIDE.md` 的截图是老界面的。文字部分已经按新界面重写，图下一轮补。
 - 浅色主题（`html.light`）整套令牌写好了，但没逐页截图验证。
+
+
+## 9. 真面板换皮（client.js）
+
+样式稿是规格，插件本体才是要交的东西。这一轮把新设计落到 `client.js`，做法是**只换壳、不动管道**：
+RPC 端点、幂等键、包状态机、图与语音的人工复核一道没改，改的是 `styles` 和 `FactoryPanel` 的外框。
+
+### 9.1 换掉的 500 行 styles
+
+旧的 `styles` 是 64 个零散键，字号 13/14/15/16 混着用，圆角 8 和 16 混着用。新的一套：
+
+- 先在文件里定义 `ink{a,b,c}` / `line{a,b}` / `surf{a,b,c}` / `accent` / `onAccent` / `soft` / `softLine` / `danger` / `radius{sm:6,md:14,pill:999}`，页面里只引用这些名字。
+- **颜色全部走宿主 token**（`--dsw-alias-*`），所以浅色主题跟着变，不用另写一套 light 覆盖；只有「比宿主再淡一档」的地方用 `color-mix`。
+- 字阶收成 11 / 12.5 / 15 / 20 / 28 五级；间距全是 4 的倍数；圆角只有 6 / 14 / 999。
+- 装饰色只出现在 2px 以下：制卡流水线的五段用 `border-left: 2px` 说话，不铺底色。
+- 旧键一个没少（含 `tab(on)` `dot(on)` `banner(kind)` `listItem(on)` 四个函数键），另补 `stage(state)`、`cell(picked)` 两个之前漏掉的函数键 —— 少一个就是运行时 `styles.stage is not a function`，整块白屏。
+
+### 9.2 换了外框的 FactoryPanel
+
+原来是「一行顶栏：图标 + 标题 + 数据目录 + 输入框 + 造包 + 刷新」。现在是：
+
+```
+page（max 1180 居中，padding 28/32/72）
+├─ header
+│  ├─ headText：eyebrow「卡片工厂」/ h1「制卡 or 学习」28px / 一行数据目录
+│  └─ headerActions：输入框 + 造一个包 + 刷新
+├─ tabs（胶囊：制卡 / 学习）
+├─ jobBar（有任务时才出现）
+└─ body：list 264（sticky，卡片底）+ detail（自适应，gap 16）
+```
+
+h1 跟着当前区变（制卡 / 学习），这样切标签时标题也跟着说人话。
+
+### 9.3 三处必须亲手修的地方
+
+1. `styles.card` 是**行**方向 flex（图左文右），`cardNarrow` 才是竖的。原来写成块级容器，结果是每张卡片的图都撑满整卡、一句话被挤到图下面去。
+2. `styles.media` 要 `flex:0 0 42%` + `position:relative`：不写 42% 图就吃满整卡；不写 relative，图上那颗「换一张」的绝对定位按钮会跑到页面外。
+3. h1 / p 默认带 margin，面板里没有全局 reset 时会把页头挤成两截 —— `title` `subtitle` `eyebrow` 三个样式都写了 `margin: 0`。
+
+### 9.4 怎么在没有浏览器的情况下看它长什么样
+
+宿主的 Web 界面要带 token 的地址才打得开，headless Chrome 直接访问 `127.0.0.1:7052` 只会得到一行
+`dsh web authentication required`。所以加了 `tests/panel-preview.mjs`：
+
+```bash
+node tests/panel-preview.mjs      # 产物 design/_shots/panel-{factory,empty,error}.html
+```
+
+它用和 `tests/client-smoke.mjs` 同一套假 React 把组件树跑一遍，再把宿主标签序列化成 HTML 落盘，
+双击就能看真面板。三个状态（有包 / 一个包也没有 / 宿主连不上）各一份。
+
+写这个预览工具踩的两个坑都出在**序列化**上，跟面板无关，但会骗人：
+
+- `style` 里的数字一律补 `px` → `lineHeight:1.7` 变成 `1.7px`，页头副标题被压成一条虚线。
+  只有长度类属性才补 px，`fontWeight` `lineHeight` `flex` `opacity` 这些保持无单位。
+- 属性白名单漏了 `src` → 11 个 `<img>` 全没有源，预览里只剩 alt 文字，会误判成布局塌了。
+
+### 9.5 这一轮没做完的
+
+- 例句卡片内部、音频条、九宫格挑图这三块的**内部排布**还是旧结构，只跟着换到了新令牌（颜色、圆角、字号），
+  没有按样式稿重排。下一轮把这三块按 `detail.html` / `factory.html` 的结构重写。
+- 学习区（`StudyPanel`）同样只换了令牌，没有按 `study.html` 的一屏一张 + 五面 facebar 重做。
+- 配置卡（`ConfigPage`）没动。
+- 真机验收还差一次：面板要重载插件后在真宿主里点一遍（`plugin_manager set_plugin include:etude` false → true）。
