@@ -274,6 +274,33 @@ try {
   // 磁盘上那份导出的副本不跟着删 —— 别人可能已经拷走了。
   check('打回不动磁盘上已导出的那份', await exists(join(exportedDir, 'manifest.json')), exportedDir)
 
+  // 复习：评分要真的记进 review.json，state 里能看出到期数量。
+  console.log('— 复习 —')
+  const reviewExample = (await call('pack.get', { id: packId })).examples[0]
+  const reviewOrd = String(reviewExample.ord)
+  check('例句有 ord（复习记录的键就是它）', Boolean(reviewOrd) && reviewOrd !== 'undefined', reviewOrd)
+  const emptyCard = await call('review.card', { packId, exampleId: reviewOrd })
+  check('没练过的卡没有调度状态', emptyCard === null, String(emptyCard))
+  const graded = await call('review.submit', { packId, exampleId: reviewOrd, grade: 3, face: 'read' })
+  check('评分返回间隔文字', graded.intervalText === '8 天', String(graded.intervalText))
+  check('评分记了 reps', graded.card.reps === 1, String(graded.card.reps))
+  const afterGrade = await call('state')
+  check('state 里带复习摘要', afterGrade.review && afterGrade.review.started === 1, JSON.stringify(afterGrade.review))
+  const cardAgain = await call('review.card', { packId, exampleId: reviewOrd })
+  check('评分能读回来', cardAgain && cardAgain.interval === 8, JSON.stringify(cardAgain))
+  const recent = await call('review.recent', { packId, limit: 3 })
+  check('最近记录有一条', recent.length === 1, String(recent.length))
+  const stats = await call('review.stats')
+  check('统计算得出来', stats.reviews === 1 && stats.cards === 1, JSON.stringify({ r: stats.reviews, c: stats.cards }))
+  check('保留率按间隔分桶', stats.retention.length === 5, String(stats.retention.length))
+  let badGrade = null
+  try {
+    await call('review.submit', { packId, exampleId: reviewOrd, grade: 9 })
+  } catch (error) {
+    badGrade = error
+  }
+  check('非法评分被拦住', badGrade !== null && /评分只能是/.test(String(badGrade?.message)), String(badGrade?.message))
+
   console.log('— 收摊 —')
   await call('pack.delete', { id: packId })
   const afterDelete = await call('state')

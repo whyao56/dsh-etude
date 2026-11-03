@@ -2,7 +2,9 @@
  *
  * 设计稿这一屏写死的是 abandon 那张卡：那一句、六条背景、两条假链接（giphy / youtu.be）、
  * 3.3s、以及「1 分钟 / 3 天 / 8 天 / 15 天」四个复习间隔。插件里这些都得换成账本里真有的东西，
- * 账本里没有的（录音、调度引擎、外部动图视频）就写成「没有」，不留假数字。
+ * 账本里没有的（录音、外部动图视频）就写成「没有」，不留假数字。
+ * 四个评分键接的是 lib/review.js 的调度：进这一句先读这张卡（review.card），四个键的第二行写
+ * 「点下去会排到什么时候」，点了就 review.submit，用后端回来的 intervalText 写那一格。
  *
  * 契约（跟其它页一套）：
  *   window.__ETUDE_APPLY__ = function (state, api) { ... }
@@ -11,8 +13,10 @@
  *   宿主每拿到一次新 state 就调一次，所以这里所有东西都得幂等。
  *
  * 这一页要用的端点：
- *   pack.get    { id }                          → 平铺的包，examples[] / swaps[] 在顶上一层
- *   image.bytes { file, kind:'images'|'audio' } → 只有 { dataBase64 }，mediaType 得自己按扩展名推
+ *   pack.get      { id }                          → 平铺的包，examples[] / swaps[] 在顶上一层
+ *   image.bytes   { file, kind:'images'|'audio' } → 只有 { dataBase64 }，mediaType 得自己按扩展名推
+ *   review.card   { packId, exampleId }           → 这张卡的调度状态，没练过回 null
+ *   review.submit { packId, exampleId, face, grade:'1'..'4' } → { card, intervalText:'8 天' }
  *   插件不开 HTTP 路由，所以图/音只能走 image.bytes，绝不能去请求 /etude/media/...
  *
  * 规矩：
@@ -40,7 +44,16 @@ var FACE_HINTS = {
 }
 var FACE_ORDER = ['listen', 'speak', 'read', 'write', 'vary']
 
-var DEFAULT_RATE_NOTE = '四个评分键没有调度引擎：点了只在这一页记一次，不写账本、不排下次复习。'
+var DEFAULT_RATE_NOTE = '这一条还没有句子，四个评分键没有地方记账 —— 造出例句再来。'
+
+/* 调度口径跟 lib/review.js 的 nextSchedule 对齐：新卡第一次就是设计稿那四个数，
+   练过的卡按 ease 乘 interval。这里只用来写「点下去排到什么时候」，不写盘。 */
+var FIRST_INTERVAL_DAYS = { 1: 0, 2: 3, 3: 8, 4: 15 }
+var EASE_START = 2.5
+var EASE_MIN = 1.3
+var EASE_MAX = 2.8
+var EASE_DELTA = { 1: -0.2, 2: -0.15, 3: 0, 4: 0.15 }
+var DAY_MS = 24 * 60 * 60 * 1000
 
 /* ───────────── 状态：跨 apply 存一点东西，靠这个做到幂等 ───────────── */
 
@@ -54,11 +67,26 @@ function ensureStore() {
       word: '',
       media: {}, // file → data URL（同一个文件不重复要字节）
       typed: {}, // '包id' → 这一页打的字
-      rates: {}, // '包id:档位' → 点了几次
       faces: null,
       wired: false, // 拦跳页的监听器只装一次
+      api: {}, // 最近一次 apply 拿到的 api，评分键的点击处理器从这里取
+      target: null, // { packId, exampleId } 这一屏正在记的那张卡
+      card: null, // 当前这张卡的调度状态（null = 没练过）
+      cards: {}, // '包id:例句id' → review.card 回来的调度状态
+      reviewSeq: 0, // review.card / review.submit 的序号，迟到的作废
+      pending: false, // review.submit 还没回来
+      flashNode: null, // 刚点的那个评分键
+      flashStyle: '',
+      flashTimer: 0,
+      dueTip: '', // 第 1 行那句「今天还有 N 张到期」
     }
   }
+  // 页面里已经有一份旧 store 时补上新字段，别让缺字段变成 undefined 崩掉
+  if (!store.cards) store.cards = {}
+  if (!store.api) store.api = {}
+  if (store.reviewSeq == null) store.reviewSeq = 0
+  if (store.pending == null) store.pending = false
+  if (store.dueTip == null) store.dueTip = ''
   return store
 }
 
@@ -66,6 +94,10 @@ function apply(state, api, store) {
   // 设计稿的按钮会真的 location.href = './study.html?...'，在 srcdoc iframe 里会把整格跳空
   guardNavigation(store)
   rewriteLinks(store)
+
+  store.api = api || {}
+  // 宿主的 state.review 是所有包的汇总，只看 due —— 0 或没有就不写这句
+  store.dueTip = dueTipOf(state)
 
   if (!state || !state.status || state.status === 'loading') {
     setHeader({ deckName: '账本', idx: '账本还在读', where: '等宿主把账本推过来' })
@@ -223,7 +255,7 @@ function paint(pack, api, store) {
   store.faces = faceState(pack, example, typed)
   paintFaces(store.faces)
   paintRail(pack, example, typed)
-  paintRate()
+  paintRate(pack, example, api, store)
 }
 
 function paintNoPack() {
@@ -247,13 +279,26 @@ function paintNoExample(pack, reason) {
   store.faces = faceState(pack, null, '')
   paintFaces(store.faces)
   paintRail(pack, null, '')
-  paintRate()
+  paintRate(pack, null, {}, store)
 }
 
 function setHeader(parts) {
   if (parts.deckName != null) setText('#deckName', parts.deckName)
   if (parts.idx != null) setText('#deckIdx', parts.idx)
-  if (parts.where != null) setText('.st-where', parts.where)
+  if (parts.where != null) {
+    // 第 1 行那句到期数是宿主 state.review 给的，不新增块，接在 .st-where 后面
+    var store = ensureStore()
+    setText('.st-where', store.dueTip ? parts.where + ' · ' + store.dueTip : parts.where)
+  }
+}
+
+/* state.review = { due, overdue, started, reviews, byPack }；due 是今天到期的张数。
+   宿主没给、或者 0，就不说这句 —— 不留「今天还有 0 张到期」这种废话。 */
+function dueTipOf(state) {
+  if (!state || !state.review) return ''
+  var due = Number(state.review.due)
+  if (!isFinite(due) || due <= 0) return ''
+  return '今天还有 ' + Math.round(due) + ' 张到期'
 }
 
 /* 英文/中文小窗里的字。设计稿写的是 abandon 的释义和音标，换成这个包的。 */
@@ -888,15 +933,270 @@ function setRailValue(key, value, empty) {
   row.className = classes.join(' ')
 }
 
-function paintRate() {
+/* ───────────── 四个评分键：接着 lib/review.js 的调度 ───────────── */
+
+/* 进这一句时先把四个键按「新卡口径」写上，再拿 review.card 回来的真实调度重画。
+   第二次 apply 会用 store.cards 里的缓存先画一遍，避免闪一下设计稿的假数字。 */
+function paintRate(pack, example, api, store) {
   var buttons = document.querySelectorAll('.st-rate .st-r')
-  for (var i = 0; i < buttons.length; i += 1) {
-    var em = buttons[i].querySelector('em')
-    // 账本里没有调度：不排下次复习，也就没有「几天后再见」这个数
-    if (em) em.textContent = '未接调度'
-    buttons[i].title = '没有调度引擎：这一档只在这一页记一次，不排下次复习，也不写账本'
+  if (!buttons.length) {
+    warn('找不到评分键 .st-rate .st-r')
+    return
   }
-  setNote(DEFAULT_RATE_NOTE)
+  var target = reviewTarget(pack, example)
+  store.target = target
+  var key = target ? target.packId + ':' + target.exampleId : ''
+  var cached = key && Object.prototype.hasOwnProperty.call(store.cards, key) ? store.cards[key] : undefined
+  var card = cached === undefined ? null : cached
+  store.card = card
+  paintRateTexts(buttons, card, null, '')
+  setRateNote(card, target)
+
+  if (!target) return
+  if (!api || typeof api.rpc !== 'function') {
+    setNote('宿主没把 RPC 递过来：评分记不上，刷新一下面板再试。')
+    return
+  }
+
+  // 换了一句就把旧请求作废，别让上一张卡的调度落到这一张上
+  var seq = (store.reviewSeq += 1)
+  var started
+  try {
+    started = Promise.resolve(api.rpc('review.card', { packId: target.packId, exampleId: target.exampleId }))
+  } catch (error) {
+    started = Promise.reject(error)
+  }
+  started
+    .then(function (result) {
+      if (seq !== store.reviewSeq) return
+      var fresh = result && typeof result === 'object' ? result : null
+      store.cards[key] = fresh
+      store.card = fresh
+      paintRateTexts(buttons, fresh, null, '')
+      setRateNote(fresh, target)
+    })
+    .catch(function (why) {
+      if (seq !== store.reviewSeq) return
+      var reason = (why && why.message) || String(why)
+      warn('review.card 失败：' + reason)
+      // 读不到调度就按没练过画，但把原因写出来，别装作这张卡练过
+      store.card = null
+      paintRateTexts(buttons, null, null, '')
+      setNote('这张卡的调度没读出来（' + reason + '）：四个键先按新卡的间隔写着。')
+    })
+}
+
+/* 四档的第二行：点下去会排到什么时候。没有 card 用 FIRST_INTERVAL_DAYS，
+   有 card 按 ease 乘 interval —— 跟 lib/review.js 的 nextSchedule 同一套口径，
+   连「前三次封顶 15 天」「interval 还是 0 就当第一次」这两条也照着抄，
+   不然键上写的天数跟点下去真排到的对不上。 */
+function forecastDays(card, grade) {
+  var g = Math.round(Number(grade))
+  if (!(g >= 1 && g <= 4)) g = 3
+  var base = card ? Number(card.ease) : EASE_START
+  var ease = clampEase((isFinite(base) ? base : EASE_START) + (EASE_DELTA[g] || 0))
+  var prev = card ? Number(card.interval) : 0
+  // 后端把「没有 interval」（新卡、或者还没从重来里走出来）都当第一次练
+  if (!card || !isFinite(prev) || !(prev > 0)) return FIRST_INTERVAL_DAYS[g]
+  if (g === 1) return 0 // 重来走分钟级
+  var days
+  if (g === 2) days = Math.max(1, Math.round(prev * 1.2))
+  else if (g === 3) days = Math.max(1, Math.round(Math.max(prev, 1) * ease))
+  else days = Math.max(1, Math.round(Math.max(prev, 1) * ease * 1.3))
+  var reps = Number(card.reps)
+  if (!isFinite(reps) || reps < 0) reps = 0
+  if (reps + 1 <= 3 && days > 15) days = 15
+  return days
+}
+
+function clampEase(value) {
+  var n = Number(value)
+  if (!isFinite(n)) n = EASE_START
+  if (n < EASE_MIN) return EASE_MIN
+  if (n > EASE_MAX) return EASE_MAX
+  return n
+}
+
+/* 0 天 = 1 分钟；不到 30 天按天；再往上折成月/年（跟后端 intervalText 一致）。 */
+function intervalLabel(days) {
+  var n = Math.round(Number(days))
+  if (!isFinite(n) || n < 1) return '1 分钟'
+  if (n < 30) return n + ' 天'
+  var months = Math.round(n / 30)
+  if (months < 12) return months + ' 个月'
+  return Math.round(n / 365) + ' 年'
+}
+
+function paintRateTexts(buttons, card, skip, skipText) {
+  for (var i = 0; i < buttons.length; i += 1) {
+    var grade = i + 1
+    var computed = intervalLabel(forecastDays(card, grade))
+    var text = buttons[i] === skip && skipText ? skipText : computed
+    var em = buttons[i].querySelector('em')
+    if (em) em.textContent = text
+    var label = buttons[i].querySelector('b')
+    var name = label ? String(label.textContent || '').trim() : '第 ' + grade + ' 档'
+    buttons[i].title =
+      '点「' + name + '」：' + (card ? '按这张卡现在的调度' : '新卡第一次') + '排到 ' + text + '后再出现'
+  }
+}
+
+/* 评分键下面那行 .mut：有记录就写卡的状态，没记录就说还没练过 */
+function setRateNote(card, target) {
+  if (!target) {
+    setNote(DEFAULT_RATE_NOTE)
+    return
+  }
+  setNote(cardNote(card))
+}
+
+function cardNote(card) {
+  if (!card) return '这张卡还没练过 —— 四个键写的是第一次点下去会排到什么时候。'
+  var parts = []
+  var last = Number(card.lastAt)
+  if (isFinite(last) && last > 0) {
+    var days = Math.floor((Date.now() - last) / DAY_MS)
+    parts.push(days <= 0 ? '上次就是今天' : '上次 ' + days + ' 天前')
+  } else {
+    parts.push('上次的日期账本里没有')
+  }
+  var reps = Number(card.reps)
+  parts.push('评过 ' + (isFinite(reps) && reps > 0 ? Math.round(reps) : 0) + ' 次')
+  var lapses = Number(card.lapses)
+  if (isFinite(lapses) && lapses > 0) parts.push('其中重来 ' + Math.round(lapses) + ' 次')
+  var interval = Number(card.interval)
+  if (isFinite(interval) && interval > 0) parts.push('现在排在 ' + intervalLabel(interval) + '后')
+  return parts.join(' · ')
+}
+
+/* 账本里例句的标识是 ord（第几条，从 1 起），detail 页的 skin.ord 也是它 ——
+   所以 review.* 的 exampleId 统一传 String(example.ord)，不走后端那个 id/ord 别名。
+   只有 ord 实在缺了才退到 id，别让一张卡因为少个字段记不上。 */
+function exampleIdOf(example) {
+  if (!example) return ''
+  var ord = String(example.ord == null ? '' : example.ord).trim()
+  if (ord) return ord
+  return String(example.id == null ? '' : example.id).trim()
+}
+
+function reviewTarget(pack, example) {
+  if (!pack || !pack.id) return null
+  var exampleId = exampleIdOf(example)
+  if (!exampleId) return null
+  return { packId: String(pack.id), exampleId: exampleId }
+}
+
+/* 页面上的面叫 write，后端日志里记的是 type —— 翻译一下再发 */
+function currentFaceKey() {
+  var on = document.querySelector('.fbar .fb.on')
+  var raw = on ? String(on.getAttribute('data-face') || '') : ''
+  if (raw === 'write') return 'type'
+  if (raw === 'listen' || raw === 'speak' || raw === 'read' || raw === 'vary') return raw
+  return 'read'
+}
+
+function gradeOfButton(button, buttons) {
+  for (var i = 0; i < buttons.length; i += 1) {
+    if (buttons[i] === button) return i + 1
+  }
+  var label = button && button.querySelector('b') ? String(button.querySelector('b').textContent || '').trim() : ''
+  var byName = { 重来: 1, 困难: 2, 良好: 3, 简单: 4 }
+  return byName[label] || 3
+}
+
+/* 点了一下：记一次真评分。成功就用后端给的 intervalText 写这一格，失败如实写原因。 */
+function submitGrade(button) {
+  var store = ensureStore()
+  var api = store.api || {}
+  var target = store.target
+  var buttons = document.querySelectorAll('.st-rate .st-r')
+  var grade = gradeOfButton(button, buttons)
+
+  if (!target) {
+    setNote('评分没记上：这一条还没有例句，账本里没有地方记。')
+    return
+  }
+  if (typeof api.rpc !== 'function') {
+    setNote('评分没记上：宿主没给 RPC，刷新一下面板再试。')
+    return
+  }
+  if (store.pending) {
+    setNote('上一次评分还在记，等它回来再点。')
+    return
+  }
+
+  store.pending = true
+  setNote('正在把这次评分写进账本…')
+  var packId = target.packId
+  var exampleId = target.exampleId
+  var key = packId + ':' + exampleId
+  // 评分也会改这张卡，迟到的 review.card 不能拿旧状态盖回来
+  var seq = (store.reviewSeq += 1)
+  var started
+  try {
+    started = Promise.resolve(
+      api.rpc('review.submit', {
+        packId: packId,
+        exampleId: exampleId,
+        face: currentFaceKey(),
+        grade: grade,
+      }),
+    )
+  } catch (error) {
+    started = Promise.reject(error)
+  }
+
+  started
+    .then(function (result) {
+      if (seq !== store.reviewSeq) return
+      store.pending = false
+      var card = result && result.card ? result.card : null
+      if (card) {
+        store.cards[key] = card
+        store.card = card
+      }
+      // 点的那一格用后端算的原文，别拿自己的公式盖掉；另外三格按新 card 重算
+      var text = (result && result.intervalText) || intervalLabel(forecastDays(card, grade))
+      paintRateTexts(buttons, card, button, text)
+      flashRate(button, store)
+      setNote(card ? cardNote(card) : '评分记上了，但后端没回这张卡的调度。')
+    })
+    .catch(function (why) {
+      if (seq !== store.reviewSeq) return
+      store.pending = false
+      var reason = (why && why.message) || String(why)
+      warn('review.submit 失败：' + reason)
+      setNote('评分没记上：' + reason)
+    })
+}
+
+/* 180–260ms 的一下：只在这一格上加一点亮，然后原样还回去，不弹不跳 */
+function flashRate(button, store) {
+  if (!button || !button.style) return
+  if (store.flashTimer) {
+    clearTimeout(store.flashTimer)
+    store.flashTimer = 0
+  }
+  if (store.flashNode && store.flashNode !== button) restoreFlash(store)
+  if (!store.flashNode) store.flashStyle = button.getAttribute('style') || ''
+  store.flashNode = button
+  button.style.boxShadow = '0 0 0 2px rgba(138, 180, 255, 0.85)'
+  button.style.filter = 'brightness(1.22)'
+  store.flashTimer = setTimeout(function () {
+    restoreFlash(store)
+  }, 220)
+}
+
+function restoreFlash(store) {
+  if (store.flashTimer) {
+    clearTimeout(store.flashTimer)
+    store.flashTimer = 0
+  }
+  var node = store.flashNode
+  store.flashNode = null
+  if (!node) return
+  node.setAttribute('style', store.flashStyle || '')
+  store.flashStyle = ''
 }
 
 /* ───────────── 媒体字节（唯一一条取图/取音的路） ───────────── */
@@ -949,7 +1249,7 @@ function onGuardedClick(event) {
 
   if (rate) {
     swallow = true
-    markRate(rate)
+    submitGrade(rate)
   } else if (wordKey) {
     swallow = true
     setNote('换词要回卡片页点词名，这一页靠 ?w= 深链进来 —— 没有牌组顺序可以翻。')
@@ -968,21 +1268,6 @@ function onGuardedClick(event) {
     event.preventDefault()
     event.stopPropagation()
   }
-}
-
-function markRate(button) {
-  var store = ensureStore()
-  var labelNode = button.querySelector('b')
-  var label = labelNode ? String(labelNode.textContent || '').trim() : '这一档'
-  var key = (store.packId || 'pack') + ':' + label
-  store.rates[key] = (store.rates[key] || 0) + 1
-  setNote(
-    '这一条刚点的是「' +
-      label +
-      '」，本页第 ' +
-      store.rates[key] +
-      ' 次。没有调度引擎：不排下次复习，也不写账本。'
-  )
 }
 
 /* 设计稿里的内部链接（卡片 / 工厂 / 统计 / 库 / 设置）在 srcdoc iframe 里同样会跳空。

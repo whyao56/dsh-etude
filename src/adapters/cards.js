@@ -110,8 +110,19 @@ window.__ETUDE_APPLY__ = function (state, api) {
     var totalExamples = packs.reduce(function (n, p) {
       return n + ((p.progress && p.progress.total) || 0)
     }, 0)
+    // 复习状态：有调度之后这里才有「今天几张到期」可写。以前只能写「还没练过」。
+    var review = state.review || null
+    var practice = ''
+    if (review && review.due > 0) {
+      practice =
+        ' 今天有 ' + review.due + ' 张到期' + (review.overdue > 0 ? '（其中 ' + review.overdue + ' 张已经过了点）' : '') + '。'
+    } else if (review && review.started > 0) {
+      practice = ' 练过 ' + review.started + ' 张，今天没有到期的。'
+    } else if (review) {
+      practice = ' 还没开始练，点「练这一句」就会开始记。'
+    }
     setDeckStat(
-      '一共 ' + packs.length + ' 个包 · ' + totalExamples + ' 条例句。每句都要配图和语音，两样齐了才算能出厂。',
+      '一共 ' + packs.length + ' 个包 · ' + totalExamples + ' 条例句。每句都要配图和语音，两样齐了才算能出厂。' + practice,
     )
   }
 

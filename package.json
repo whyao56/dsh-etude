@@ -41,8 +41,8 @@
   ],
   "scripts": {
     "build": "node scripts/build-client.cjs",
-    "test": "node --test tests/unit.test.mjs && node tests/client-smoke.mjs && node tests/rpc-smoke.mjs",
-    "test:unit": "node --test tests/unit.test.mjs",
+    "test": "node --test tests/unit.test.mjs tests/review.test.mjs tests/record.test.mjs && node tests/client-smoke.mjs && node tests/rpc-smoke.mjs",
+    "test:unit": "node --test tests/unit.test.mjs tests/review.test.mjs tests/record.test.mjs",
     "test:client": "node tests/client-smoke.mjs",
     "test:rpc": "node tests/rpc-smoke.mjs",
     "test:py": "python -m pytest tests/test_contract.py -q",

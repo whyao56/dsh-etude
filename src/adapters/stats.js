@@ -1,16 +1,21 @@
 /* stats · 统计页接真账本
  *
- * 设计稿这一页有 11 张卡，其中 8 张画的是复习历史（热力图、复习曲线、间隔分布、
- * 简易度分布、记忆保留率、回答按钮、逐小时正确率、预测）。这些数据账本里一条都没有：
- * lib/rpc.js 的 state() 只给 { root, packs, selfcheck, jobs, exportDir, version }，
- * 包上也只有 { status, progress:{total,images,audios,done}, learnable, createdAt, … }。
- * 没有 reviews / answers / revlog / due / interval / ease / retention —— 全查过。
- *
- * 所以分两拨处理：
- *   · 能从账本真算的：包数、例句数、配图齐、语音齐、能出厂、按 status 的分布、
+ * 设计稿这一页有 11 张卡。数据分三个来源：
+ *   · 账本（state.packs）：包数、例句数、配图齐、语音齐、能出厂、按 status 的分布、
  *     按 createdAt 分到最近 14 天、正在跑的任务、自检、目录与版本
- *     → 填进「规模」（原「今天」）、「卡片数量」、「新增」三张卡。
- *   · 算不出来的：不画假柱子。图 display:none，卡头写「暂时算不出来」，底部写清「要什么才有」。
+ *     → 「规模」（原「今天」）、「卡片数量」、「新增」三张卡。
+ *   · 复习日志（api.rpc('review.stats')，见 lib/review.js 的 reviewStats）：
+ *     daily / retention / intervalHistogram / hourly / byGrade / avgEase / easeDistribution
+ *     → 「复习」「记忆保留率」「复习间隔」「逐小时分析」「回答按钮」「卡片简易度」六张卡用真数。
+ *   · state.review（lib/review.js 的 dueSummary）：due / overdue / started / reviews
+ *     → 「预测」那张卡画不出排期，但 .sums 四个格子填真数。
+ *
+ * 还是画不出来的只有两张：「预测」要未来每天的排期（后端只记到期时刻，没有排期分布）、
+ * 「日程表」要最近半年的每日记录（daily 只给 14 天）。这两张不编柱子，写清缺什么。
+ *
+ * 空态分两种，说法不一样：
+ *   · reviews === 0：不是加载失败，是一次都没练过 —— 说清「练一次就有了」。
+ *   · review.stats 拿不到（预览里假 rpc 回 {}、或接口还没上）：写「还不知道」，不写 0。
  *
  * 硬规矩：只改现有节点的值（textContent / setAttribute / style），不新增 SVG 元素、
  * 不重排结构；找不到锚点就 console.warn 跳过，绝不抛错。宿主每拿到新 state 就调一次，
@@ -43,7 +48,7 @@ function apply(state, api) {
   scaleCard(state, nums)
   statusCard(nums)
   addedCard(nums)
-  blankCards()
+  reviewCards(state, api)
   hideFakeControls()
 }
 
@@ -84,6 +89,14 @@ function hide(target, root) {
     return null
   }
   node.style.display = 'none'
+  return node
+}
+
+/** 上一轮藏过的东西这一轮要露出来（宿主会反复推 state） */
+function show(target, root) {
+  const node = typeof target === 'string' ? q(target, root) : target
+  if (!node) return null
+  node.style.display = ''
   return node
 }
 
@@ -401,37 +414,599 @@ function addedCard(nums) {
   }
 }
 
-/* --------------------------------------------- 算不出来的那 8 张：写字说明 */
+/* ------------------------------------- 复习那 8 张：review.stats 的真数 */
 
-const NO_RECORD = '账本里没有作答记录，这张图要等你练过才有。'
+const BAR_BASE = 148 // 柱状图基线（设计稿每张柱图都一样）
+const BAR_TOP = 14 // 最大值的柱顶落在的 y
 
-function blankCards() {
-  blank('s-forecast', '账本里没有排期，这张图要等你练过才有。', '要什么才有：每条例句的复习时间，和它下次什么时候到期。', [
-    '.sums',
-  ])
-  blank('s-heat', NO_RECORD, '要什么才有：每条例句的练习时间。练够几天，格子上才有颜色。')
-  blank('s-reviews', NO_RECORD, '要什么才有：每天答了几次、答得对不对的记录。')
-  blank('s-intervals', NO_RECORD, '要什么才有：同一条例句两次复习之间隔了几天。')
-  blank('s-ease', NO_RECORD, '要什么才有：每次作答后算出来的难度值。')
-  blank('s-retention', NO_RECORD, '要什么才有：每次作答按的是「记得」还是「忘了」。', ['table.rt'])
-  blank('s-hourly', NO_RECORD, '要什么才有：每次作答的时刻。')
-  blank('s-buttons', NO_RECORD, '要什么才有：每次作答按的哪个按钮。')
+const REVIEW_CARDS = [
+  's-forecast',
+  's-heat',
+  's-reviews',
+  's-intervals',
+  's-ease',
+  's-retention',
+  's-hourly',
+  's-buttons',
+]
+
+/** 一次都没练过：这不是加载失败 */
+const TIP_EMPTY =
+  '不是加载失败 —— 账本里一次复习都还没有，所以这几张图还空着。练一次就有了：去「卡片」页随便练一句、给个评分，再回这页看。'
+
+/** 接口没回数（预览里的假 rpc 回的是 {}）：说不知道，不拿 0 冒充 */
+const TIP_UNKNOWN =
+  '复习记录还没读出来。可能是一次都没练过，也可能是 review.stats 这条还没接上；练过一次、接口通了，这里就有数。'
+
+/** 只从 state.review 拿到总数，明细没回来 */
+const TIP_PARTIAL = '复习明细还没读出来，现在只拿得到总数。每天几次、间隔分布、通过率要等 review.stats 回话。'
+
+/** 要复习的数和到期明细全从 state.review（dueSummary）来 */
+function hostNumbers(host) {
+  const num = (value) => (typeof value === 'number' && isFinite(value) ? value : null)
+  return {
+    reviews: num(host && host.reviews),
+    due: num(host && host.due),
+    overdue: num(host && host.overdue),
+    started: num(host && host.started),
+  }
+}
+
+/** 预览环境回 {}、旧宿主没有 review.stats：这些都不算「有数」 */
+function normalizeStats(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  if (typeof raw.reviews !== 'number' || !isFinite(raw.reviews)) return null
+  const rows = (value) => (Array.isArray(value) ? value.filter((one) => one && typeof one === 'object') : [])
+  return {
+    reviews: raw.reviews,
+    cards: typeof raw.cards === 'number' && isFinite(raw.cards) ? raw.cards : null,
+    daily: rows(raw.daily),
+    retention: rows(raw.retention),
+    intervals: rows(raw.intervalHistogram),
+    hourly: rows(raw.hourly),
+    grades: rows(raw.byGrade),
+    avgEase: typeof raw.avgEase === 'number' && isFinite(raw.avgEase) ? raw.avgEase : null,
+    ease: rows(raw.easeDistribution),
+  }
+}
+
+/** 拿 review.stats，回来以后按「有数 / 没练过 / 不知道」三选一画 */
+function reviewCards(state, api) {
+  const host = hostNumbers(state && state.review)
+  const paint = (raw) => {
+    try {
+      const stats = normalizeStats(raw)
+      if (stats && stats.reviews > 0) paintReviews(stats, host)
+      else if (stats && stats.reviews === 0) quietCards(TIP_EMPTY, '还没练过')
+      else if (host.reviews !== null && host.reviews > 0) paintPartial(host)
+      else quietCards(TIP_UNKNOWN, '还没读到复习记录')
+    } catch (error) {
+      console.warn('[etude/stats] 复习那几张卡画到一半出错', error)
+    }
+  }
+
+  if (!api || typeof api.rpc !== 'function') {
+    miss('宿主的 api.rpc')
+    paint(null)
+    return
+  }
+  let pending
+  try {
+    pending = api.rpc('review.stats', {})
+  } catch (error) {
+    console.warn('[etude/stats] review.stats 调不动', error)
+    paint(null)
+    return
+  }
+  Promise.resolve(pending).then(paint, (error) => {
+    console.warn('[etude/stats] review.stats 没回数，按「还不知道」写', error)
+    try {
+      paint(null)
+    } catch (inner) {
+      console.warn('[etude/stats] 空态也画不动', inner)
+    }
+  })
+}
+
+function paintReviews(stats, host) {
+  reviewsCard(stats, host)
+  retentionCard(stats)
+  intervalsCard(stats)
+  easeCard(stats)
+  hourlyCard(stats)
+  buttonsCard(stats)
+  forecastCard(stats, host)
+  heatCard(stats)
+}
+
+/** 只有 state.review 的总数：预测卡的四个格子照填，其余写「明细还没有」 */
+function paintPartial(host) {
+  quietCards(TIP_PARTIAL, '只读到总数')
+  forecastCard(null, host)
+}
+
+/** 没数的时候：图藏掉、卡头写清是哪种空、底部一句话。不新增节点。 */
+function quietCards(tip, smut) {
+  REVIEW_CARDS.forEach((id) => {
+    const card = document.getElementById(id)
+    if (!card) return miss('#' + id)
+    hide('.chartbox', card)
+    hide('.sctls', card)
+    hide('table.rt', card)
+    hide('.sums', card)
+    setText(q('.shead2 .smut', card), smut)
+    const takeaway = q('.takeaway', card)
+    if (!takeaway) return miss('#' + id + ' 的说明行')
+    setText(takeaway, tip)
+  })
+}
+
+/* ------------------------------------------------------------ 画柱子 */
+
+function round2(value) {
+  return String(Math.round(value * 100) / 100)
 }
 
 /**
- * 一张算不出来的卡：图藏掉、卡头标「暂时算不出来」、底部一句「要什么才有」。
- * 不新增节点 —— 说明就写在设计稿本来就有的 .takeaway 里。
+ * 一根柱子：只改它自己的 d（圆角半径 4 照设计稿），不新增节点。
+ * centerX 给了就把柱子整体挪到那个中心（逐小时卡要按小时排）。
  */
-function blank(id, head, why, extra) {
-  const card = document.getElementById(id)
-  if (!card) return miss('#' + id)
-  hide('.chartbox', card)
-  hide('.sctls', card)
-  ;(extra || []).forEach((selector) => hide(selector, card))
-  setText(q('.shead2 .smut', card), '暂时算不出来')
+function paintBar(node, count, max, tip, centerX) {
+  if (!node) return miss('柱子')
+  const nums = String(node.getAttribute('d') || '').match(/-?[\d.]+/g)
+  if (!nums || nums.length < 16) return miss('柱子的 d 认不出来')
+  let x1 = Number(nums[0])
+  let x2 = Number(nums[14])
+  if (!isFinite(x1) || !isFinite(x2) || !(x2 > x1)) return miss('柱子的宽度认不出来')
+  if (typeof centerX === 'number' && isFinite(centerX)) {
+    const shift = centerX - (x1 + x2) / 2
+    x1 += shift
+    x2 += shift
+  }
+  const r = Math.min(4, Math.max(0, (x2 - x1) / 2 - 0.5))
+  const top = count > 0 ? BAR_BASE - ((BAR_BASE - BAR_TOP) * count) / max : BAR_BASE
+  const d =
+    'M' + round2(x1) + ' ' + BAR_BASE +
+    ' L' + round2(x1) + ' ' + round2(top + r) +
+    ' Q' + round2(x1) + ' ' + round2(top) + ' ' + round2(x1 + r) + ' ' + round2(top) +
+    ' L' + round2(x2 - r) + ' ' + round2(top) +
+    ' Q' + round2(x2) + ' ' + round2(top) + ' ' + round2(x2) + ' ' + round2(top + r) +
+    ' L' + round2(x2) + ' ' + BAR_BASE + ' Z'
+  setAttr(node, 'd', d)
+  node.style.display = ''
+  setAttr(node, 'data-tip', tip)
+  setText(q('title', node), tip)
+}
+
+function dayLabel(stamp) {
+  const date = new Date(Number(stamp))
+  if (!isFinite(date.getTime())) return '—'
+  return date.getMonth() + 1 + '/' + date.getDate()
+}
+
+function monthDay(stamp) {
+  const date = new Date(Number(stamp))
+  if (!isFinite(date.getTime())) return '还不知道'
+  return date.getMonth() + 1 + '月' + date.getDate() + '日'
+}
+
+/** 档位标签里的上界：'2–3' → 3、'90+' → 90 */
+function upperOf(label) {
+  const nums = String(label).match(/\d+/g) || []
+  return nums.length ? nums[nums.length - 1] : String(label)
+}
+
+function countWord(rows) {
+  return rows.reduce((sum, one) => sum + (Number(one.count) || 0), 0)
+}
+
+/* ----------------------------------------- 复习：最近 N 天答了几次（面积图） */
+
+function reviewsCard(stats, host) {
+  const card = document.getElementById('s-reviews')
+  if (!card) return miss('#s-reviews')
+  show('.chartbox', card)
+  const svg = q('#box-reviews svg', card)
+  if (!svg) return miss('#box-reviews 里的图')
+
+  const daily = stats.daily.filter((one) => isFinite(Number(one.count)) && isFinite(Number(one.at)))
+  if (daily.length < 2) return miss('复习曲线的天')
+
+  const BASE = BAR_BASE
+  const TOP = BAR_TOP
+  const WIDE = 584 // 设计稿画区宽（x 0 → 584）
+  const DAYS = daily.length
+  const step = WIDE / (DAYS - 1)
+  const values = daily.map((one) => Number(one.count) || 0)
+  const maxValue = niceMax(Math.max.apply(null, values))
+  const yOf = (value) => BASE - ((BASE - TOP) * value) / maxValue
+  const xs = values.map((unused, index) => Math.round(index * step * 10) / 10)
+  const points = xs.map((x, index) => x + ' ' + yOf(values[index]).toFixed(1))
+
+  setAttr(q('path.line2', svg), 'd', 'M' + points.join(' L'))
+  setAttr(
+    q('path.area2', svg),
+    'd',
+    'M' + xs[0] + ' ' + BASE + ' L' + points.join(' L') + ' L' + xs[DAYS - 1] + ' ' + BASE + ' Z',
+  )
+
+  // 设计稿画了 30 天，我们只画 daily 给的那几天：多出来的圆点藏掉，不删节点
+  const dots = qa('circle.adot', svg)
+  const hits = qa('circle.ahit', svg)
+  daily.forEach((one, index) => {
+    const value = values[index]
+    const tip = dayLabel(one.at) + ' · ' + value + ' 次'
+    const cy = yOf(value).toFixed(1)
+    ;[dots[index], hits[index]].forEach((node) => {
+      if (!node) return
+      setAttr(node, 'cx', String(xs[index]))
+      setAttr(node, 'cy', cy)
+      node.style.display = ''
+    })
+    if (hits[index]) {
+      setAttr(hits[index], 'data-tip', tip)
+      setText(q('title', hits[index]), tip)
+    }
+  })
+  for (let index = DAYS; index < dots.length; index += 1) {
+    if (dots[index]) dots[index].style.display = 'none'
+    if (hits[index]) hits[index].style.display = 'none'
+  }
+
+  const ticks = qa('text.tx', svg).filter((node) => !node.classList.contains('ty'))
+  ticks.forEach((node, index) => {
+    const bucket = Math.round((index * (DAYS - 1)) / (ticks.length - 1 || 1))
+    node.style.display = ''
+    setAttr(node, 'x', String(xs[bucket]))
+    setText(node, dayLabel(daily[bucket].at))
+  })
+  const axis = qa('text.tx.ty', svg)
+  if (axis.length === 3) {
+    setText(axis[0], String(maxValue))
+    setText(axis[1], String(maxValue / 2))
+    setText(axis[2], '0')
+  } else {
+    miss('复习卡的 y 轴刻度')
+  }
+
+  const sum = values.reduce((one, two) => one + two, 0)
+  const busy = values.filter((one) => one > 0).length
+  const today = values[DAYS - 1]
+  setText(q('.shead2 .smut', card), '最近 ' + DAYS + ' 天 · 共 ' + sum + ' 次回答')
+
   const takeaway = q('.takeaway', card)
-  if (!takeaway) return miss('#' + id + ' 的说明行')
-  setText(takeaway, head + why)
+  if (!takeaway) return miss('#s-reviews .takeaway')
+  const parts = ['最近 ' + DAYS + ' 天答了 ' + sum + ' 次，其中今天 ' + today + ' 次。']
+  parts.push(busy ? '有 ' + busy + ' 天在练，' + (DAYS - busy) + ' 天一次没练。' : '这 ' + DAYS + ' 天一次都没练。')
+  if (host.due !== null) {
+    parts.push('现在有 ' + host.due + ' 张卡到期' + (host.overdue ? '（其中 ' + host.overdue + ' 张已经过期）' : '') + '。')
+  } else {
+    parts.push('到期张数还不知道：state.review 没给。')
+  }
+  parts.push('正确率那条线没画 —— 后端只有按天的次数，没有按天的正确率。')
+  setText(takeaway, parts.join(''))
+}
+
+/* ----------------------------------------------- 记忆保留率：按间隔档的表 */
+
+function retentionCard(stats) {
+  const card = document.getElementById('s-retention')
+  if (!card) return miss('#s-retention')
+  show('table.rt', card)
+  const table = q('table.rt', card)
+  if (!table) return miss('#s-retention 的表')
+
+  const buckets = stats.retention
+  if (!buckets.length) return miss('保留率的分档')
+
+  const head = qa('thead th', table)
+  const HEAD = ['间隔', '答对', '答错', '通过率', '复习次数']
+  HEAD.forEach((label, index) => setText(head[index], label))
+
+  const rows = qa('tbody tr', table)
+  buckets.forEach((one, index) => {
+    const row = rows[index]
+    if (!row) return miss('保留率第 ' + (index + 1) + ' 行')
+    row.style.display = ''
+    const reviews = Number(one.reviews) || 0
+    const passed = Number(one.passed) || 0
+    const rate = typeof one.rate === 'number' && isFinite(one.rate) ? one.rate : null
+    setText(q('th', row), String(one.label || '—'))
+    const cells = qa('td', row)
+    setText(cells[0], String(passed))
+    setText(cells[1], String(reviews - passed))
+    // 一次都没练过的档位通过率是真不知道，写「—」不写 0%
+    setText(cells[2], rate === null ? '—' : rate + '%')
+    setText(cells[3], String(reviews))
+  })
+  for (let index = buckets.length; index < rows.length; index += 1) rows[index].style.display = 'none'
+
+  const solid = buckets.filter((one) => Number(one.reviews) > 0 && typeof one.rate === 'number')
+  setText(q('.shead2 .smut', card), '按间隔 5 档 · 通过＝良好或简单')
+
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-retention .takeaway')
+  if (!solid.length) {
+    setText(takeaway, '复习间隔都不到 1 天，所以这张表还没有能比的长短。练几天再回来。')
+    return
+  }
+  const first = solid[0]
+  const last = solid[solid.length - 1]
+  const parts = [
+    '间隔 ' + first.label + '：' + first.rate + '% 通过（' + first.reviews + ' 次）。',
+    '间隔 ' + last.label + '：' + last.rate + '% 通过（' + last.reviews + ' 次）。',
+    solid.length > 1
+      ? '差了 ' + Math.round(Math.abs(last.rate - first.rate) * 10) / 10 + ' 个百分点 —— 掉得越快，间隔该收得越短。'
+      : '只有一档有记录，还比不出长短。',
+    '空白格＝这一档一次都没复习过，不是 0%。',
+  ]
+  setText(takeaway, parts.join(''))
+}
+
+/* -------------------------------------------------- 复习间隔直方图（7 档） */
+
+function intervalsCard(stats) {
+  const card = document.getElementById('s-intervals')
+  if (!card) return miss('#s-intervals')
+  show('.chartbox', card)
+  const svg = q('#box-intervals svg', card)
+  if (!svg) return miss('#box-intervals 里的图')
+
+  const bars = qa('path.bar', svg)
+  const buckets = stats.intervals
+  if (!buckets.length) return miss('间隔分档')
+  const max = niceMax(Math.max.apply(null, buckets.map((one) => Number(one.count) || 0)))
+
+  buckets.forEach((one, index) => {
+    const bar = bars[index]
+    if (!bar) return miss('间隔分布第 ' + (index + 1) + ' 根柱')
+    const count = Number(one.count) || 0
+    paintBar(bar, count, max, one.label + ' 天 · ' + count + ' 张卡')
+  })
+  for (let index = buckets.length; index < bars.length; index += 1) bars[index].style.display = 'none'
+
+  // 刻度挪到相邻两根柱中间的缝里，写这一档的上界（天）
+  const edges = []
+  buckets.forEach((one, index) => {
+    const bar = bars[index]
+    if (!bar) return
+    const nums = String(bar.getAttribute('d') || '').match(/-?[\d.]+/g) || []
+    edges.push({ x1: Number(nums[0]), x2: Number(nums[14]), label: one.label })
+  })
+  const ticks = qa('text.tx', svg)
+  ticks.forEach((node, index) => {
+    const left = edges[index]
+    const right = edges[index + 1]
+    if (!left || !right) {
+      node.style.display = 'none'
+      return
+    }
+    node.style.display = ''
+    setAttr(node, 'x', round2((left.x2 + right.x1) / 2))
+    setText(node, upperOf(left.label))
+  })
+
+  const total = countWord(buckets)
+  const top = buckets.slice().sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))[0]
+  setText(q('.shead2 .smut', card), total + ' 张卡的当前间隔')
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-intervals .takeaway')
+  setText(
+    takeaway,
+    '按卡片的当前间隔分 7 档，横轴写到的是这一档的上界：「1」＝当天就再见到，「90+」＝三个月以上才回来。' +
+      '现在 ' + total + ' 张卡里最多的是 ' + (top ? top.label + ' 天这一档（' + (Number(top.count) || 0) + ' 张）' : '还不知道') +
+      '。间隔为 0 的卡（还没排上）不在这张图里。',
+  )
+}
+
+/* ------------------------------------------------ 卡片简易度（ease 分档） */
+
+function easeCard(stats) {
+  const card = document.getElementById('s-ease')
+  if (!card) return miss('#s-ease')
+  show('.chartbox', card)
+  const svg = q('#box-ease svg', card)
+  if (!svg) return miss('#box-ease 里的图')
+
+  const bars = qa('path.bar', svg)
+  const buckets = stats.ease
+  if (!buckets.length) return miss('简易度的分档')
+
+  // 设计稿 9 根柱：4 档放第 0/2/4/6 根，中间那几根（原来凑数的）藏掉
+  const slots = [0, 2, 4, 6]
+  const max = niceMax(Math.max.apply(null, buckets.map((one) => Number(one.count) || 0)))
+  buckets.forEach((one, index) => {
+    const bar = bars[slots[index]]
+    if (!bar) return miss('简易度第 ' + (index + 1) + ' 根柱')
+    const count = Number(one.count) || 0
+    paintBar(bar, count, max, one.label + ' · ' + count + ' 张卡')
+  })
+  bars.forEach((bar, index) => {
+    if (slots.indexOf(index) < 0) bar.style.display = 'none'
+  })
+
+  const ticks = qa('text.tx', svg)
+  ticks.forEach((node, index) => {
+    const one = buckets[index]
+    if (!one) {
+      node.style.display = 'none'
+      return
+    }
+    node.style.display = ''
+    setText(node, one.label)
+  })
+
+  const total = stats.cards === null ? countWord(buckets) : stats.cards
+  const top = buckets.slice().sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))[0]
+  const avg = stats.avgEase
+  setText(q('.shead2 .smut', card), avg === null ? '还没有难度值' : '越高越容易 · 平均 ' + avg.toFixed(2))
+
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-ease .takeaway')
+  if (avg === null) {
+    setText(takeaway, '简易度是按卡片算的，一张卡都没有，所以还没有平均值。练一句，下次给的评分就会算出 ease。')
+    return
+  }
+  setText(
+    takeaway,
+    '平均简易度 ' + avg.toFixed(2) + '（这个值越高越容易；每答一次按评分加减一点）。' +
+      '当前 ' + (total === null ? '—' : total) + ' 张卡里，落在 ' + (top ? top.label + ' 这一档的最多：' + (Number(top.count) || 0) + ' 张' : '还不知道') + '。',
+  )
+}
+
+/* ------------------------------------------------------------ 逐小时分析 */
+
+function hourlyCard(stats) {
+  const card = document.getElementById('s-hourly')
+  if (!card) return miss('#s-hourly')
+  show('.chartbox', card)
+  const svg = q('#box-hourly svg', card)
+  if (!svg) return miss('#box-hourly 里的图')
+
+  const bars = qa('path.bar', svg)
+  const rows = stats.hourly
+    .map((one) => ({ hour: Number(one.hour), count: Number(one.count) || 0 }))
+    .filter((one) => isFinite(one.hour) && one.hour >= 0 && one.hour <= 23)
+  if (!rows.length) return miss('逐小时的次数')
+
+  // 设计稿只有 7 根柱：画练得最多的 7 个小时，柱心按小时刻度（15.9167 + h*25.8333）
+  const shown = rows
+    .slice()
+    .sort((a, b) => b.count - a.count || a.hour - b.hour)
+    .slice(0, bars.length)
+    .filter((one) => one.count > 0)
+    .sort((a, b) => a.hour - b.hour)
+
+  if (!shown.length) return miss('有练习的小时')
+  const max = niceMax(shown.reduce((best, one) => Math.max(best, one.count), 0))
+  shown.forEach((one, index) => {
+    const bar = bars[index]
+    if (!bar) return miss('逐小时第 ' + (index + 1) + ' 根柱')
+    paintBar(bar, one.count, max, one.hour + ' 点 · ' + one.count + ' 次', 15.9167 + one.hour * 25.8333)
+  })
+  for (let index = shown.length; index < bars.length; index += 1) bars[index].style.display = 'none'
+
+  const total = countWord(rows)
+  const top = shown.slice().sort((a, b) => b.count - a.count)[0]
+  setText(q('.shead2 .smut', card), '练得最多的 ' + shown.length + ' 个小时 · 共 ' + total + ' 次')
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-hourly .takeaway')
+  setText(
+    takeaway,
+    '横轴是钟点，只画了练得最多的 ' + shown.length + ' 个小时：' +
+      shown
+        .slice()
+        .sort((a, b) => b.count - a.count)
+        .map((one) => one.hour + ' 点 ' + one.count + ' 次')
+        .join('、') +
+      '。设计稿那条「正确率」线没画 —— 后端只给按小时的次数，没有按小时的正确率。',
+  )
+}
+
+/* --------------------------------------------------------- 回答按钮分布 */
+
+function buttonsCard(stats) {
+  const card = document.getElementById('s-buttons')
+  if (!card) return miss('#s-buttons')
+  show('.chartbox', card)
+  const svg = q('#box-buttons svg', card)
+  if (!svg) return miss('#box-buttons 里的图')
+
+  const bars = qa('path.bar', svg)
+  const grades = stats.grades
+  if (!grades.length) return miss('四个回答按钮')
+  const max = niceMax(Math.max.apply(null, grades.map((one) => Number(one.count) || 0)))
+  const FALLBACK = ['重来', '困难', '良好', '简单']
+
+  grades.forEach((one, index) => {
+    const bar = bars[index]
+    if (!bar) return miss('回答按钮第 ' + (index + 1) + ' 根柱')
+    const count = Number(one.count) || 0
+    paintBar(bar, count, max, (one.label || FALLBACK[index] || '按钮') + ' · ' + count + ' 次')
+  })
+  for (let index = grades.length; index < bars.length; index += 1) bars[index].style.display = 'none'
+
+  const ticks = qa('text.tx', svg)
+  ticks.forEach((node, index) => {
+    const one = grades[index]
+    if (!one) {
+      node.style.display = 'none'
+      return
+    }
+    node.style.display = ''
+    setText(node, String(one.label || FALLBACK[index] || '—'))
+  })
+
+  const total = countWord(grades)
+  const passed =
+    grades.reduce((sum, one) => sum + (Number(one.grade) >= 3 ? Number(one.count) || 0 : 0), 0)
+  const share = total ? Math.round((passed / total) * 100) : 0
+  const best = grades.slice().sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))[0]
+  setText(q('.shead2 .smut', card), '共 ' + total + ' 次 · 通过 ' + share + '%')
+
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-buttons .takeaway')
+  setText(
+    takeaway,
+    '共 ' + total + ' 次回答：' +
+      grades
+        .map((one, index) => (one.label || FALLBACK[index] || '—') + ' ' + (Number(one.count) || 0))
+        .join('、') +
+      '。通过＝按了良好或简单，占 ' + share + '%' +
+      (best ? '，最多的是「' + (best.label || '—') + '」。' : '。'),
+  )
+}
+
+/* --------------------------------- 预测：排期画不出来，但四个总数是真的 */
+
+function forecastCard(stats, host) {
+  const card = document.getElementById('s-forecast')
+  if (!card) return miss('#s-forecast')
+  // 后端只记「什么时候到期」，没有未来每天的排期分布，这张图不编柱子
+  hide('.chartbox', card)
+  show('.sums', card)
+  const cells = qa('.sums > div', card)
+  const text = (value, unit) => (typeof value === 'number' && isFinite(value) ? String(value) + unit : '还不知道')
+  const rows = [
+    ['复习过', text(stats ? stats.reviews : host.reviews, ' 次')],
+    ['练过卡', text(stats ? stats.cards : host.started, ' 张')],
+    ['现在到期', text(host.due, ' 张')],
+    ['其中过期', text(host.overdue, ' 张')],
+  ]
+  rows.forEach((row, index) => {
+    const cell = cells[index]
+    if (!cell) return miss('预测卡第 ' + (index + 1) + ' 个格子')
+    setText(q('span.mut', cell), row[0])
+    setText(q('b', cell), row[1])
+  })
+  setText(q('.shead2 .smut', card), '后端还没有排期')
+
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-forecast .takeaway')
+  setText(
+    takeaway,
+    '这张图要「以后每天有多少张到期」的排期，后端现在只记每张卡的到期时刻、没有按天的分布，所以画不出来。' +
+      '能算的四个数填在上面了：复习过 ' + rows[0][1] + '、练过 ' + rows[1][1] + '卡、现在到期 ' + rows[2][1] +
+      '（其中过期 ' + rows[3][1] + '）。',
+  )
+}
+
+/* --------------------------------- 日程表：热力图要半年，后端只给 14 天 */
+
+function heatCard(stats) {
+  const card = document.getElementById('s-heat')
+  if (!card) return miss('#s-heat')
+  hide('.chartbox', card)
+  const days = stats && stats.daily.length ? stats.daily.length : null
+  setText(q('.shead2 .smut', card), days ? '要半年 · 后端只给 ' + days + ' 天' : '要半年 · 后端只给两周')
+
+  const takeaway = q('.takeaway', card)
+  if (!takeaway) return miss('#s-heat .takeaway')
+  setText(
+    takeaway,
+    '热力图是最近半年、一天一格。后端现在只给最近 ' + (days || 14) + ' 天的每日次数（画在「复习」那张卡上了），' +
+      '不够铺满 52 列，所以这张不打颜色 —— 不编格子。',
+  )
 }
 
 /* 标题栏和卡头上那些背后没有真数据的控件 */
