@@ -105,7 +105,14 @@ function apply(state, api, store) {
   }
 
   var seq = (store.seq += 1)
-  Promise.resolve(api.rpc('pack.get', { id: stub.id }))
+  // 宿主可能同步抛（比如 id 不合法），包一层免得整页停在这句「正在读」
+  var started
+  try {
+    started = Promise.resolve(api.rpc('pack.get', { id: stub.id }))
+  } catch (error) {
+    started = Promise.reject(error)
+  }
+  started
     .then(function (full) {
       if (seq !== store.seq) return // 已经换成别的包了，这份迟到的不算
       if (!full || !full.id) throw new Error('pack.get 没回包')
