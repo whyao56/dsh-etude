@@ -60,7 +60,7 @@ async function main() {
   await sleep(1500)
 
   const evaluate = async (body) => {
-    const expression = `(() => {
+    const expression = `(async () => {
       const iframe = document.querySelector('iframe')
       const doc = iframe && iframe.contentDocument
       if (!doc) return '没有 iframe'
@@ -104,6 +104,101 @@ async function main() {
       1,
     ),
   )
+  const snap = `
+    const img = doc.querySelector('.imgbar img')
+    const dur = doc.querySelector('.vline span.mut')
+    return {
+      h2: doc.querySelector('.fx-wordhd h2').textContent,
+      info: doc.querySelector('.fx-info').textContent.replace(/\\s+/g,' ').trim(),
+      def: doc.querySelector('.fx-list .fx-def .dt') ? doc.querySelector('.fx-list .fx-def .dt').textContent : '(没有 fx-def)',
+      rows: doc.querySelectorAll('.fx-row').length,
+      body: doc.querySelectorAll('.fx-body').length,
+      notes: [...doc.querySelectorAll('.fx-note')].map(n => n.textContent),
+      five: [...doc.querySelectorAll('.f5list .f5row em')].map(n => n.textContent),
+      img: img ? img.getAttribute('src').slice(0, 24) : '(没有 imgbar)',
+      dur: dur ? dur.textContent : '(没有声块)',
+      chips: [...doc.querySelectorAll('.chips span')].map(n => n.textContent),
+      side: [...doc.querySelectorAll('.fx-words li')].length,
+      sideHg: doc.querySelector('.fx-sidehd').textContent.trim(),
+      foot: doc.querySelector('.fx-foot').textContent.slice(0, 24)
+    }
+  `
+
+  for (const [label, state] of [
+    ['loading', `{ status: 'loading' }`],
+    ['error', `{ status: 'error', error: '账本文件读不了' }`],
+    ['空账本', `{ status: 'ready', packs: [], jobs: [] }`],
+  ]) {
+    console.log('--- ' + label + ' ---')
+    console.log(
+      JSON.stringify(
+        await evaluate(`
+          const api = { rpc: iframe.contentWindow.__ETUDE__.rpc }
+          try { iframe.contentWindow.__ETUDE_APPLY__(${state}, api) } catch (e) { return '抛错：' + e.message }
+          ${snap}
+        `),
+        null,
+        1,
+      ),
+    )
+  }
+
+  console.log('--- 再喂一份真 state，看模板能不能还原 ---')
+  console.log(
+    JSON.stringify(
+      await evaluate(`
+        const api = { rpc: iframe.contentWindow.__ETUDE__.rpc }
+        const state = await api.rpc('state')
+        try { iframe.contentWindow.__ETUDE_APPLY__(state, api) } catch (e) { return '抛错：' + e.message }
+        await new Promise(r => setTimeout(r, 700))
+        ${snap}
+      `),
+      null,
+      1,
+    ),
+  )
+
+  console.log('--- 设计稿演示数据是否还有 ---')
+  console.log(
+    JSON.stringify(
+      await evaluate(`
+        const html = doc.body.innerHTML
+        const needles = ['assets/factory', 'c1.jpg', '3.1s', '已选这张', 'They danced with wild abandon', '放弃（计划、希望）']
+        const where = {}
+        for (const n of needles) {
+          const out = []
+          const walk = (node) => {
+            if (node.nodeType === 3) {
+              if (node.nodeValue.indexOf(n) >= 0) {
+                let p = node.parentElement, chain = []
+                while (p && chain.length < 4) { chain.push(p.tagName.toLowerCase() + (p.className ? '.' + String(p.className).split(' ').join('.') : '')); p = p.parentElement }
+                out.push(chain.join(' < '))
+              }
+              return
+            }
+            if (node.nodeType === 1) {
+              if (node.tagName === 'IMG' && String(node.getAttribute('src')).indexOf(n) >= 0) {
+                let p = node.parentElement, chain = []
+                while (p && chain.length < 4) { chain.push(p.tagName.toLowerCase() + (p.className ? '.' + String(p.className).split(' ').join('.') : '')); p = p.parentElement }
+                out.push('img[' + node.getAttribute('src') + '] < ' + chain.join(' < '))
+              }
+              for (const child of node.childNodes) walk(child)
+            }
+          }
+          walk(doc.body)
+          where[n] = out.slice(0, 3)
+        }
+        return {
+          msheet: doc.querySelectorAll('.msheet').length,
+          sensesVisible: [...doc.querySelectorAll('.fx-sense')].filter(s => s.style.display !== 'none').length,
+          where,
+        }
+      `),
+      null,
+      1,
+    ),
+  )
+
   ws.close()
 }
 

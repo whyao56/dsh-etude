@@ -787,10 +787,12 @@ function sortPacks(packs) {
 
 /* 例句还不存在时只清空、不留设计稿的演示数字。 */
 function blankMain(state, message) {
+  var error = Boolean(state && state.status === 'error')
+  var empty = Boolean(state && state.status === 'ready')
   var head = document.querySelector('.fx-wordhd')
   if (head) {
     var h2 = head.querySelector('h2')
-    if (h2) h2.textContent = state && state.status === 'error' ? '账本读不出来' : '账本还没出来'
+    if (h2) h2.textContent = error ? '账本读不出来' : empty ? '账本里还没有包' : '账本还没出来'
     var ipa = head.querySelector('.mut.opt')
     if (ipa) ipa.textContent = ''
     var chip = head.querySelector('.chip')
@@ -806,7 +808,7 @@ function blankMain(state, message) {
   var def = document.querySelector('.fx-list .fx-def')
   if (def) {
     var dt = def.querySelector('.dt')
-    if (dt) dt.textContent = '等账本'
+    if (dt) dt.textContent = empty ? '先造一个包' : '等账本'
   }
   clearRows()
   insertNote(
