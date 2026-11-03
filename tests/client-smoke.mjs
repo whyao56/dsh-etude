@@ -108,7 +108,21 @@ const sandbox = {
   },
   document: {
     querySelector: () => null,
-    createElement: () => ({ dataset: {}, textContent: '' }),
+    createElement: () => {
+      const node = {
+        dataset: {},
+        style: {},
+        className: '',
+        textContent: '',
+        children: [],
+        setAttribute() {},
+        appendChild(child) {
+          node.children.push(child)
+          return child
+        },
+      }
+      return node
+    },
     head: { appendChild: () => {} },
   },
   URL: { createObjectURL: () => 'blob:fake', revokeObjectURL() {} },
@@ -127,7 +141,24 @@ const sandbox = {
 sandbox.globalThis = sandbox
 
 const source = await readFile(clientPath, 'utf8')
-vm.runInContext(source, vm.createContext(sandbox), { filename: clientPath })
+// 把内部组件抠出来 —— 不然只能测到首屏（EtudeApp 默认停在卡片页），
+// 学习/工厂/统计/设置四屏永远跑不到，等于没测。
+const withComponents = source.replace(
+  'return module.exports\n  },',
+  `Object.assign(module.exports, { __components: {
+    EtudeApp, CardsPage, StudyPage: typeof StudyPage === 'function' ? StudyPage : null,
+    FactoryPage: typeof FactoryPage === 'function' ? FactoryPage : null,
+    StatsPage: typeof StatsPage === 'function' ? StatsPage : null,
+    SettingsPage: typeof SettingsPage === 'function' ? SettingsPage : null,
+  } })
+  return module.exports
+  },`,
+)
+if (withComponents === source) {
+  console.error('没能把内部组件抠出来（构建产物末尾的形状变了）—— 冒烟会只测首屏。')
+  process.exit(1)
+}
+vm.runInContext(withComponents, vm.createContext(sandbox), { filename: clientPath })
 
 if (!captured || captured.id !== 'dsh-etude') {
   console.error('client.js 没有按 __ModuleLoader__ 的约定注册，id 对不上。')
@@ -136,6 +167,9 @@ if (!captured || captured.id !== 'dsh-etude') {
 
 const moduleExports = captured.factory((name) => {
   if (name === 'react') return React
+  // 面板把界面渲染进 shadow root，要用 createPortal。替身直接放行 —— 断的是
+  // 「注册与渲染不抛错」，不是挂载位置。
+  if (name === 'react-dom') return { createPortal: (children) => children }
   throw new Error(`客户端半不该 require(${JSON.stringify(name)})`)
 })
 
@@ -222,6 +256,34 @@ function render(node, path) {
     return
   }
   hostNodes += 1
+  // 面板把界面挂在 shadow root 里，靠 ref 拿到宿主元素。替身得让 ref 真的被调用，
+  // 否则 useEffect 里永远是 null，界面上一个节点都画不出来（白屏）。
+  if (typeof props?.ref === 'function' || (props?.ref && typeof props.ref === 'object')) {
+    const children = []
+    const shadow = {
+      children,
+      querySelector(selector) {
+        if (selector === '.etude-mount') return children.find((one) => one.className === 'etude-mount') ?? null
+        if (String(selector).startsWith('style')) return children.find((one) => one.tag === 'style') ?? null
+        return null
+      },
+      appendChild(child) {
+        children.push(child)
+        return child
+      },
+    }
+    const el = {
+      shadowRoot: null,
+      style: {},
+      setAttribute() {},
+      attachShadow() {
+        this.shadowRoot = shadow
+        return shadow
+      },
+    }
+    if (typeof props.ref === 'function') props.ref(el)
+    else props.ref.current = el
+  }
   render(props?.children, `${path}.${String(type)}`)
 }
 
@@ -364,6 +426,46 @@ rpcHandler = async () => {
 await mount('主面板（宿主连不上）', mainEntry.component, { size: 18 })
 
 await mount('侧栏图标', sidebarEntry.component, { size: 18, active: false }, 2)
+
+// 四屏各画一遍。冒烟以前只测首屏，学习/工厂/统计/设置从来没被渲染过 ——
+// 子代理带来的分片要是有一屏在渲染时抛错，界面就是白屏，而这个测试看不出来。
+// 注意：上面那个「宿主连不上」的用例把 rpcHandler 换成了抛错版，这里必须换回来，
+// 否则四屏全走错误分支，测出来是「能画错误卡」而不是「能画界面」。
+rpcHandler = async (channel, endpoint) => {
+  if (endpoint === 'state') return { ok: true, value: fakeState }
+  if (endpoint === 'pack.get') return { ok: true, value: fakePack }
+  if (endpoint === 'pack.voice.list') return { ok: true, value: { voices: [{ id: 'en-US-AriaNeural', label: 'Aria' }] } }
+  if (endpoint === 'pack.check') return { ok: true, value: { manifest: {}, verdict: 'ok', missing: [] } }
+  if (endpoint === 'image.bytes' || endpoint === 'candidate.bytes') {
+    return { ok: true, value: { dataBase64: pngBase64, mediaType: 'image/png' } }
+  }
+  return { ok: true, value: {} }
+}
+const pages = moduleExports.__components || {}
+const pageProps = {
+  rpc: () => ({ call: (...args) => rpcHandler(...args) }),
+  state: { status: 'ready', ...fakeState },
+  error: null,
+  reload: () => {},
+  onReload: () => {},
+  onGo: () => {},
+  onPage: () => {},
+}
+for (const [label, key] of [
+  ['卡片页', 'CardsPage'],
+  ['学习页', 'StudyPage'],
+  ['工厂页', 'FactoryPage'],
+  ['统计页', 'StatsPage'],
+  ['设置页', 'SettingsPage'],
+]) {
+  const component = pages[key]
+  if (typeof component !== 'function') {
+    console.error(`   FAIL ${label} — 构建产物里没有这个组件`)
+    process.exitCode = 1
+    continue
+  }
+  await mount(label, component, pageProps, 8)
+}
 
 if (!process.exitCode) {
   console.log('客户端半冒烟通过：面板不会白屏，数据回来了会重画。')

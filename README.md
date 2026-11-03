@@ -1,4 +1,4 @@
-﻿# dsh-etude · 卡片工厂
+# dsh-etude · 卡片工厂
 
 **DeepSeek Harness 插件：把「一个词」做成一整套能练的语言卡片。**
 
@@ -21,23 +21,34 @@
   → 导出：Downloads/dsh-etude/coffee-<id>/ 里就是成品
 ```
 
-> 现状：**0.1.0，能用**。真模型造过 8 目标 × 8 条例句，零 flag；配图走 Wikimedia
-> Commons 实拍图，每张都人工点过；语音走 Edge TTS（零配置、不要 key），也能接
-> OpenAI 兼容的 TTS。
+> 现状：**0.2.0**。0.1.0 的重面板换成了一套真界面：底部深色、主色是那种偏冷的
+> 蓝紫（`#97B1F0`），状态只用「齐 / 待 / 缺」三种说法，字号字重间距都收过一轮
+> （4 的倍数、6 级字阶、3 档字重、圆角只有 6/14/999）。
+>
+> 界面不是另画的一套：它就是把 `design/` 那 15 页样式稿搬进来，套在 shadow root
+> 里跑，所以样式稿改了界面就跟着改。搬法与为什么这么做见
+> [docs/UI.md](docs/UI.md)。
 
-![卡片工厂面板](docs/assets/panel-wide.jpg)
+![卡片页](docs/assets/ui-cards.png)
 
-挑图的那一条会切上下布局，九宫格铺满整卡宽 —— 缩略图太小就等于让人瞎点：
+学习页 —— 一句一个面，左抽屉七块，右栏「每一块都在这里」，底部四档评分：
 
-![九宫格挑图](docs/assets/panel-grid.jpg)
+![学习页](docs/assets/ui-study.png)
 
-窄屏（390px）下卡包列表变成横向一溜，卡片转上下布局：
+工厂页 —— 造料、挑图、听声、出厂，全在一页里直排，不再是十一个弹窗：
 
-<img src="docs/assets/panel-narrow.jpg" width="390" alt="窄屏">
+![工厂页](docs/assets/ui-factory.png)
 
-底部那排动作：批量取候选图（只取货、不替你点头）、打包、导出、补齐语音、删包。
+统计页 —— 只画数得出来的：包数、例句、配图齐、语音齐、能出厂：
 
-![底部动作](docs/assets/panel-actions.jpg)
+![统计页](docs/assets/ui-stats.png)
+
+设置页 —— 七组，全是 `index.js` 里真有的字段：
+
+![设置页](docs/assets/ui-settings.png)
+
+> 0.1.0 那套重面板的截图还在 `docs/assets/panel-*.jpg`（列表 + 巨图卡 + 底部动作条），
+> 对照着看就知道 0.2.0 换掉了什么：不是换皮，是按设计稿重排成了五页。
 
 ---
 
@@ -236,7 +247,19 @@ credit_url`，缺授权信息只警告、不拦交付 —— 但那种包别对�
 
 ```
 index.js           Host 半入口：Config、RPC、媒体路由、三个工具、systemPrompt 段
-client.js          Web UI 半：侧栏图标 + 主面板 + 配置卡（零依赖，手写 SVG）
+client.js          Web UI 半（构建产物：由 src/ 下的分片拼出来，别直接改）
+src/               界面的源文件，按文件名顺序拼成 client.js
+  00-base.js       h()、图标、Screen 外壳
+  10-shell.js      shadow 宿与顶栏
+  20-bridge.js     调 RPC、取账本、把包列表摊成表格行
+  40-cards.js      卡片页
+  45-study.js      学习页（五个面 + 评分）
+  50-factory.js    工厂页（造料 / 挑图 / 声音 / 出厂）
+  60-stats.js      统计页
+  70-settings.js   设置页
+  90-app.js        把上面几页拼成一个 App
+  99-register.js   注册侧栏条目与主面板
+scripts/build-client.cjs   把 src/*.js + design/app.css 拼成 client.js
 lib/
   prompts.js       Etude 那套七条 HARD RULES 原文 + 本插件加的三处约束
   examples.js      造例句、确定性校验、不过关带意见重试一次
@@ -247,7 +270,8 @@ lib/
   manifest.js      camelCase → 契约 v2 的 snake_case
 contract/          清单 schema + 两份同源校验器（JS / Python）
 tests/             单元、客户端渲染冒烟、RPC 冒烟、整链路自检、pytest
-docs/              GUIDE（操作手册）、DESIGN（十条决定，每条都写了否掉的另一个选择）、
+design/            15 页样式稿（界面真源，见 design/README.md）
+docs/              GUIDE（操作手册）、UI（界面怎么搬的）、DESIGN（十条决定）、
                    HANDOVER、assets（README 与手册用的截图）
 docs/video/        教程视频与生成它的代码（narration.mjs 逐字稿 + build.mjs 渲染器）
 ```

@@ -41,3 +41,7 @@ desktop.ini
 
 # screenshot output (dev only)
 design/_shots/
+
+# 0.1.0 界面备份（打磨前留的对照，不进仓库）
+design.v60/
+
