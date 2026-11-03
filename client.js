@@ -2,7 +2,7 @@
  * dsh-etude — Client half（由 scripts/build-client.mjs 生成，别直接改）
  *
  * 源在 src/NN-*.js，按文件名顺序拼；样式取 design/app.css，转成 shadow root 可用的形式。
- * 生成时间 2026-11-03T05:20:17.432Z
+ * 生成时间 2026-11-03T05:22:04.037Z
  */
 window.__ModuleLoader__.load({
   id: 'dsh-etude',
@@ -326,6 +326,9 @@ const FRAME_RUNTIME = `
   var seq = 0
   var pending = {}
   var PAGE = (document.documentElement && document.documentElement.dataset && document.documentElement.dataset.frame) || ''
+  // 深链的 query 只能从宿主传进来：srcdoc 里 location.search 永远是空的。
+  // 适配器优先读这个，再退到 location / hash。
+  window.__ETUDE_QUERY__ = (document.documentElement && document.documentElement.dataset && document.documentElement.dataset.query) || ''
   function post(kind, payload) {
     try {
       parent.postMessage(Object.assign({ source: 'etude-frame', page: PAGE, kind: kind }, payload || {}), '*')
@@ -450,6 +453,8 @@ function frameDoc(page, opts) {
   return (
     '<!doctype html><html lang="zh" data-frame="' +
     page +
+    '" data-query="' +
+    String((opts && opts.query) || '').replace(/"/g, '&quot;') +
     '"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<style>' +
@@ -495,7 +500,14 @@ function DesignFrame(props) {
     setDoc(null)
     setBooted(0)
     const id = setTimeout(() => {
-      setDoc(frameDoc(page, { skin: props.skin, skipGuide: props.skipGuide, previewState: props.previewState }))
+      setDoc(
+        frameDoc(page, {
+          query,
+          skin: props.skin,
+          skipGuide: props.skipGuide,
+          previewState: props.previewState,
+        }),
+      )
     }, 0)
     return () => clearTimeout(id)
   }, [page, query])
