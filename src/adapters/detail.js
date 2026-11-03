@@ -2,8 +2,13 @@
  *
  * 这一页 = 句库页 + 右边一个抽屉。抽屉里设计稿写的是 Anki 调度：
  * 「档 4 · 4 天后」「4 天 / 偏难 / 7 次 / 10月22日」「最近七次：10月30日 打 卡住」。
- * 插件没有调度引擎 —— 这些数一条都算不出来，所以整块如实写成「没有调度记录」，
- * 一个假数字都不留。真能填的是：句子本身、说法和释义、场景、原声是谁合成的。
+ * 后端现在有复习记录了，这三块接真数：
+ *   · review.card({packId, exampleId}) → { ease, interval, reps, lapses, grade, due, lastAt }
+ *   · review.recent({packId, limit:7}) → [{ at, packId, exampleId, face, grade, interval, ease, due }] 倒序
+ *   · state.review（dueSummary）→ { due, overdue, started, reviews } 给右上角 chip
+ * 例句的键是 ord（lib/packs.js 的例句只有 ord、没有 id，见 lib/rpc.js:534）。
+ * 一条记录都没有时才写「没有调度记录」；读不到（预览里假 rpc 回 {} 或 reject）写「还不知道」，
+ * 既不空白也不报错上屏。
  *
  * 契约同 cards.js：window.__ETUDE_APPLY__ = function (state, api)
  * 规矩：只改值；列表行可整批重建；锚点缺了 console.warn 跳过；幂等。
@@ -38,8 +43,9 @@ window.__ETUDE_APPLY__ = function (state, api) {
   var total = 0
   for (var i = 0; i < packs.length; i += 1) total += Number((packs[i].progress || {}).total) || 0
 
-  setSub(total + ' 句 · ' + packs.length + ' 个包 · 按面看进度')
-  setChips(total, packs)
+  var due = state.review && typeof state.review.due === 'number' ? state.review.due : null
+  setSub(total + ' 句 · ' + packs.length + ' 个包 · 按面看进度' + (due === null ? '' : ' · 到期 ' + due + ' 张'))
+  setChips(total, packs, due)
 
   var picked = null
   for (var p = 0; p < packs.length; p += 1) {
@@ -296,8 +302,8 @@ function fillDrawer(full, ord) {
     return
   }
 
-  // ① 五个面：设计稿是「已过 / 档 4 · 4 天后」。插件没有练习记录，写成「没练过」。
-  var rows = secs[0].querySelectorAll('.drow')
+  // ① 五个面：素材那根 pip 照账本里有没有图 / 音算；调度一栏等 review.card 回来再填
+  var rows = secs[0] ? secs[0].querySelectorAll('.drow') : []
   var faceNames = ['读', '打', '听', '说', '改']
   var hasRead = !!(example && example.image && example.image.file)
   var hasListen = !!(example && example.audio && example.audio.file)
@@ -307,39 +313,39 @@ function fillDrawer(full, ord) {
     var pipNode = rows[i].querySelector('.pip')
     if (pipNode) pipNode.className = 'pip' + (have[i] ? ' ok' : '')
     var dst = rows[i].querySelector('.dst')
-    if (dst) dst.textContent = '没练过'
+    if (dst) dst.textContent = '正在读调度…'
     var tail = rows[i].querySelector('.mut')
     if (tail) {
-      tail.textContent = '没有调度记录'
-      tail.setAttribute('title', '插件没有 Anki 调度：间隔、难度、复习次数一条都没有')
+      tail.textContent = '正在读调度…'
+      tail.setAttribute('title', '调度按「包 + 例句」记一条，五个面共用这一条')
     }
   }
+  if (secs[0]) {
+    var faceHead = secs[0].querySelector('.dsech')
+    if (faceHead) faceHead.setAttribute('title', '后端按「包 + 例句」记一条调度，五个面共用这一条')
+  }
 
-  // ② 卡片信息：四个格子全是调度数，一个都算不出来
+  // ② 卡片信息：当前间隔 / 难度 / 复习次数 / 到期，真值等 review.card 回来再填
   var dv = drawer.querySelectorAll('.dgrid .dv')
   if (!dv.length) console.warn('[etude/detail] 卡片信息里没有 .dv，跳过')
   for (var v = 0; v < dv.length; v += 1) {
-    dv[v].textContent = '没有调度记录'
-    dv[v].setAttribute('title', '插件不管复习排期，这四个数都没有')
+    dv[v].textContent = '正在读调度…'
+    dv[v].setAttribute('title', '等 review.card 回话')
+  }
+  var gridCells = drawer.querySelectorAll('.dgrid > div')
+  for (var gi = 0; gi < gridCells.length; gi += 1) {
+    var gridLabel = gridCells[gi].querySelector('.mut')
+    if (gridLabel && GRID_LABELS[gi]) gridLabel.textContent = GRID_LABELS[gi]
   }
 
-  // ③ 最近七次：一条复习记录都没有
+  // ③ 最近七次：等 review.recent 回来再填
   if (secs[2]) {
     var heading = secs[2].querySelector('.dsech')
-    if (heading) heading.textContent = '最近七次 · 后端没有记录'
+    if (heading) heading.textContent = '最近七次 · 正在读…'
     var past = secs[2].querySelectorAll('.drow')
     for (var k = 0; k < past.length; k += 1) {
       if (past[k].parentNode) past[k].parentNode.removeChild(past[k])
     }
-    var note = document.createElement('div')
-    note.className = 'drow'
-    note.setAttribute('data-etude', 'note')
-    note.innerHTML =
-      '<span class="mut" style="width:76px">—</span>' +
-      '<span class="df">—</span>' +
-      '<span class="pip"></span>' +
-      '<span class="mut" style="margin-left:auto">还没有复习记录</span>'
-    secs[2].appendChild(note)
   } else {
     console.warn('[etude/detail] 抽屉里找不到「最近七次」那段，跳过')
   }
@@ -390,6 +396,216 @@ function fillDrawer(full, ord) {
       footButtons[b].setAttribute('title', '去学习页练这个说法')
       goStudy(footButtons[b], full.target)
     }
+  }
+
+  // ⑥ 调度那三块（五个面的尾巴 / 卡片信息 / 最近七次）要问后端，回来再改
+  loadReview(full, example, secs)
+}
+
+/* ── 调度：review.card + review.recent 的真值 ─────────────────────────────── */
+
+var GRADES = ['重来', '困难', '良好', '简单']
+var GRID_LABELS = ['当前间隔', '难度', '复习次数', '到期']
+var FACE_TEXT = { listen: '听', speak: '说', read: '读', write: '写', vary: '改' }
+
+function faceText(face) {
+  return FACE_TEXT[String(face || '').toLowerCase()] || '—'
+}
+
+function gradeText(grade) {
+  return GRADES[Number(grade) - 1] || '—'
+}
+
+/** 复习账本的键是 `<packId>:<ord>`：例句只有 ord，没有 id（lib/packs.js） */
+function exampleIdOf(example) {
+  if (!example) return ''
+  var id = example.id == null ? '' : String(example.id).trim()
+  if (id) return id
+  var ord = example.ord == null ? '' : String(example.ord).trim()
+  return ord
+}
+
+function monthDay(stamp) {
+  var date = new Date(Number(stamp))
+  if (!isFinite(date.getTime())) return '还不知道'
+  return date.getMonth() + 1 + '月' + date.getDate() + '日'
+}
+
+/** 和 lib/review.js 的 intervalText 一致：<1 天写 1 分钟，30 天以上折成月 / 年 */
+function intervalText(days) {
+  var value = Number(days)
+  if (!isFinite(value) || value < 0) return '还不知道'
+  if (value < 1) return '1 分钟'
+  if (value < 30) return Math.round(value) + ' 天'
+  var months = Math.round(value / 30)
+  return months < 12 ? months + ' 个月' : Math.round(value / 365) + ' 年'
+}
+
+function easeText(ease) {
+  var value = Number(ease)
+  if (!isFinite(value) || value <= 0) return '还不知道'
+  return value.toFixed(2) + ' · ' + (value < 1.8 ? '偏难' : value < 2.3 ? '一般' : '容易')
+}
+
+/** 后端回的是一张卡（有 ease / reps / due …）还是空对象 */
+function isCard(value) {
+  if (!value || typeof value !== 'object') return false
+  return (
+    typeof value.ease === 'number' ||
+    typeof value.reps === 'number' ||
+    typeof value.interval === 'number' ||
+    typeof value.due === 'number'
+  )
+}
+
+/** 画不出来的时候也别空白：失败回 undefined，真没有回 null，两种说法不一样 */
+function safeRpc(api, endpoint, payload) {
+  try {
+    return Promise.resolve(api.rpc(endpoint, payload)).catch(function (error) {
+      console.warn('[etude/detail] ' + endpoint + ' 没回数', error)
+      return undefined
+    })
+  } catch (error) {
+    console.warn('[etude/detail] ' + endpoint + ' 调不动', error)
+    return Promise.resolve(undefined)
+  }
+}
+
+function loadReview(full, example, secs) {
+  var skin = window.__ETUDE_DETAIL__ || {}
+  var api = skin.api
+  skin.reviewToken = (skin.reviewToken || 0) + 1
+  var token = skin.reviewToken
+
+  var packId = String((full && full.id) || '')
+  var exampleId = exampleIdOf(example)
+  if (!api || typeof api.rpc !== 'function' || !packId || !exampleId) {
+    if (!packId || !exampleId) console.warn('[etude/detail] 这句拼不出 packId/exampleId，调度跳过')
+    else console.warn('[etude/detail] 宿主没给 api.rpc，调度跳过')
+    paintSchedule(secs, null, [], true)
+    return
+  }
+
+  var cardCall = safeRpc(api, 'review.card', { packId: packId, exampleId: exampleId })
+  var recentCall = safeRpc(api, 'review.recent', { packId: packId, limit: 7 })
+  Promise.all([cardCall, recentCall]).then(function (pair) {
+    if (token !== (skin.reviewToken || 0)) return // 抽屉已经换到别的句子了
+    var rawCard = pair[0]
+    var rawRecent = pair[1]
+    var unknown = rawCard === undefined || rawRecent === undefined
+    if (!unknown && rawCard !== null && !isCard(rawCard)) unknown = true // 预览回的 {} 这种
+    paintSchedule(secs, isCard(rawCard) ? rawCard : null, Array.isArray(rawRecent) ? rawRecent : [], unknown)
+  })
+}
+
+function paintSchedule(secs, card, recent, unknown) {
+  var rows = secs[0] ? secs[0].querySelectorAll('.drow') : []
+  var list = Array.isArray(recent) ? recent : []
+
+  // ① 五个面：调度只有一条（包 + 例句），五个面共用
+  for (var i = 0; i < rows.length; i += 1) {
+    var dst = rows[i].querySelector('.dst')
+    var tail = rows[i].querySelector('.mut')
+    if (card) {
+      var grade = Number(card.grade)
+      if (dst) dst.textContent = grade >= 3 ? '已过' : grade >= 1 ? '卡住' : '没练过'
+      if (tail) {
+        tail.textContent = '间隔 ' + intervalText(card.interval) + ' · ' + monthDay(card.due) + ' 到期'
+        tail.setAttribute(
+          'title',
+          '后端按「包 + 例句」记一条，五个面共用：上次给了「' + gradeText(card.grade) + '」，遗忘 ' +
+            (Number(card.lapses) || 0) + ' 次',
+        )
+      }
+    } else if (unknown) {
+      if (dst) dst.textContent = '—'
+      if (tail) {
+        tail.textContent = '还不知道'
+        tail.setAttribute('title', '还没读到这张卡的调度记录')
+      }
+    } else {
+      if (dst) dst.textContent = '没练过'
+      if (tail) {
+        tail.textContent = '没有调度记录'
+        tail.setAttribute('title', '这句还没复习过；练一次、给个评分就有调度了')
+      }
+    }
+  }
+
+  // ② 卡片信息：当前间隔 / 难度 / 复习次数 / 到期
+  var cells = secs[1] ? secs[1].querySelectorAll('.dgrid > div') : []
+  var values
+  if (card) {
+    values = [
+      Number(card.reps) > 0 ? intervalText(card.interval) : '还没排',
+      easeText(card.ease),
+      (Number(card.reps) || 0) + ' 次',
+      monthDay(card.due),
+    ]
+  } else if (unknown) {
+    values = ['还不知道', '还不知道', '还不知道', '还不知道']
+  } else {
+    values = ['没有调度记录', '没有调度记录', '没有调度记录', '没有调度记录']
+  }
+  for (var c = 0; c < cells.length; c += 1) {
+    var label = cells[c].querySelector('.mut')
+    if (label && GRID_LABELS[c]) label.textContent = GRID_LABELS[c]
+    var dv = cells[c].querySelector('.dv')
+    if (!dv) continue
+    dv.textContent = values[c] || '还不知道'
+    dv.setAttribute(
+      'title',
+      card
+        ? '来自 review.card：遗忘 ' + (Number(card.lapses) || 0) + ' 次，上次 ' + monthDay(card.lastAt)
+        : unknown
+          ? '还没读到这张卡的调度记录'
+          : '这句还没有复习记录',
+    )
+  }
+
+  // ③ 最近七次：review.recent 按时间倒序，时间用本地日期，面 / 评分都翻译成中文
+  var sec = secs[2]
+  if (!sec) {
+    console.warn('[etude/detail] 抽屉里找不到「最近七次」那段，跳过')
+    return
+  }
+  var heading = sec.querySelector('.dsech')
+  var olds = sec.querySelectorAll('.drow')
+  for (var k = 0; k < olds.length; k += 1) {
+    if (olds[k].parentNode) olds[k].parentNode.removeChild(olds[k])
+  }
+
+  if (!list.length) {
+    if (heading) heading.textContent = unknown ? '最近七次 · 还没读到' : '最近七次 · 后端没有记录'
+    var note = document.createElement('div')
+    note.className = 'drow'
+    note.setAttribute('data-etude', 'note')
+    note.innerHTML =
+      '<span class="mut" style="width:76px">—</span>' +
+      '<span class="df">—</span>' +
+      '<span class="pip"></span>' +
+      '<span class="mut" style="margin-left:auto">' + (unknown ? '还没读到调度记录' : '还没有复习记录') + '</span>'
+    sec.appendChild(note)
+    return
+  }
+
+  if (heading) heading.textContent = '最近七次 · 这个包 ' + list.length + ' 条'
+  for (var n = 0; n < list.length; n += 1) {
+    var one = list[n] || {}
+    var row = document.createElement('div')
+    row.className = 'drow'
+    row.setAttribute('data-etude', 'review')
+    row.setAttribute(
+      'title',
+      '第 ' + String(one.exampleId == null ? '?' : one.exampleId) + ' 句 · 间隔 ' + intervalText(one.interval) +
+        ' · ease ' + (typeof one.ease === 'number' ? one.ease.toFixed(2) : '—'),
+    )
+    row.innerHTML =
+      '<span class="mut" style="width:76px">' + escapeHtml(monthDay(one.at)) + '</span>' +
+      '<span class="df">' + escapeHtml(faceText(one.face)) + '</span>' +
+      '<span class="pip' + (Number(one.grade) >= 3 ? ' ok' : ' warn') + '"></span>' +
+      '<span class="mut" style="margin-left:auto">' + escapeHtml(gradeText(one.grade)) + '</span>'
+    sec.appendChild(row)
   }
 }
 
@@ -467,9 +683,9 @@ function setSub(text) {
   else console.warn('[etude/detail] 找不到 .hdr .sub，跳过')
 }
 
-/* 四个 chip 设计稿写的是「卡住 / 没开始 / 过了」——调度口径，插件没有。
-   换成能算的：句子数、包数、能练的包数、配图配声齐的句子数给不出，就写包。 */
-function setChips(total, packs) {
+/* 四个 chip 设计稿写的是「卡住 / 没开始 / 过了」—— 调度口径。
+   现在能算的是：句子数、包数、能练的包数、今天到期要复习的卡数（state.review.due）。 */
+function setChips(total, packs, due) {
   var chips = document.querySelectorAll('.hdr .act .chip')
   if (!chips.length) {
     console.warn('[etude/detail] 找不到 .hdr .act .chip，跳过')
@@ -481,11 +697,11 @@ function setChips(total, packs) {
     '全部 ' + total + ' 句',
     '包 ' + packs.length + ' 个',
     '能练 ' + learnable + ' 个',
-    '没调度的 ' + (packs.length - learnable) + ' 个',
+    due === null || due === undefined ? '到期还不知道' : '到期 ' + due + ' 张',
   ]
   for (var c = 0; c < chips.length && c < labels.length; c += 1) chips[c].textContent = labels[c]
   if (chips[0]) chips[0].setAttribute('title', '账本里所有包的例句总数')
   if (chips[1]) chips[1].setAttribute('title', '左栏一行一个包')
   if (chips[2]) chips[2].setAttribute('title', '图和音齐了、已经打包的包')
-  if (chips[3]) chips[3].setAttribute('title', '还没有一条复习记录')
+  if (chips[3]) chips[3].setAttribute('title', '今天到期、还没复习的卡（state.review.due）')
 }
