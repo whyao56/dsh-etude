@@ -1,46 +1,91 @@
-/* 90 · 组装：一个 App，按顶栏切页。
-   四屏都是可选的 —— 某个分片还没写出来时（typeof 是 'undefined'），
-   这一页就退回一张说明卡，不会整片白屏。 */
+/* 90 · 组装：一个 iframe，原样跑 design/ 的页面。
+ *
+ * 之前这里是五页 React（卡片/学习/工厂/统计/设置），丢掉的东西太多：
+ * 启动页没了、工厂 12 个弹层没了、设置 4 组没了、还有 8 个页面根本没搬。
+ * 现在只做三件事：拿 state、把页面切过去、把页面里的请求转给 RPC。
+ * 界面本身一行不重画 —— 它就是 design/ 里那 15 页。
+ */
 
-function EtudeApp({ rpc, configForm }) {
-  const [page, setPage] = useState('cards')
+const ETUDE_PAGES = [
+  'index',
+  'cards',
+  'study',
+  'listen',
+  'speak',
+  'read',
+  'type',
+  'vary',
+  'library',
+  'factory',
+  'stats',
+  'settings',
+  'tutorial',
+  'mine',
+  'detail',
+]
+
+function EtudeApp(props) {
+  const rpc = props.rpc
+  const [page, setPage] = useState('index')
+  const [query, setQuery] = useState('')
+  // 启动页点「开启」之后才进卡片页；直接进插件的人和刷新过的人，默认看卡片页。
+  const [entered, setEntered] = useState(false)
   const { state, error, reload } = useFactory(rpc)
 
-  const pageOf = (name) => {
-    if (name === 'cards') return h(CardsPage, { rpc, state, error, onReload: reload, onGo: setPage })
-    if (name === 'study' && typeof StudyPage === 'function') {
-      return h(StudyPage, { rpc, state, error, onReload: reload, onGo: setPage })
+  const onNav = (next, nextQuery) => {
+    if (!next || ETUDE_PAGES.indexOf(next) < 0) return
+    if (next === 'index') {
+      setEntered(false)
+    } else {
+      setEntered(true)
     }
-    if (name === 'factory' && typeof FactoryPage === 'function') {
-      return h(FactoryPage, { rpc, state, error, reload })
+    setPage(next)
+    setQuery(nextQuery || '')
+    if (next === 'index' && typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem('kf-test:onboarded')
+      } catch (e) {}
     }
-    if (name === 'stats' && typeof StatsPage === 'function') {
-      return h(StatsPage, { rpc, state, error, reload })
-    }
-    if (name === 'settings' && typeof SettingsPage === 'function') {
-      // form 是宿主 configForms 的 etude 表单；没有就传 null，设置页会渲染成只读并说明原因。
-      return h(SettingsPage, { rpc, state, error, reload, form: configForm || null, onBack: () => setPage('cards') })
-    }
-    return h(ViewStub, { title: name, note: '这一屏还没搬进插件。' })
   }
 
-  return h(
-    ShadowHost,
-    { theme: 'dark' },
-    h(
-      'div',
-      { className: 'etude-shell' },
-      h(Topbar, { page, onPage: setPage, state }),
-      pageOf(page),
-    ),
-  )
+  const onPageReady = (readyPage) => {
+    // 启动页：点「开启」等同于进卡片页
+    if (readyPage === 'index') setEntered(false)
+  }
+
+  // 深链：study?w=abandon 能把词带过去
+  // 启动页要留在原地（它就是入口画面），一旦进过正片就不会再被顶回去。
+  const frame = h(DesignFrame, {
+    page: page === 'index' || entered ? page : 'cards',
+    query,
+    state: state,
+    error: error,
+    rpc: rpc,
+    onNav,
+    onPageReady,
+    onError: (message) => {
+      if (typeof console !== 'undefined') console.warn('[etude] 页面适配器报错：', message)
+    },
+  })
+
+  return h(Wrapper, { onKey: reload }, frame)
 }
 
-function ViewStub({ title, note }) {
+/** 一层壳，只为给 iframe 一个 100% 高度；样式全在 iframe 里。 */
+function Wrapper({ children }) {
   return h(
-    Screen,
-    { className: 'half' },
-    h('header', { className: 'hdr' }, h('h1', null, title)),
-    h('div', { className: 'card', style: { padding: '24px' } }, h('p', { className: 'mut' }, note)),
+    'div',
+    {
+      className: 'etude-frame-wrap',
+      style: {
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        minHeight: '480px',
+        overflow: 'hidden',
+        background: 'var(--bg-bottom, #1B1C23)',
+      },
+    },
+    children,
   )
 }

@@ -145,12 +145,7 @@ const source = await readFile(clientPath, 'utf8')
 // 学习/工厂/统计/设置四屏永远跑不到，等于没测。
 const withComponents = source.replace(
   'return module.exports\n  },',
-  `Object.assign(module.exports, { __components: {
-    EtudeApp, CardsPage, StudyPage: typeof StudyPage === 'function' ? StudyPage : null,
-    FactoryPage: typeof FactoryPage === 'function' ? FactoryPage : null,
-    StatsPage: typeof StatsPage === 'function' ? StatsPage : null,
-    SettingsPage: typeof SettingsPage === 'function' ? SettingsPage : null,
-  } })
+  `Object.assign(module.exports, { __components: { EtudeApp, DesignFrame }, __pages: __PAGES__ })
   return module.exports
   },`,
 )
@@ -415,58 +410,86 @@ rpcHandler = async (channel, endpoint) => {
 const mainEntry = registrations.find((one) => one.declaration.name === 'main')
 const sidebarEntry = registrations.find((one) => one.declaration.name === 'sidebar.panellist')
 
-await mount('主面板（有包、有候选图、有语音）', mainEntry.component, { size: 18 })
+// 界面现在是 iframe：React 只画「一层壳 + 一个 iframe」，节点数天然只有 2。
+// 页面本体在 srcdoc 里，由后面那组「15 页都在」的断言来保证。
+await mount('主面板（有包、有候选图、有语音）', mainEntry.component, { size: 18 }, 2)
 
 rpcHandler = async () => ({ ok: true, value: { root: 'C:\\x', version: '0.1.0', packs: [], jobs: [], selfcheck: [] } })
-await mount('主面板（一个新包也没有）', mainEntry.component, { size: 18 })
+await mount('主面板（一个新包也没有）', mainEntry.component, { size: 18 }, 2)
 
 rpcHandler = async () => {
   throw Object.assign(new Error('socket closed'), { code: 'connection-closed' })
 }
-await mount('主面板（宿主连不上）', mainEntry.component, { size: 18 })
+await mount('主面板（宿主连不上）', mainEntry.component, { size: 18 }, 2)
 
 await mount('侧栏图标', sidebarEntry.component, { size: 18, active: false }, 2)
 
-// 四屏各画一遍。冒烟以前只测首屏，学习/工厂/统计/设置从来没被渲染过 ——
-// 子代理带来的分片要是有一屏在渲染时抛错，界面就是白屏，而这个测试看不出来。
-// 注意：上面那个「宿主连不上」的用例把 rpcHandler 换成了抛错版，这里必须换回来，
-// 否则四屏全走错误分支，测出来是「能画错误卡」而不是「能画界面」。
-rpcHandler = async (channel, endpoint) => {
-  if (endpoint === 'state') return { ok: true, value: fakeState }
-  if (endpoint === 'pack.get') return { ok: true, value: fakePack }
-  if (endpoint === 'pack.voice.list') return { ok: true, value: { voices: [{ id: 'en-US-AriaNeural', label: 'Aria' }] } }
-  if (endpoint === 'pack.check') return { ok: true, value: { manifest: {}, verdict: 'ok', missing: [] } }
-  if (endpoint === 'image.bytes' || endpoint === 'candidate.bytes') {
-    return { ok: true, value: { dataBase64: pngBase64, mediaType: 'image/png' } }
-  }
-  return { ok: true, value: {} }
+// 界面是 iframe：不再逐页渲染 React 组件，而是检查「15 页都在、srcdoc 能拼出来」。
+// 一页缺失、或者 CSS/JS 没内联进去，插件里就是白屏 —— 这个测试必须挡住。
+const pages = moduleExports.__pages || {}
+const expected = [
+  'index', 'cards', 'study', 'listen', 'speak', 'read', 'type', 'vary',
+  'library', 'factory', 'stats', 'settings', 'tutorial', 'mine', 'detail',
+]
+let missing = expected.filter((name) => !pages.pages || !pages.pages[name])
+if (missing.length) {
+  console.error('   FAIL 内联页面缺：' + missing.join(', '))
+  process.exitCode = 1
+} else {
+  console.log('   OK   15 页全部内联：' + expected.length + ' 页')
 }
-const pages = moduleExports.__components || {}
-const pageProps = {
-  rpc: () => ({ call: (...args) => rpcHandler(...args) }),
-  state: { status: 'ready', ...fakeState },
-  error: null,
-  reload: () => {},
-  onReload: () => {},
-  onGo: () => {},
-  onPage: () => {},
+if (!pages.css || pages.css.length < 100000) {
+  console.error('   FAIL 内联 CSS 太小，可能没读进 design/app.css')
+  process.exitCode = 1
+} else {
+  console.log('   OK   内联 CSS ' + (pages.css.length / 1024).toFixed(0) + 'KB')
 }
-for (const [label, key] of [
-  ['卡片页', 'CardsPage'],
-  ['学习页', 'StudyPage'],
-  ['工厂页', 'FactoryPage'],
-  ['统计页', 'StatsPage'],
-  ['设置页', 'SettingsPage'],
-]) {
-  const component = pages[key]
-  if (typeof component !== 'function') {
-    console.error(`   FAIL ${label} — 构建产物里没有这个组件`)
+if (!pages.js || pages.js.length < 20000) {
+  console.error('   FAIL 内联 JS 太小，页面脚本可能没进去')
+  process.exitCode = 1
+} else {
+  console.log('   OK   内联 JS ' + (pages.js.length / 1024).toFixed(0) + 'KB')
+}
+
+// 每一页的 body 里都得有设计稿的骨架，缺了就是白屏
+for (const name of expected) {
+  const raw = (pages.pages && pages.pages[name]) || ''
+  const body = typeof raw === 'string' ? raw : raw.body || ''
+  if (body.length < 200) {
+    console.error('   FAIL ' + name + ' 的 body 太短（' + body.length + ' 字节）')
     process.exitCode = 1
-    continue
   }
-  await mount(label, component, pageProps, 8)
+}
+if (!process.exitCode) console.log('   OK   每页都有 body 片段')
+
+// body 上的 class 不能丢：index 的 splash-body 一没，星空那两段样式全废
+const indexRaw = (pages.pages && pages.pages.index) || ''
+const indexAttrs = typeof indexRaw === 'string' ? '' : indexRaw.attrs || ''
+if (!/splash-body/.test(indexAttrs)) {
+  console.error('   FAIL 启动页的 <body class="splash-body"> 没保住（attrs=' + indexAttrs + '）')
+  process.exitCode = 1
+} else {
+  console.log('   OK   启动页 body 属性保住了')
+}
+
+// design 的脚本里一旦还留着 location.href =，iframe 里点一下就是 404 白屏。
+// 构建会把它们改写成 __etudeGo(...)，这里守住这条线。
+const leftover = (pages.js || '').match(/(?:window\.)?location\.href\s*=(?!=)/g)
+if (leftover && leftover.length) {
+  console.error('   FAIL 内联 JS 里还有 ' + leftover.length + ' 处 location.href =（构建没改写干净）')
+  process.exitCode = 1
+} else {
+  console.log('   OK   页面脚本里的 location.href 都已改成 __etudeGo')
+}
+
+const frame = moduleExports.__components && moduleExports.__components.DesignFrame
+if (typeof frame !== 'function') {
+  console.error('   FAIL 构建产物里没有 DesignFrame')
+  process.exitCode = 1
+} else {
+  await mount('设计稿宿主（iframe）', frame, { page: 'cards', state: { status: 'ready', ...fakeState } }, 1)
 }
 
 if (!process.exitCode) {
-  console.log('客户端半冒烟通过：面板不会白屏，数据回来了会重画。')
+  console.log('客户端半冒烟通过：面板不会白屏，15 页都在，数据回来了会重画。')
 }

@@ -21,13 +21,7 @@ mkdirSync(outDir, { recursive: true })
 const source = readFileSync(join(repo, 'client.js'), 'utf8')
 const withComponents = source.replace(
   'return module.exports\n  },',
-  `Object.assign(module.exports, { __components: {
-    EtudeApp, CardsPage,
-    StudyPage: typeof StudyPage === 'function' ? StudyPage : null,
-    FactoryPage: typeof FactoryPage === 'function' ? FactoryPage : null,
-    StatsPage: typeof StatsPage === 'function' ? StatsPage : null,
-    SettingsPage: typeof SettingsPage === 'function' ? SettingsPage : null,
-  } })
+  `Object.assign(module.exports, { __components: { EtudeApp, DesignFrame }, __pages: __PAGES__ })
   return module.exports
   },`,
 )
@@ -135,6 +129,10 @@ const sandbox = {
     head: { appendChild() {} },
   },
   URL: { createObjectURL: () => 'blob:fake', revokeObjectURL() {} },
+  addEventListener() {},
+  removeEventListener() {},
+  postMessage() {},
+  localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
   Blob: class {},
   atob: (text) => Buffer.from(text, 'base64').toString('binary'),
   btoa: (text) => Buffer.from(text, 'binary').toString('base64'),
@@ -195,7 +193,7 @@ const pack = {
 
 const state = {
   root: 'C:\\Users\\HP\\AppData\\Local\\dsh-etude',
-  version: '0.2.0',
+  version: require('./../package.json').version,
   exportDir: 'C:\\Users\\HP\\Downloads\\dsh-etude',
   packs: [pack, { ...pack, id: 'ffeeddccbbaa9988', target: 'run out of', kind: 'phrase', status: 'packed', progress: { total: 4, images: 4, audios: 4, done: true }, learnable: true }],
   jobs: [],
@@ -276,8 +274,10 @@ function build(node, path, out) {
     const value = props[name]
     if (value === undefined || value === null || value === false) return
     if (typeof value === 'object' || typeof value === 'function') return
-    const css = /[A-Z]/.test(name) ? name.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()) : name
-    attrs.push(`${css}="${String(value).replace(/"/g, '&quot;')}"`)
+    // HTML 属性大小写：iframe 的 srcDoc 必须落成 srcdoc，否则浏览器不认
+    const ALIAS = { srcDoc: 'srcdoc', readOnly: 'readonly', autoFocus: 'autofocus', tabIndex: 'tabindex' }
+    const css = ALIAS[name] || (/[A-Z]/.test(name) ? name.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()) : name)
+    attrs.push(`${css}="${String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`)
   })
   if (typeof props?.ref === 'function' || (props?.ref && typeof props.ref === 'object')) {
     // 挂在 shadow root 上的那个宿主 div：把门给它一个真的容器
@@ -359,37 +359,43 @@ html body .chart .bar,html body .chart .dc{transform:none!important;opacity:1!im
 `
 
 const pages = moduleExports.__components
+
+// 界面是 iframe：每页预览 = 直接把 DesignFrame 渲染出来，等于插件里那一格。
+// body 外面那圈只负责给它一个 100vh 的盒子。
 const jobs = [
-  ['cards', 'CardsPage', '卡片'],
-  ['study', 'StudyPage', '学习'],
-  ['factory', 'FactoryPage', '工厂'],
-  ['stats', 'StatsPage', '统计'],
-  ['settings', 'SettingsPage', '设置'],
+  ['index', '启动'],
+  ['cards', '卡片'],
+  ['study', '学习'],
+  ['listen', '听'],
+  ['speak', '说'],
+  ['read', '读'],
+  ['type', '写'],
+  ['vary', '改'],
+  ['factory', '工厂'],
+  ['stats', '统计'],
+  ['settings', '设置'],
+  ['library', '句库'],
+  ['detail', '详情'],
+  ['mine', '挖句'],
+  ['tutorial', '教程'],
 ]
 
-const props = {
-  rpc: () => ({ call: (...args) => rpcHandler(...args) }),
-  state,
-  error: null,
-  reload: () => {},
-  onReload: () => {},
-  onGo: () => {},
-  onPage: () => {},
-}
+const frameProps = (page) => ({
+  page,
+  query: '',
+  state: { status: 'ready', ...state },
+  skipGuide: true,
+  // 静态预览没有父窗口，把 state 注入 iframe 里跑一遍适配器，截图才看得到真数据
+  previewState: { status: 'ready', ...state },
+})
 
 async function main() {
-  for (const [slug, key, label] of jobs) {
-    const component = pages[key]
-    if (typeof component !== 'function') {
-      console.log(`skip ${slug}（没有这个组件）`)
-      continue
-    }
-    const body = await renderPage(component, props)
+  for (const [slug, label] of jobs) {
+    const body = await renderPage(pages.DesignFrame, frameProps(slug))
     const html = `<!doctype html>
 <html lang="zh"><head><meta charset="utf-8"><title>dsh-etude · ${label}</title>
-<style>${css}</style>
-<style>${previewCss}</style>
-</head><body><div class="etude-shell">${body}</div></body></html>`
+<style>html,body{margin:0;height:100%;background:#1B1C23;overflow:hidden}</style>
+</head><body><div style="height:100vh">${body}</div></body></html>`
     writeFileSync(join(outDir, `plugin-${slug}.html`), html)
     console.log(`ok ${slug} → ${join(outDir, `plugin-${slug}.html`)}（${html.length} 字节）`)
   }

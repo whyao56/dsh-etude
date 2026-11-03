@@ -16,6 +16,7 @@
  * 成品包是标准的 v2 卡片包目录，谁想读都能读。
  */
 import z from '@deepseek-ai/schemastery'
+import { readFileSync } from 'node:fs'
 
 import { registerMediaRoutes } from './lib/http-server.js'
 import { createJobRunner } from './lib/jobs.js'
@@ -29,7 +30,10 @@ export const name = 'dsh-etude'
 
 export const inject = ['tools']
 
-export const version = '0.1.0'
+/** 版本只认 package.json 一处，别在这里再写死一个数（曾经 0.1.0 / 0.2.0 / 0.3.0 三个说法） */
+export const version = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+).version
 
 export const RPC_CHANNEL = '/etude'
 

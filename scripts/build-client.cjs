@@ -69,6 +69,28 @@ if (!list.length) {
   process.exit(1)
 }
 
+// design 的 15 页，CSS/JS 各一份、每页一段 body —— 见 scripts/inline-design.cjs
+const pagesFile = path.join(ROOT, 'build', 'pages.json')
+if (!fs.existsSync(pagesFile)) {
+  console.error('缺 build/pages.json —— 先跑 node scripts/inline-design.cjs')
+  process.exit(1)
+}
+const pages = JSON.parse(fs.readFileSync(pagesFile, 'utf8'))
+
+/** 每页一个数据适配器：src/adapters/<page>.js（没有就空串） */
+function adapters() {
+  const dir = path.join(SRC, 'adapters')
+  const out = {}
+  if (!fs.existsSync(dir)) return out
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.endsWith('.js')) continue
+    out[f.replace(/\.js$/, '')] = fs.readFileSync(path.join(dir, f), 'utf8')
+  }
+  return out
+}
+
+const adapterMap = adapters()
+
 const body = list
   .map(
     (p) =>
@@ -98,6 +120,10 @@ window.__ModuleLoader__.load({
 
     /** design/app.css，:root 已换成 :host */
     const __CSS__ = ${JSON.stringify(css)}
+    /** design 的 15 页：{ css, js, pages:{name:body} } */
+    const __PAGES__ = ${JSON.stringify(pages)}
+    /** 每页的数据适配器：{ name: source } */
+    const __ADAPTERS__ = ${JSON.stringify(adapterMap)}
 ${body}
 
     return module.exports

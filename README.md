@@ -21,13 +21,17 @@
   → 导出：Downloads/dsh-etude/coffee-<id>/ 里就是成品
 ```
 
-> 现状：**0.2.0**。0.1.0 的重面板换成了一套真界面：底部深色、主色是那种偏冷的
-> 蓝紫（`#97B1F0`），状态只用「齐 / 待 / 缺」三种说法，字号字重间距都收过一轮
-> （4 的倍数、6 级字阶、3 档字重、圆角只有 6/14/999）。
+> 现状：**0.3.0**。0.2.0 那一版是把 15 页样式稿「翻译」成 React 重写，结果丢了启动页、
+> 8 个页面、工厂 12 个弹层 —— 翻译必然丢细节。0.3.0 改成**原样搬**：15 页放在一个
+> iframe 里跑，样式、交互、弹层、动效全部来自 `design/` 本体，插件只负责往里喂真数据。
 >
-> 界面不是另画的一套：它就是把 `design/` 那 15 页样式稿搬进来，套在 shadow root
-> 里跑，所以样式稿改了界面就跟着改。搬法与为什么这么做见
-> [docs/UI.md](docs/UI.md)。
+> 结构：`design/`（界面真源）→ `scripts/inline-design.cjs` 把 15 页的 body 与公共
+> CSS/JS 抽出来 → `scripts/build-client.cjs` 内联进 `client.js` → `src/30-frame.js`
+> 用 iframe 渲染，`src/adapters/<page>.js` 把写死的演示数字换成账本里的真数字。
+>
+> 为什么不吃 React 那一口、适配器契约怎么写，见 [docs/ADAPTERS.md](docs/ADAPTERS.md)。
+
+![启动页](docs/assets/ui-index.png)
 
 ![卡片页](docs/assets/ui-cards.png)
 
