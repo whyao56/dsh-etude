@@ -2,7 +2,7 @@
  * dsh-etude — Client half（由 scripts/build-client.mjs 生成，别直接改）
  *
  * 源在 src/NN-*.js，按文件名顺序拼；样式取 design/app.css，转成 shadow root 可用的形式。
- * 生成时间 2026-11-03T05:52:59.764Z
+ * 生成时间 2026-11-03T05:55:00.096Z
  */
 window.__ModuleLoader__.load({
   id: 'dsh-etude',
