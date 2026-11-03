@@ -534,6 +534,9 @@ function quietCards(tip, smut) {
     hide('.sctls', card)
     hide('table.rt', card)
     hide('.sums', card)
+    // 设计稿里那些示例数字一起抹掉：这张卡现在是空的，页面上不许留假数
+    qa('table.rt tbody td', card).forEach((cell) => setText(cell, '—'))
+    qa('.sums b', card).forEach((sum) => setText(sum, '—'))
     setText(q('.shead2 .smut', card), smut)
     const takeaway = q('.takeaway', card)
     if (!takeaway) return miss('#' + id + ' 的说明行')
@@ -563,8 +566,11 @@ function paintBar(node, count, max, tip, centerX) {
     x1 += shift
     x2 += shift
   }
-  const r = Math.min(4, Math.max(0, (x2 - x1) / 2 - 0.5))
   const top = count > 0 ? BAR_BASE - ((BAR_BASE - BAR_TOP) * count) / max : BAR_BASE
+  // 0 的柱不留高度（不然圆角会从基线下面拐一下，看着像负值）；柱子太矮时圆角也跟着收
+  const r = count > 0
+    ? Math.min(4, Math.max(0, (x2 - x1) / 2 - 0.5), Math.max(0, (BAR_BASE - top) / 2))
+    : 0
   const d =
     'M' + round2(x1) + ' ' + BAR_BASE +
     ' L' + round2(x1) + ' ' + round2(top + r) +

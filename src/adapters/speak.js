@@ -3,10 +3,11 @@
  * design/speak.html 里写死了：succumb、第 2 句、c1.jpg、3.2s、
  * 「edge · Aria · 女声」和一句假句子。
  *
- * 这一面有一件后端完全没有的事：录音。
- * 账本里没有录音字段，rpc 里也没有录音端点，网页里也没接 MediaRecorder ——
- * 所以这里不假装能录：圆按钮置灰、写明「录音还没接」，把这一面降级成
- * 「看图说一句 + 自己听原声对」的可跳过状态。
+ * 这一面还有一件设计稿没做的事：自己录一遍。后端现在有录音存储了
+ * （example.record / example.record.bytes / example.record.delete），圆钮是真能录的：
+ *   点一下 → getUserMedia + MediaRecorder → 再点一下停 → 读成 base64 →
+ *   example.record 存进账本 → 「听自己这一遍」走 example.record.bytes 回放。
+ * 没有麦克风 / 用户拒绝 / 浏览器不支持 MediaRecorder 时只改文案，不抛错、不弹窗。
  */
 
 ;(function () {
@@ -44,7 +45,7 @@
     setTitle(pack.target || '(没名字)')
     setFaces(null, null)
     setCrumbOrd(1)
-    markRecorder()
+    markRecorder(pack, api)
     if (!api || typeof api.rpc !== 'function') {
       setNote('宿主没给 RPC，取不到这一句。')
       return
@@ -68,6 +69,7 @@
         if (example.audio && example.audio.file) muteStaleHint()
         fillPicture(example, api)
         fillVoice(example, api)
+        bindRecord(example)
         var cue = document.querySelector('.stage .reveal .cue')
         if (cue) cue.textContent = example.sentence || ''
         else warn('没找到 .stage .reveal .cue，句子没换上')
@@ -89,33 +91,568 @@
     document.head.appendChild(style)
   }
 
-  // ── 录音：没有这回事，就别让它看起来有 ──────────────────────────────
-  function markRecorder() {
+  // ── 录音：真录、真传、真回放 ────────────────────────────────────────
+  //
+  // 状态挂在这个闭包里。一页只有一个「说」的圆钮，同一时刻也只录一条；
+  // 重新 apply（换词、state 刷新）不能把正在录的那一遍弄丢，所以
+  // session 每开录 +1，回来晚的 onstop 认不出自己就直接丢掉。
+  var REC = {
+    api: null,
+    packId: '',
+    example: null,
+    ord: 0,
+    ready: false, // 浏览器有能力（getUserMedia + MediaRecorder）；不代表用户允许
+    why: '', // 不能录时写进 .reclab 的实话
+    recorder: null,
+    stream: null,
+    chunks: [],
+    startedAt: 0,
+    timer: 0,
+    session: 0,
+    uploading: false,
+    playing: null,
+  }
+
+  /** 圆钮从「还没接」改成可点；能力判断先做完，再决定文案 */
+  function markRecorder(pack, api) {
+    REC.api = api || null
+    REC.packId = (pack && pack.id) || ''
+    var sup = recorderSupport()
+    REC.ready = sup.ok
+    REC.why = sup.ok ? '' : '这个浏览器不支持录音 —— ' + sup.reason
+    dropPlaying()
     var rec = document.querySelector('.stage .rec')
-    var lab = document.querySelector('.stage .reclab')
-    if (rec) {
-      rec.setAttribute('aria-disabled', 'true')
-      rec.setAttribute('title', '录音还没接')
-      rec.style.opacity = '0.4'
-      rec.style.cursor = 'not-allowed'
-      rec.style.pointerEvents = 'none'
-      rec.onclick = null
+    if (!rec) {
+      warn('没找到 .stage .rec，录音没接上')
     } else {
-      warn('没找到 .stage .rec，录音标记没打上')
-    }
-    if (lab) {
-      lab.textContent = '录音还没接 —— 这一面先跳过：看图说一句，或者点开「听原声」跟着念'
-    } else {
-      warn('没找到 .stage .reclab')
-    }
-    // 底栏那颗「R 重录」也是录音的幌子 —— 改成实话，键位提示本身留着
-    var bar = document.querySelector('.actbar')
-    var spans = bar ? bar.querySelectorAll('span') : []
-    for (var i = 0; i < spans.length; i += 1) {
-      if (spans[i].textContent.trim() === '重录') {
-        spans[i].textContent = '未接录音'
-        spans[i].setAttribute('title', '后端没有录音这个端点')
+      rec.removeAttribute('aria-disabled')
+      rec.setAttribute('role', 'button')
+      rec.setAttribute('tabindex', '0')
+      rec.setAttribute('aria-label', '录音')
+      rec.setAttribute('aria-pressed', isRecording() ? 'true' : 'false')
+      rec.setAttribute('title', REC.ready ? '点一下开始录，再点一下停' : REC.why)
+      rec.style.opacity = ''
+      rec.style.cursor = 'pointer'
+      rec.style.pointerEvents = ''
+      if (!isRecording()) rec.classList.remove('on')
+      rec.onclick = function () {
+        toggleRecord()
       }
+      rec.onkeydown = function (event) {
+        var key = String((event && event.key) || '')
+        if (key !== 'Enter' && key !== ' ' && key !== 'Spacebar') return
+        event.preventDefault()
+        toggleRecord()
+      }
+    }
+    recStyle()
+    wireRecordKey()
+    restoreBar()
+    if (isRecording()) return
+    var lab = document.querySelector('.stage .reclab')
+    if (!lab) {
+      warn('没找到 .stage .reclab')
+    } else if (REC.ready) {
+      lab.textContent = '点一下开始录 · 再点一下停'
+    } else {
+      lab.textContent = REC.why
+    }
+    hidePlay()
+  }
+
+  /** pack.get 回来之后：认下这一句的 ord，把「上次录的那一遍」亮出来 */
+  function bindRecord(example) {
+    if (!example) return
+    var ord = Number(example.ord) || 1
+    if (isRecording() && REC.ord !== ord) abortRecording()
+    REC.example = example
+    REC.ord = ord
+    if (isRecording() || REC.uploading) return
+    var record = example.record
+    if (!record || !record.file) {
+      hidePlay()
+      return
+    }
+    setRecLab('上次录的那一遍 · ' + sayMs(record.durationMs))
+    showPlay('听自己这一遍')
+  }
+
+  /** 点圆钮：开录 / 停录 / 什么都不能做时说句实话 */
+  function toggleRecord() {
+    if (REC.uploading) {
+      setRecLab('上一遍还在存，等它存完')
+      return
+    }
+    if (isRecording()) {
+      stopRecording()
+      return
+    }
+    if (REC.recorder) return // 已经在收尾
+    if (!REC.api || typeof REC.api.rpc !== 'function') {
+      setRecLab('宿主没给 RPC，录了也没地方存')
+      return
+    }
+    if (!REC.ready) {
+      setRecLab(REC.why)
+      return
+    }
+    if (!REC.example) {
+      setRecLab('例句还没取到，等一下再录')
+      return
+    }
+    startRecording()
+  }
+
+  function startRecording() {
+    REC.session += 1
+    var session = REC.session
+    var rec = document.querySelector('.stage .rec')
+    if (rec) {
+      rec.classList.add('on')
+      rec.setAttribute('aria-pressed', 'true')
+    }
+    setRecLab('等浏览器给麦克风…')
+    var nav = typeof navigator !== 'undefined' ? navigator : null
+    var media = nav && nav.mediaDevices
+    var ask
+    try {
+      ask = media.getUserMedia({ audio: true })
+    } catch (error) {
+      micFailed(error)
+      return
+    }
+    Promise.resolve(ask)
+      .then(function (stream) {
+        if (session !== REC.session) {
+          stopStream(stream)
+          return
+        }
+        REC.stream = stream
+        var recorder = null
+        var mime = pickMime()
+        try {
+          recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream)
+        } catch (error) {
+          recorder = null
+        }
+        if (!recorder) {
+          stopStream(stream)
+          REC.stream = null
+          clearRecordingPaint()
+          setRecLab('麦克风能开，但这个浏览器起不了 MediaRecorder，这一面先跳过')
+          return
+        }
+        REC.recorder = recorder
+        REC.chunks = []
+        REC.startedAt = Date.now()
+        recorder.ondataavailable = function (event) {
+          if (event && event.data && event.data.size) REC.chunks.push(event.data)
+        }
+        recorder.onerror = function (event) {
+          var error = (event && event.error) || new Error('录音中断')
+          REC.session += 1 // 让随后那次 onstop 作废
+          stopTicker()
+          clearRecordingPaint()
+          try {
+            if (recorder.state !== 'inactive') recorder.stop()
+          } catch (ignored) {}
+          stopStream(stream)
+          REC.stream = null
+          REC.recorder = null
+          setRecLab('录音断了（' + short(error) + '），再点一下重录')
+        }
+        recorder.onstop = function () {
+          finishRecording(session, recorder)
+        }
+        try {
+          recorder.start(250)
+        } catch (error) {
+          REC.recorder = null
+          stopStream(stream)
+          REC.stream = null
+          clearRecordingPaint()
+          setRecLab('录音起不来（' + short(error) + '），再点一下试试')
+          return
+        }
+        startTicker()
+        paintRecording()
+      })
+      .catch(function (error) {
+        if (session === REC.session) micFailed(error)
+      })
+  }
+
+  function stopRecording() {
+    var recorder = REC.recorder
+    if (!recorder) return
+    setRecLab('这就停…')
+    try {
+      if (recorder.state !== 'inactive') recorder.stop()
+    } catch (error) {
+      finishRecording(REC.session, recorder)
+    }
+  }
+
+  /** 换词/换句时把没录完的这段扔掉：不停止上传，只释放麦克风 */
+  function abortRecording() {
+    REC.session += 1
+    stopTicker()
+    var recorder = REC.recorder
+    REC.recorder = null
+    if (recorder) {
+      try {
+        if (recorder.state !== 'inactive') recorder.stop()
+      } catch (error) {}
+    }
+    stopStream(REC.stream)
+    REC.stream = null
+    REC.chunks = []
+    REC.startedAt = 0
+    clearRecordingPaint()
+  }
+
+  function finishRecording(session, recorder) {
+    stopTicker()
+    var stream = REC.stream
+    REC.stream = null
+    REC.recorder = null
+    stopStream(stream)
+    clearRecordingPaint()
+    var chunks = REC.chunks
+    REC.chunks = []
+    if (!recorder) return
+    var blob
+    try {
+      blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
+    } catch (error) {
+      setRecLab('这一遍拼不起来（' + short(error) + '），再点一下重录')
+      return
+    }
+    var durationMs = REC.startedAt ? Date.now() - REC.startedAt : 0
+    REC.startedAt = 0
+    if (session !== REC.session) return
+    if (!blob.size) {
+      setRecLab('这一遍是空的（麦克风没给声音），再点一下重录')
+      return
+    }
+    var mime = String(recorder.mimeType || blob.type || '')
+      .split(';')[0]
+      .trim()
+      .toLowerCase()
+    if (!/^audio\/(webm|ogg|wav|mpeg)$/.test(mime)) {
+      setRecLab('这个浏览器录出来是 ' + (mime || '未知格式') + '，后端不认，换 Chrome 试试')
+      return
+    }
+    if (blob.size > 8 * 1024 * 1024) {
+      setRecLab('这一遍 ' + (blob.size / 1024 / 1024).toFixed(1) + 'MB，超了后端 8MB 上限，录短一点')
+      return
+    }
+    upload(blob, mime, durationMs, session)
+  }
+
+  function upload(blob, mime, durationMs, session) {
+    var api = REC.api
+    var packId = REC.packId
+    var ord = REC.ord
+    REC.uploading = true
+    setRecLab('正在存进账本…（' + sayMs(durationMs) + '）')
+    blobToBase64(blob)
+      .then(function (base64) {
+        if (!base64) throw new Error('读出来是空的')
+        return api.rpc('example.record', {
+          packId: packId,
+          ord: ord,
+          base64: base64,
+          mime: mime,
+          durationMs: durationMs,
+        })
+      })
+      .then(function (saved) {
+        REC.uploading = false
+        if (session !== REC.session) return
+        var kept = saved || {}
+        if (REC.example && Number(REC.example.ord) === ord) REC.example.record = kept
+        var ms = Number(kept.durationMs)
+        setRecLab('刚录完 · ' + sayMs(Number.isFinite(ms) && ms > 0 ? ms : durationMs) + ' · 已存进账本')
+        showPlay('听自己这一遍')
+      })
+      .catch(function (error) {
+        REC.uploading = false
+        setRecLab('没存上（' + short(error) + '）· 再点一下重录')
+      })
+  }
+
+  function playOwn() {
+    if (REC.playing) {
+      dropPlaying()
+      showPlay('听自己这一遍')
+      return
+    }
+    var api = REC.api
+    var packId = REC.packId
+    var ord = REC.ord
+    if (!api || typeof api.rpc !== 'function') {
+      setRecLab('宿主没给 RPC，回放取不到')
+      return
+    }
+    if (!ord) {
+      setRecLab('还没有录过这一句')
+      return
+    }
+    showPlay('正在取那一遍…')
+    api
+      .rpc('example.record.bytes', { packId: packId, ord: ord })
+      .then(function (res) {
+        if (!res || !res.base64) throw new Error('没有字节')
+        var audio = makeAudio('data:' + (res.mime || 'audio/webm') + ';base64,' + res.base64)
+        if (!audio) throw new Error('浏览器放不了音频')
+        REC.playing = audio
+        audio.onended = function () {
+          dropPlaying()
+          showPlay('听自己这一遍')
+        }
+        audio.onerror = function () {
+          dropPlaying()
+          showPlay('听自己这一遍')
+          setRecLab('这一遍放不出来（字节不完整？）')
+        }
+        showPlay('正在放…')
+        return audio.play().catch(function (error) {
+          dropPlaying()
+          showPlay('听自己这一遍')
+          setRecLab('放不出来（' + short(error) + '）· 再点一下试试')
+        })
+      })
+      .catch(function (error) {
+        showPlay('听自己这一遍')
+        setRecLab('回放没取到（' + short(error) + '）· 再点一下试试')
+      })
+  }
+
+  function makeAudio(url) {
+    if (typeof Audio !== 'function') return null
+    try {
+      return new Audio(url)
+    } catch (error) {
+      return null
+    }
+  }
+
+  function dropPlaying() {
+    var audio = REC.playing
+    REC.playing = null
+    if (!audio) return
+    try {
+      audio.onended = null
+      audio.onerror = null
+      audio.pause()
+    } catch (error) {}
+  }
+
+  /** 「听自己这一遍」按钮：设计稿这一面没有按钮位，只能生成一个 .mini（唯一新增节点） */
+  function playButton() {
+    var stage = document.querySelector('.stage')
+    if (!stage) {
+      warn('没找到 .stage，回放按钮没处放')
+      return null
+    }
+    var button = stage.querySelector('button[data-etude-play]')
+    if (button) return button
+    var lab = stage.querySelector('.reclab')
+    button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'mini'
+    button.setAttribute('data-etude-play', '')
+    button.style.marginTop = '-14px'
+    button.textContent = '听自己这一遍'
+    button.onclick = function (event) {
+      if (event) event.preventDefault()
+      playOwn()
+    }
+    if (lab && lab.parentNode === stage) stage.insertBefore(button, lab.nextSibling)
+    else stage.appendChild(button)
+    return button
+  }
+
+  function showPlay(text) {
+    var button = playButton()
+    if (!button) return
+    button.textContent = text
+    button.style.display = ''
+  }
+
+  function hidePlay() {
+    var stage = document.querySelector('.stage')
+    var button = stage ? stage.querySelector('button[data-etude-play]') : null
+    if (!button) return
+    button.textContent = '听自己这一遍'
+    button.style.display = 'none'
+  }
+
+  function setRecLab(text) {
+    var lab = document.querySelector('.stage .reclab')
+    if (lab) lab.textContent = text
+    else warn('没找到 .stage .reclab，录音文案没处写')
+  }
+
+  function startTicker() {
+    stopTicker()
+    REC.timer = setInterval(paintRecording, 200)
+  }
+
+  function stopTicker() {
+    if (!REC.timer) return
+    clearInterval(REC.timer)
+    REC.timer = 0
+  }
+
+  function paintRecording() {
+    var rec = document.querySelector('.stage .rec')
+    if (rec) {
+      rec.classList.add('on')
+      rec.setAttribute('aria-pressed', 'true')
+    }
+    // 这里不能走 sayMs：刚开录那一下差 0 毫秒，会被当成「时长没记」
+    var ms = REC.startedAt ? Date.now() - REC.startedAt : 0
+    setRecLab('正在录 · ' + (ms / 1000).toFixed(1) + ' 秒 · 再点一下停')
+  }
+
+  function clearRecordingPaint() {
+    var rec = document.querySelector('.stage .rec')
+    if (!rec) return
+    rec.classList.remove('on')
+    rec.setAttribute('aria-pressed', 'false')
+  }
+
+  /** 录制态的样式：设计稿只给了 .rec 的静态样子，.on 得自己补一条（只加 class，不改结构） */
+  function recStyle() {
+    if (typeof document === 'undefined' || !document.head) return
+    if (document.querySelector('style[data-etude-rec]')) return
+    var style = document.createElement('style')
+    style.setAttribute('data-etude-rec', '')
+    style.textContent =
+      '.stage .rec.on{background:rgba(var(--accent-rgb),.34);border-color:rgba(var(--accent-rgb),.9);' +
+      'box-shadow:0 0 0 8px rgba(var(--accent-rgb),.16);animation:etude-rec-pulse 1s ease-in-out infinite}' +
+      '@keyframes etude-rec-pulse{50%{box-shadow:0 0 0 16px rgba(var(--accent-rgb),.04)}}'
+    document.head.appendChild(style)
+  }
+
+  function recorderSupport() {
+    var nav = typeof navigator !== 'undefined' ? navigator : null
+    var media = nav && nav.mediaDevices
+    if (!media || typeof media.getUserMedia !== 'function') {
+      return { ok: false, reason: '这个浏览器没有 getUserMedia' }
+    }
+    if (typeof window === 'undefined' || typeof window.MediaRecorder !== 'function') {
+      return { ok: false, reason: '这个浏览器没有 MediaRecorder' }
+    }
+    return { ok: true, reason: '' }
+  }
+
+  function pickMime() {
+    if (typeof MediaRecorder.isTypeSupported !== 'function') return ''
+    var list = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg']
+    for (var i = 0; i < list.length; i += 1) {
+      if (MediaRecorder.isTypeSupported(list[i])) return list[i]
+    }
+    return ''
+  }
+
+  function isRecording() {
+    return !!(REC.recorder && REC.recorder.state === 'recording')
+  }
+
+  function stopStream(stream) {
+    if (!stream || typeof stream.getTracks !== 'function') return
+    var tracks = stream.getTracks() || []
+    for (var i = 0; i < tracks.length; i += 1) {
+      try {
+        tracks[i].stop()
+      } catch (error) {}
+    }
+  }
+
+  function micFailed(error) {
+    REC.session += 1 // 晚回来的 then/onstop 一律作废
+    stopTicker()
+    clearRecordingPaint()
+    stopStream(REC.stream)
+    REC.stream = null
+    REC.recorder = null
+    setRecLab('浏览器不让用麦克风（' + micReason(error) + '），这一面先跳过')
+  }
+
+  function micReason(error) {
+    var name = String((error && error.name) || '')
+    if (name === 'SecurityError') return '这个地址不算安全，得是 https 或 localhost'
+    if (/NotAllowed|PermissionDenied/i.test(name)) return '权限被拦了，去地址栏那儿允许一下'
+    if (/NotFound|DevicesNotFound/i.test(name)) return '这台机器上没找到麦克风'
+    if (/NotReadable|TrackStart/i.test(name)) return '麦克风被别的程序占着'
+    if (name === 'OverconstrainedError') return '这台麦克风不满足要求'
+    return short(error) || '浏览器没给原因'
+  }
+
+  function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      if (typeof FileReader === 'function') {
+        var reader = new FileReader()
+        reader.onerror = function () {
+          reject(new Error('读不出这段录音'))
+        }
+        reader.onload = function () {
+          var text = String(reader.result || '')
+          var cut = text.indexOf(',')
+          resolve(cut < 0 ? '' : text.slice(cut + 1))
+        }
+        reader.readAsDataURL(blob)
+        return
+      }
+      if (typeof blob.arrayBuffer === 'function' && typeof btoa === 'function') {
+        blob
+          .arrayBuffer()
+          .then(function (buffer) {
+            var bytes = new Uint8Array(buffer)
+            var text = ''
+            for (var i = 0; i < bytes.length; i += 1) text += String.fromCharCode(bytes[i])
+            resolve(btoa(text))
+          })
+          .catch(reject)
+        return
+      }
+      reject(new Error('浏览器读不出这段 audio blob'))
+    })
+  }
+
+  function sayMs(ms) {
+    var n = Number(ms)
+    if (!Number.isFinite(n) || n <= 0) return '时长没记'
+    return (n / 1000).toFixed(1) + ' 秒'
+  }
+
+  /** 底栏那颗「R 重录」现在是真的了 —— 把键位绑上，文案还原 */
+  function wireRecordKey() {
+    if (typeof window === 'undefined' || window.__etudeRecordKeys) return
+    window.__etudeRecordKeys = true
+    document.addEventListener('keydown', function (event) {
+      if (!event || event.ctrlKey || event.metaKey || event.altKey) return
+      if (!/^r$/i.test(String(event.key || ''))) return
+      var node = event.target
+      if (node && (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' || node.isContentEditable)) return
+      if (!REC.example || !REC.api) return
+      event.preventDefault()
+      toggleRecord()
+    })
+  }
+
+  function restoreBar() {
+    var bar = document.querySelector('.actbar')
+    if (!bar) return
+    var spans = bar.querySelectorAll('span')
+    for (var i = 0; i < spans.length; i += 1) {
+      var text = spans[i].textContent.trim()
+      if (text !== '重录' && text !== '未接录音') continue
+      spans[i].textContent = '重录'
+      spans[i].setAttribute('title', '按 R 开始/停止录音（就是上面那个圆钮）')
     }
   }
 

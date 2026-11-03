@@ -7,8 +7,10 @@
  * 真数据来自包上的 swaps[]：{ role, original, candidates[], samples[] }。
  * original 是句子里的那一段原文，candidates 才是能换上去的说法。
  *
- * 有一件事后端没有：把改写存下来。rpc 里没有任何「改」的端点，所以底下
- * 「先只改这一条 / 连语音一起补」两个按钮只能如实置灰 —— 这一面到此是预览。
+ * 用户自己写的那一句走 example.vary({ packId, ord, text })，回包是
+ * { text, previous, at }；之后 pack.get 会在那条例句上带回 myVariant。
+ * 设计稿这一面没有输入框，只有「自己打一个」那颗胶囊 —— 写框就摆在它那一行
+ * 下面，直接吃现成的 `.stage > input.writein` 样式（宽 560 / 高 44 / 圆角 14）。
  */
 
 ;(function () {
@@ -79,6 +81,7 @@
         fillChips(swap)
         fillDefn(full, example, swap, sentence)
         fillScope(example, full)
+        fillVary(pack, example, api)
         rewriteNext(full)
       })
       .catch(function (error) {
@@ -152,7 +155,7 @@
       if (mut) {
         mut.textContent =
           '这个包没有换词候选 —— 句子还在，但没有别的说法可换。回工厂重造这句，或者换一条。' +
-          noteUnsaved()
+          noteUnsaved(example)
       }
       return
     }
@@ -165,7 +168,7 @@
         mut.textContent =
           (original
             ? '包里记的换法「' + original + '」在这句里没找到 —— 先按原句看。'
-            : '这个包没记这段原文（swaps[].original）—— 换出来的句子拼不了。') + noteUnsaved()
+            : '这个包没记这段原文（swaps[].original）—— 换出来的句子拼不了。') + noteUnsaved(example)
       }
       var inert = qa('[data-etude-swap]')
       for (var n = 0; n < inert.length; n += 1) {
@@ -176,7 +179,7 @@
     }
     var first = candidates[0]
     body.innerHTML = swapped(sentence, original, first) || boldIn(sentence, pack.target || '')
-    if (mut) mut.textContent = '句子骨架没动，只换了那个说法 —— 五个面的输入输出关系一个没变。' + noteUnsaved()
+    if (mut) mut.textContent = '句子骨架没动，只换了那个说法 —— 五个面的输入输出关系一个没变。' + noteUnsaved(example)
     // 点候选就地预览：改完是这样跟着换，选中的 chip 记个 on
     var row = qa('.stage .chips')[1]
     if (!row) return
@@ -213,8 +216,195 @@
     // chips[2]「只开 读 / 写」是设计定的规矩，不动
   }
 
-  function noteUnsaved() {
-    return '改写还没存进账本 —— 后端还没有「改」这个端点。'
+  // ── 改写：写框 + 底下两颗存按钮 ─────────────────────────────────────
+
+  /** 设计稿只有「自己打一个」那颗胶囊，没有输入框。写框摆在它那一行下面，
+   *  挂成 .stage 的直接子节点就能吃 `.stage > input.writein` 的现成样式。 */
+  function varyBox() {
+    return document.querySelector('[data-etude-vary-input]')
+  }
+
+  function ensureVaryBox() {
+    var box = varyBox()
+    if (box) return box
+    var rows = qa('.stage .chips')
+    if (rows.length < 2) {
+      warn('没找到「自己打一个」那一行，写框没地方摆')
+      return null
+    }
+    var row = rows[1]
+    box = document.createElement('input')
+    box.type = 'text'
+    box.className = 'inp writein'
+    box.setAttribute('data-etude-vary-input', '')
+    box.setAttribute('placeholder', '自己打一个：整句重说，或者只换那个说法')
+    box.setAttribute('autocomplete', 'off')
+    box.setAttribute('maxlength', '400')
+    row.parentNode.insertBefore(box, row.nextSibling)
+    return box
+  }
+
+  /** 「自己打一个」那颗胶囊：点它就聚焦写框（不删不改，只是有了落点） */
+  function selfChip() {
+    var chips = qa('.stage .chips .chip')
+    for (var i = 0; i < chips.length; i += 1) {
+      if ((chips[i].textContent || '').indexOf('自己打一个') >= 0) return chips[i]
+    }
+    return null
+  }
+
+  /** 状态行：写框下面那一行 .mut，第一次用时才建，之后一直复用 */
+  function statusLine() {
+    var note = document.querySelector('[data-etude-vary-status]')
+    if (note) return note
+    var box = varyBox()
+    if (!box || !box.parentNode) return null
+    note = document.createElement('p')
+    note.className = 'mut'
+    note.setAttribute('data-etude-vary-status', '')
+    note.setAttribute('role', 'status')
+    note.style.marginTop = '6px'
+    box.parentNode.insertBefore(note, box.nextSibling)
+    return note
+  }
+
+  function setStatus(text) {
+    var note = statusLine()
+    if (!note) {
+      setNote(text)
+      return
+    }
+    note.textContent = text
+  }
+
+  /** 「改完是这样」那一句：存下自己的改写之后，这里显示的就是改写本身 */
+  function showVariant(text, pack) {
+    var body = document.querySelector('.stage .defn > p:not(.mut)')
+    if (!body) {
+      warn('没找到「改完是这样」那一句，改写只留在写框里')
+      return
+    }
+    body.innerHTML = boldIn(text, (pack && pack.target) || '')
+  }
+
+  // 上一次填进写框的是哪一句（packId#ord）。state 会被推好几次，同一句重推时
+  // 不能拿账本里的旧文本把用户正在打的字冲掉 —— 只有真换了句子才重填。
+  var LAST_BOX = ''
+
+  function fillVary(pack, example, api) {
+    var box = ensureVaryBox()
+    if (!box) return
+    var chip = selfChip()
+    if (chip) {
+      chip.onclick = function () {
+        box.focus()
+      }
+    }
+    var mine = (example && example.myVariant) || null
+    var key = (pack && pack.id ? pack.id : '') + '#' + ((example && example.ord) || 1)
+    var fresh = key !== LAST_BOX
+    LAST_BOX = key
+    if (mine && mine.text) {
+      if (fresh && box.value !== mine.text) box.value = mine.text
+      showVariant(mine.text, pack)
+      if (fresh) setStatus('上次存的：' + oneLine(mine.text) + ' · 共 ' + countChars(mine.text) + ' 字')
+    } else if (fresh) {
+      if (box.value !== '') box.value = ''
+      setStatus('还没存过 —— 写完点底下「先只改这一条」，会存进账本。')
+    }
+    var buttons = qa('.actbar button.btn.ghost')
+    if (!buttons.length) {
+      warn('没找到底下那两颗按钮，改写存不了')
+      return
+    }
+    buttons[0].onclick = function () {
+      saveVariant(pack, example, api, 'text')
+    }
+    if (buttons[1]) {
+      buttons[1].onclick = function () {
+        saveVariant(pack, example, api, 'voice')
+      }
+    }
+  }
+
+  var SAVING = false
+
+  /** 存改写：这一面唯一会写账本的地方。空的不发 RPC，失败照实说。 */
+  function saveVariant(pack, example, api, mode) {
+    var box = varyBox()
+    if (!box) {
+      warn('没有写框，改写存不了')
+      return
+    }
+    var text = String(box.value || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    if (!text) {
+      setStatus('先写一句再存。')
+      box.focus()
+      return
+    }
+    if (!pack || !pack.id) {
+      setStatus('还没取到这个包，等账本回来再存。')
+      return
+    }
+    if (!api || typeof api.rpc !== 'function') {
+      setStatus('宿主没给 RPC，存不了改写。')
+      return
+    }
+    if (SAVING) return
+    SAVING = true
+    setStatus('存着呢…')
+    api
+      .rpc('example.vary', { packId: pack.id, ord: (example && example.ord) || 1, text: text })
+      .then(function (saved) {
+        var mine = (saved && saved.text) || text
+        if (example) {
+          example.myVariant = {
+            text: mine,
+            previous: (saved && saved.previous) || null,
+            at: (saved && saved.at) || Date.now(),
+          }
+        }
+        if (String(box.value || '').trim() !== mine) box.value = mine
+        showVariant(mine, pack)
+        setStatus(
+          '存进账本了 · 共 ' +
+            countChars(mine) +
+            ' 字' +
+            (mode === 'voice' ? ' · 语音还没接：后端没有补语音这一步' : ''),
+        )
+      })
+      .catch(function (error) {
+        setStatus('没存上：' + why(error))
+      })
+      .then(function () {
+        SAVING = false
+      })
+  }
+
+  function countChars(text) {
+    return String(text || '').length
+  }
+
+  function oneLine(text) {
+    var clean = String(text || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    return clean.length > 60 ? clean.slice(0, 60) + '…' : clean
+  }
+
+  function why(error) {
+    var text = String((error && error.message) || error || '宿主没说原因')
+      .replace(/\s+/g, ' ')
+      .trim()
+    return text.length > 80 ? text.slice(0, 80) + '…' : text
+  }
+
+  function noteUnsaved(example) {
+    return example && example.myVariant && example.myVariant.text
+      ? '上次存的改写还在账本里 —— 再存会顶掉它。'
+      : '这句改写还没存 —— 写完点底下「先只改这一条」才进账本。'
   }
 
   /* app.css 里 `.stage:not(:has(.play))::after` 会顶一句「这一句还没有语音，
@@ -228,16 +418,30 @@
     document.head.appendChild(style)
   }
 
-  /** 底下那两颗按钮：点下去本来是「存一条变体」，现在没端点，置灰 */
+  /** 底下那两颗按钮：改写真能存了，去掉 disabled / 置灰 / not-allowed。
+   *  真正的 onclick 由 fillVary 挂（要拿到 pack + example），这里只保证能点。 */
   function markButtons() {
     var buttons = qa('.actbar button.btn.ghost')
     for (var i = 0; i < buttons.length; i += 1) {
-      buttons[i].disabled = true
-      buttons[i].setAttribute('title', '后端还没有「改」的端点')
-      buttons[i].style.opacity = '0.45'
-      buttons[i].style.cursor = 'not-allowed'
-      buttons[i].onclick = null
+      buttons[i].disabled = false
+      buttons[i].removeAttribute('disabled')
+      buttons[i].removeAttribute('aria-disabled')
+      buttons[i].style.opacity = ''
+      buttons[i].style.cursor = ''
+      buttons[i].style.pointerEvents = ''
+      buttons[i].setAttribute(
+        'title',
+        i === 0
+          ? '把这一页写的改写存进账本'
+          : '先把改写存进账本；补语音这一步后端还没有',
+      )
+      buttons[i].onclick = notReady
     }
+  }
+
+  /** 账本还没回来时点了保存：照实说，不装作存上了 */
+  function notReady() {
+    setStatus('还没取到这一句，账本回来再存。')
   }
 
   function rewriteNext(pack) {

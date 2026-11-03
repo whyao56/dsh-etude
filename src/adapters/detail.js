@@ -482,7 +482,7 @@ function loadReview(full, example, secs) {
   if (!api || typeof api.rpc !== 'function' || !packId || !exampleId) {
     if (!packId || !exampleId) console.warn('[etude/detail] 这句拼不出 packId/exampleId，调度跳过')
     else console.warn('[etude/detail] 宿主没给 api.rpc，调度跳过')
-    paintSchedule(secs, null, [], true)
+    paintSchedule(secs, null, [], true, '')
     return
   }
 
@@ -494,27 +494,56 @@ function loadReview(full, example, secs) {
     var rawRecent = pair[1]
     var unknown = rawCard === undefined || rawRecent === undefined
     if (!unknown && rawCard !== null && !isCard(rawCard)) unknown = true // 预览回的 {} 这种
-    paintSchedule(secs, isCard(rawCard) ? rawCard : null, Array.isArray(rawRecent) ? rawRecent : [], unknown)
+    paintSchedule(
+      secs,
+      isCard(rawCard) ? rawCard : null,
+      Array.isArray(rawRecent) ? rawRecent : [],
+      unknown,
+      exampleId,
+    )
   })
 }
 
-function paintSchedule(secs, card, recent, unknown) {
+function paintSchedule(secs, card, recent, unknown, exampleId) {
   var rows = secs[0] ? secs[0].querySelectorAll('.drow') : []
   var list = Array.isArray(recent) ? recent : []
 
-  // ① 五个面：调度只有一条（包 + 例句），五个面共用
+  // ① 五个面：卡片本身是「包 + 例句」一条，所以整体档位看 card；
+  //    每一面各自最后一次是什么档，只能从 review.recent 里这句的那些记录推
+  var faceByLabel = { 读: 'read', 打: 'write', 写: 'write', 听: 'listen', 说: 'speak', 改: 'vary' }
+  var faceMarks = {}
+  if (exampleId) {
+    for (var m = list.length - 1; m >= 0; m -= 1) {
+      var last = list[m] || {}
+      if (String(last.exampleId == null ? '' : last.exampleId) !== exampleId) continue
+      faceMarks[String(last.face == null ? '' : last.face)] = last
+    }
+  }
+
   for (var i = 0; i < rows.length; i += 1) {
     var dst = rows[i].querySelector('.dst')
     var tail = rows[i].querySelector('.mut')
-    if (card) {
-      var grade = Number(card.grade)
-      if (dst) dst.textContent = grade >= 3 ? '已过' : grade >= 1 ? '卡住' : '没练过'
+    var df = rows[i].querySelector('.df')
+    var mark = faceByLabel[((df && df.textContent) || '').trim()] || ''
+    mark = mark ? faceMarks[mark] : null
+    if (mark) {
+      var grade = Number(mark.grade)
+      if (dst) dst.textContent = grade >= 3 ? '已过' : grade >= 1 ? '卡住' : '没开始'
       if (tail) {
-        tail.textContent = '间隔 ' + intervalText(card.interval) + ' · ' + monthDay(card.due) + ' 到期'
+        tail.textContent = '间隔 ' + intervalText(mark.interval) + ' · ' + monthDay(mark.due) + ' 到期'
         tail.setAttribute(
           'title',
-          '后端按「包 + 例句」记一条，五个面共用：上次给了「' + gradeText(card.grade) + '」，遗忘 ' +
-            (Number(card.lapses) || 0) + ' 次',
+          '这一面最近一次给的是「' + gradeText(mark.grade) + '」（' + monthDay(mark.at) + '，来自 review.recent）',
+        )
+      }
+    } else if (card) {
+      // 这句练过，但最近七次记录里没有这一面 —— 不猜，留个破折号
+      if (dst) dst.textContent = '—'
+      if (tail) {
+        tail.textContent = '这一面最近七次里没有'
+        tail.setAttribute(
+          'title',
+          '这句一共复习了 ' + (Number(card.reps) || 0) + ' 次（review.card），但 review.recent 只给这个包最近 7 条，里面没有这一面',
         )
       }
     } else if (unknown) {
