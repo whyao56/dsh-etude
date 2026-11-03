@@ -22,6 +22,15 @@ window.__ETUDE_APPLY__ = function (state, api) {
   }
   var packs = state.packs || []
 
+  // 设计稿右上角那颗「Anki 已连 · 8765」是写死的假连接状态。这里没有 Anki，
+  // 换成账本的真实规模——有就有，没有就写清楚。
+  var chip = document.querySelector('.hdr .chip.live')
+  if (chip) {
+    chip.innerHTML =
+      '<i></i>账本已连 · ' + packs.length + ' 个包'
+    chip.setAttribute('title', '数据在 ' + (state.root || '本机账本目录') + '，不是 Anki')
+  }
+
   // ── 牌组表：设计稿是「Anki 调度」口径，插件没有调度引擎。
   // 换成「例句 / 配图 / 语音 / 到哪一步」，一行一个包。
   var table = document.querySelector('.deckcard')

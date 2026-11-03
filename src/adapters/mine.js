@@ -147,7 +147,7 @@ function loadPreview(pack, api, skin) {
     .rpc('pack.get', { id: pack.id })
     .then(function (full) {
       if (!skin || token !== skin.token) return
-      fillPreview(full || pack)
+      fillPreview(full || pack, api)
     })
     .catch(function (error) {
       if (!skin || token !== skin.token) return
@@ -155,7 +155,7 @@ function loadPreview(pack, api, skin) {
     })
 }
 
-function fillPreview(pack) {
+function fillPreview(pack, api) {
   var examples = (pack.examples || []).slice()
   var ex = null
   for (var i = 0; i < examples.length; i += 1) {

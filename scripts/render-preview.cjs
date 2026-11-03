@@ -195,7 +195,7 @@ const state = {
   root: 'C:\\Users\\HP\\AppData\\Local\\dsh-etude',
   version: require('./../package.json').version,
   exportDir: 'C:\\Users\\HP\\Downloads\\dsh-etude',
-  packs: [pack, { ...pack, id: 'ffeeddccbbaa9988', target: 'run out of', kind: 'phrase', status: 'packed', progress: { total: 4, images: 4, audios: 4, done: true }, learnable: true }],
+  packs: [pack, { ...pack, id: 'ffeeddccbbaa9988', target: 'run out of', gloss: '用完、没了', kind: 'phrase', status: 'packed', progress: { total: 4, images: 4, audios: 4, done: true }, learnable: true }],
   jobs: [],
   selfcheck: [
     { id: 'node', ok: true, detail: 'v24.19.0' },
